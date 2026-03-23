@@ -80,17 +80,16 @@
   }
   .section-title p { color: var(--muted); font-size: 1.05rem; }
 
-  /* ── COURSE GRID ── */
-  .course-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 28px;
+  /* ── FEATURED CARD WRAPPER ── */
+  .featured-wrap {
+    display: flex;
+    justify-content: center;
   }
 
   /* ── COURSE CARD ── */
   .course-card {
     background: var(--card-bg);
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--border);
     text-decoration: none;
     color: var(--text);
@@ -98,41 +97,40 @@
     flex-direction: column;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     overflow: hidden;
+    width: 100%;
+    max-width: 560px;
+    box-shadow: 0 4px 24px rgba(0,120,212,0.10);
   }
   .course-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0,120,212,0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 16px 48px rgba(0,120,212,0.18);
     border-color: var(--primary);
   }
 
-  .card-banner {
-    height: 8px;
-  }
-  .banner-azure  { background: linear-gradient(90deg, #0078d4, #50e6ff); }
-  .banner-coming { background: linear-gradient(90deg, #605e5c, #a19f9d); }
+  .card-banner { height: 6px; }
+  .banner-azure { background: linear-gradient(90deg, #0078d4, #50e6ff); }
 
   .card-body {
-    padding: 28px;
+    padding: 36px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
   }
 
   .card-header-row {
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: center;
+    gap: 20px;
   }
   .card-icon {
-    width: 56px; height: 56px;
-    border-radius: 12px;
+    width: 72px; height: 72px;
+    border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
+    font-size: 2.2rem;
     flex-shrink: 0;
   }
-  .icon-azure  { background: linear-gradient(135deg, #0078d4, #00b4d8); }
-  .icon-coming { background: #f3f2f1; }
+  .icon-azure { background: linear-gradient(135deg, #0078d4, #00b4d8); }
 
   .card-info { flex: 1; }
   .card-provider {
@@ -141,76 +139,74 @@
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: var(--muted);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   .card-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--text);
-    line-height: 1.3;
+    line-height: 1.25;
   }
   .card-code {
-    font-size: 0.85rem;
-    color: var(--primary);
-    font-weight: 600;
-    margin-top: 2px;
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: white;
+    background: var(--primary);
+    border-radius: 20px;
+    padding: 2px 12px;
+    letter-spacing: 0.5px;
   }
 
   .card-desc {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
   .card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
   }
   .tag {
-    background: #f0f4f8;
-    border: 1px solid var(--border);
+    background: #e8f0fe;
+    border: 1px solid #c5d8f5;
     border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 0.78rem;
-    color: var(--muted);
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--secondary);
+    font-weight: 500;
   }
 
   .card-footer {
-    padding: 16px 28px;
+    padding: 20px 36px;
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: #fafbfd;
   }
-  .card-stats { font-size: 0.85rem; color: var(--muted); }
+  .card-stats { font-size: 0.88rem; color: var(--muted); }
   .card-cta {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+    background: var(--primary);
+    border-radius: 24px;
+    padding: 8px 22px;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .course-card:hover .card-cta {
+    background: var(--secondary);
+    transform: translateX(2px);
   }
   .card-cta .arrow { transition: transform 0.2s; }
-  .course-card:hover .card-cta .arrow { transform: translateX(4px); }
-
-  /* Coming soon state */
-  .course-card.coming-soon {
-    opacity: 0.65;
-    cursor: default;
-    pointer-events: none;
-  }
-  .badge-soon {
-    display: inline-block;
-    background: #f3f2f1;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 3px 12px;
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-weight: 600;
-  }
+  .course-card:hover .card-cta .arrow { transform: translateX(3px); }
 
   /* ── FOOTER ── */
   footer {
@@ -250,7 +246,7 @@
       <p>Mỗi khóa học bao gồm đầy đủ lý thuyết, ví dụ thực tế và trọng tâm thi cử.</p>
     </div>
 
-    <div class="course-grid">
+    <div class="featured-wrap">
 
       <!-- AZ-204 -->
       <a href="az-204/index.html" class="course-card">
@@ -279,53 +275,6 @@
         </div>
       </a>
 
-      <!-- Placeholder: AZ-900 -->
-      <div class="course-card coming-soon">
-        <div class="card-banner banner-coming"></div>
-        <div class="card-body">
-          <div class="card-header-row">
-            <div class="card-icon icon-coming">🌐</div>
-            <div class="card-info">
-              <div class="card-provider">Microsoft Azure</div>
-              <div class="card-title">Azure Fundamentals</div>
-              <div class="card-code">AZ-900</div>
-            </div>
-          </div>
-          <p class="card-desc">Nền tảng về cloud computing, các dịch vụ Azure cơ bản, bảo mật, quyền riêng tư và định giá.</p>
-          <div class="card-tags">
-            <span class="tag">Cloud Concepts</span>
-            <span class="tag">Core Services</span>
-            <span class="tag">Pricing</span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="badge-soon">Sắp ra mắt</span>
-        </div>
-      </div>
-
-      <!-- Placeholder: DP-900 -->
-      <div class="course-card coming-soon">
-        <div class="card-banner banner-coming"></div>
-        <div class="card-body">
-          <div class="card-header-row">
-            <div class="card-icon icon-coming">📊</div>
-            <div class="card-info">
-              <div class="card-provider">Microsoft Azure</div>
-              <div class="card-title">Azure Data Fundamentals</div>
-              <div class="card-code">DP-900</div>
-            </div>
-          </div>
-          <p class="card-desc">Khái niệm dữ liệu cốt lõi, các dịch vụ dữ liệu Azure — relational, non-relational, analytics.</p>
-          <div class="card-tags">
-            <span class="tag">Relational Data</span>
-            <span class="tag">NoSQL</span>
-            <span class="tag">Analytics</span>
-          </div>
-        </div>
-        <div class="card-footer">
-          <span class="badge-soon">Sắp ra mắt</span>
-        </div>
-      </div>
 
     </div>
   </div>
