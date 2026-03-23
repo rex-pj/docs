@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-204 | Hướng Dẫn Học Azure Developer Associate - Tiếng Việt</title>
+<style>
+  :root {
+    --primary: #0078d4;
+    --secondary: #005a9e;
+    --accent: #50e6ff;
+    --bg: #f0f4f8;
+    --card-bg: #ffffff;
+    --text: #323130;
+    --muted: #605e5c;
+    --success: #107c10;
+    --warning: #ff8c00;
+    --danger: #d13438;
+    --border: #e1dfdd;
+    --purple: #5c2d91;
+    --teal: #008272;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0a1628 0%, #0f2460 40%, #0078d4 80%, #00b4d8 100%);
+    color: white;
+    padding: 80px 40px 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .cert-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(80,230,255,0.5);
+    border-radius: 50px;
+    padding: 6px 20px;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .hero h1 {
+    font-size: 3.2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    line-height: 1.2;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto 32px;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.85rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── WAVE ── */
+  .wave-divider {
+    margin-top: -2px;
+    background: var(--bg);
+  }
+  .wave-divider svg { display: block; }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+  /* ── EXAM OVERVIEW ── */
+  .overview-section { padding: 60px 0; }
+  .section-title {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .section-title h2 {
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .section-title p { color: var(--muted); font-size: 1.05rem; }
+
+  /* ── SKILL BARS ── */
+  .skill-areas {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .skill-areas h3 { color: var(--primary); margin-bottom: 24px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+  .skill-item { margin-bottom: 20px; }
+  .skill-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+  .skill-label span:first-child { font-weight: 600; }
+  .skill-label .percent { color: var(--primary); font-weight: 700; }
+  .skill-bar { background: #e8f0fe; border-radius: 8px; height: 10px; overflow: hidden; }
+  .skill-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.8s ease; }
+
+  /* ── CHAPTER GRID ── */
+  .chapters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+    padding: 40px 0;
+  }
+  .chapter-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+  .chapter-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,120,212,0.15);
+    border-color: var(--primary);
+  }
+  .card-header {
+    padding: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+  .card-icon.blue { background: #e8f0fe; }
+  .card-icon.green { background: #e8f5e9; }
+  .card-icon.purple { background: #ede7f6; }
+  .card-icon.orange { background: #fff3e0; }
+  .card-icon.teal { background: #e0f2f1; }
+  .card-icon.red { background: #fce4ec; }
+  .card-meta { flex: 1; }
+  .card-num {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .card-subtitle { font-size: 0.85rem; color: var(--muted); }
+  .card-body { padding: 0 24px 16px; flex: 1; }
+  .card-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+  .card-topics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .topic-tag {
+    display: inline-block;
+    background: #f0f4f8;
+    color: var(--secondary);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .card-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-modules { font-size: 0.8rem; color: var(--muted); }
+  .card-arrow {
+    width: 32px; height: 32px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+  }
+  .exam-weight {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+
+  /* ── INFO BANNER ── */
+  .info-banner {
+    background: linear-gradient(135deg, #fff4ce, #fffbee);
+    border: 1px solid #ff8c00;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 32px 0;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .info-banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .info-banner-text h4 { color: #ff8c00; margin-bottom: 4px; }
+  .info-banner-text p { font-size: 0.9rem; color: var(--text); }
+
+  /* ── STUDY TIPS ── */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 32px 0;
+  }
+  .tip-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .tip-card h4 { color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .tip-card p { font-size: 0.9rem; color: var(--muted); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #1a1a2e;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    padding: 40px 20px;
+    margin-top: 80px;
+  }
+  footer p { font-size: 0.9rem; margin-bottom: 8px; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 2rem; }
+    .hero-stats { gap: 24px; }
+    .chapters-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="cert-badge">🏆 Microsoft Certified</div>
+    <h1>Hướng Dẫn Học<br><span>AZ-204</span></h1>
+    <p>Azure Developer Associate — Tài liệu học toàn diện bằng tiếng Việt, bao gồm sơ đồ, ví dụ code và giải thích chi tiết</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">11</div>
+        <div class="stat-label">Chương học</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">25+</div>
+        <div class="stat-label">Module</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Lĩnh vực thi</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100</div>
+        <div class="stat-label">Phút thi</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WAVE -->
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" height="60">
+    <path d="M0,0 C360,60 1080,60 1440,0 L1440,60 L0,60 Z" fill="#f0f4f8"/>
+  </svg>
+</div>
+
+<div class="container">
+
+  <!-- INFO BANNER -->
+  <div class="info-banner">
+    <div class="info-banner-icon">⚠️</div>
+    <div class="info-banner-text">
+      <h4>Lưu ý về chứng chỉ</h4>
+      <p>Chứng chỉ AZ-204 và kỳ thi liên quan sẽ <strong>ngừng hoạt động vào ngày 31 tháng 7, 2026</strong>. Điểm tối thiểu để đạt là <strong>700/1000</strong>. Thời gian thi: <strong>100 phút</strong>.</p>
+    </div>
+  </div>
+
+  <!-- OVERVIEW SECTION -->
+  <div class="overview-section">
+    <div class="section-title">
+      <h2>📊 Phân Bổ Nội Dung Thi</h2>
+      <p>Tỷ lệ câu hỏi theo từng lĩnh vực trong kỳ thi AZ-204</p>
+    </div>
+
+    <div class="skill-areas">
+      <h3>📋 Các Lĩnh Vực Được Kiểm Tra</h3>
+
+      <div class="skill-item">
+        <div class="skill-label">
+          <span>🖥️ Phát triển giải pháp Azure Compute</span>
+          <span class="percent">25–30%</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 28%"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-label">
+          <span>💾 Phát triển cho Azure Storage</span>
+          <span class="percent">15–20%</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 18%"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-label">
+          <span>🔐 Triển khai bảo mật Azure</span>
+          <span class="percent">15–20%</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 18%"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-label">
+          <span>📊 Giám sát, xử lý sự cố và tối ưu hóa</span>
+          <span class="percent">5–10%</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 8%"></div></div>
+      </div>
+
+      <div class="skill-item">
+        <div class="skill-label">
+          <span>🔌 Kết nối và sử dụng Azure và dịch vụ bên thứ ba</span>
+          <span class="percent">20–25%</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill" style="width: 23%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTERS SECTION -->
+  <div class="section-title">
+    <h2>📚 Các Chương Học</h2>
+    <p>Nhấn vào từng chương để xem nội dung chi tiết bằng tiếng Việt</p>
+  </div>
+
+  <div class="chapters-grid">
+
+    <!-- Chapter 1: App Service -->
+    <a href="01-azure-app-service.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon blue">🌐</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 01</div>
+          <div class="card-title">Azure App Service Web Apps</div>
+          <div class="card-subtitle">Dịch vụ web ứng dụng</div>
+          <div><span class="exam-weight">25–30%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Tìm hiểu cách tạo, cấu hình và triển khai web apps trên Azure App Service. Bao gồm autoscaling, deployment slots và bảo mật.</p>
+        <div class="card-topics">
+          <span class="topic-tag">App Service Plans</span>
+          <span class="topic-tag">Deployment Slots</span>
+          <span class="topic-tag">Autoscaling</span>
+          <span class="topic-tag">Authentication</span>
+          <span class="topic-tag">TLS/SSL</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 4 modules • 9+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 2: Azure Functions -->
+    <a href="02-azure-functions.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon orange">⚡</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 02</div>
+          <div class="card-title">Azure Functions</div>
+          <div class="card-subtitle">Hàm serverless</div>
+          <div><span class="exam-weight">25–30%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Tạo và triển khai Azure Functions. Tìm hiểu triggers, bindings, hosting plans và cách kết nối với các dịch vụ Azure.</p>
+        <div class="card-topics">
+          <span class="topic-tag">Triggers</span>
+          <span class="topic-tag">Bindings</span>
+          <span class="topic-tag">Consumption Plan</span>
+          <span class="topic-tag">Premium Plan</span>
+          <span class="topic-tag">Durable Functions</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 2 modules • 6+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 3: Cosmos DB -->
+    <a href="03-cosmos-db.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon purple">🌐</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 03</div>
+          <div class="card-title">Azure Cosmos DB</div>
+          <div class="card-subtitle">Cơ sở dữ liệu NoSQL phân tán</div>
+          <div><span class="exam-weight">15–20%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Tìm hiểu Cosmos DB: các API được hỗ trợ, mức độ nhất quán, hệ thống phân cấp tài nguyên và cách làm việc với SDK .NET v3.</p>
+        <div class="card-topics">
+          <span class="topic-tag">Consistency Levels</span>
+          <span class="topic-tag">Request Units</span>
+          <span class="topic-tag">Change Feed</span>
+          <span class="topic-tag">Stored Procedures</span>
+          <span class="topic-tag">.NET SDK v3</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 2 modules • 9+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 4: Blob Storage -->
+    <a href="04-blob-storage.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon teal">💾</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 04</div>
+          <div class="card-title">Azure Blob Storage</div>
+          <div class="card-subtitle">Lưu trữ đối tượng đám mây</div>
+          <div><span class="exam-weight">15–20%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Tạo và quản lý Blob Storage. Tìm hiểu về access tiers, vòng đời dữ liệu, bảo mật và cách sử dụng Azure Blob SDK.</p>
+        <div class="card-topics">
+          <span class="topic-tag">Access Tiers</span>
+          <span class="topic-tag">Lifecycle Policies</span>
+          <span class="topic-tag">SAS Tokens</span>
+          <span class="topic-tag">Metadata</span>
+          <span class="topic-tag">Redundancy</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 3 modules • 11+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 5: Containerized Solutions -->
+    <a href="05-containerized-solutions.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon blue">🐳</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 05</div>
+          <div class="card-title">Giải Pháp Container</div>
+          <div class="card-subtitle">ACR, ACI, Container Apps</div>
+          <div><span class="exam-weight">25–30%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Xây dựng và triển khai giải pháp container với Azure Container Registry, Azure Container Instances và Azure Container Apps.</p>
+        <div class="card-topics">
+          <span class="topic-tag">Container Registry</span>
+          <span class="topic-tag">Container Instances</span>
+          <span class="topic-tag">Container Apps</span>
+          <span class="topic-tag">Dapr</span>
+          <span class="topic-tag">Revisions</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 3 modules • 13+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 6: Authentication -->
+    <a href="06-authentication.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon green">🔐</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 06</div>
+          <div class="card-title">Xác Thực &amp; Phân Quyền</div>
+          <div class="card-subtitle">Identity Platform, Entra ID, Graph</div>
+          <div><span class="exam-weight">15–20%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Xác thực người dùng và ứng dụng với Microsoft Identity Platform, Entra ID, SAS tokens và Microsoft Graph API.</p>
+        <div class="card-topics">
+          <span class="topic-tag">OAuth 2.0</span>
+          <span class="topic-tag">MSAL</span>
+          <span class="topic-tag">SAS Tokens</span>
+          <span class="topic-tag">Microsoft Graph</span>
+          <span class="topic-tag">Entra ID</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 3 modules • 10+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 7: Security -->
+    <a href="07-security.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon red">🛡️</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 07</div>
+          <div class="card-title">Bảo Mật Azure</div>
+          <div class="card-subtitle">Key Vault, Managed Identity, App Config</div>
+          <div><span class="exam-weight">15–20%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Triển khai giải pháp Azure an toàn với Key Vault để quản lý secrets, Managed Identities và Azure App Configuration.</p>
+        <div class="card-topics">
+          <span class="topic-tag">Key Vault</span>
+          <span class="topic-tag">Managed Identities</span>
+          <span class="topic-tag">App Configuration</span>
+          <span class="topic-tag">Feature Flags</span>
+          <span class="topic-tag">Certificates</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 3 modules • 12+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 8: Monitoring -->
+    <a href="08-monitoring.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon teal">📊</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 08</div>
+          <div class="card-title">Giám Sát &amp; Xử Lý Sự Cố</div>
+          <div class="card-subtitle">Application Insights &amp; Azure Monitor</div>
+          <div><span class="exam-weight">5–10%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Sử dụng Application Insights để giám sát hiệu suất, phân tích metrics, traces và logs. Thiết lập availability tests và alerts.</p>
+        <div class="card-topics">
+          <span class="topic-tag">Application Insights</span>
+          <span class="topic-tag">Metrics &amp; Logs</span>
+          <span class="topic-tag">Availability Tests</span>
+          <span class="topic-tag">Application Map</span>
+          <span class="topic-tag">Usage Analytics</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 1 module • 5+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 9: API Management -->
+    <a href="09-api-management.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon purple">🔌</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 09</div>
+          <div class="card-title">API Management</div>
+          <div class="card-subtitle">Quản lý và bảo mật API</div>
+          <div><span class="exam-weight">20–25%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Tìm hiểu Azure API Management: tạo và tài liệu hóa API, cấu hình policies, kiểm soát truy cập và chuyển đổi API.</p>
+        <div class="card-topics">
+          <span class="topic-tag">API Gateway</span>
+          <span class="topic-tag">Policies</span>
+          <span class="topic-tag">Rate Limiting</span>
+          <span class="topic-tag">Subscriptions</span>
+          <span class="topic-tag">Developer Portal</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 1 module • 7+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 10: Event-based -->
+    <a href="10-event-based.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon orange">📡</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 10</div>
+          <div class="card-title">Giải Pháp Hướng Sự Kiện</div>
+          <div class="card-subtitle">Event Grid &amp; Event Hubs</div>
+          <div><span class="exam-weight">20–25%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Xây dựng ứng dụng hướng sự kiện với Azure Event Grid (pub/sub) và Azure Event Hubs (streaming dữ liệu lớn).</p>
+        <div class="card-topics">
+          <span class="topic-tag">Event Grid</span>
+          <span class="topic-tag">Event Hubs</span>
+          <span class="topic-tag">Webhooks</span>
+          <span class="topic-tag">Partitions</span>
+          <span class="topic-tag">Event Capture</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 2 modules • 8+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+    <!-- Chapter 11: Message-based -->
+    <a href="11-message-based.html" class="chapter-card">
+      <div class="card-header">
+        <div class="card-icon green">📨</div>
+        <div class="card-meta">
+          <div class="card-num">Chương 11</div>
+          <div class="card-title">Giải Pháp Dựa Trên Tin Nhắn</div>
+          <div class="card-subtitle">Service Bus &amp; Queue Storage</div>
+          <div><span class="exam-weight">20–25%</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">Tích hợp Azure Service Bus và Azure Queue Storage vào giải pháp. Gửi và nhận tin nhắn bằng .NET SDK.</p>
+        <div class="card-topics">
+          <span class="topic-tag">Service Bus</span>
+          <span class="topic-tag">Queue Storage</span>
+          <span class="topic-tag">Topics &amp; Subscriptions</span>
+          <span class="topic-tag">Dead-letter Queue</span>
+          <span class="topic-tag">.NET SDK</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-modules">📦 1 module • 7+ units</span>
+        <div class="card-arrow">→</div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- STUDY TIPS -->
+  <div class="section-title" style="margin-top: 40px;">
+    <h2>💡 Mẹo Học Thi</h2>
+    <p>Những gợi ý hữu ích để chuẩn bị cho kỳ thi AZ-204</p>
+  </div>
+
+  <div class="tips-grid">
+    <div class="tip-card">
+      <h4>🎯 Ưu tiên theo tỷ lệ</h4>
+      <p>Tập trung vào Compute (25-30%) và kết nối dịch vụ (20-25%) trước vì chiếm tỷ lệ lớn nhất trong bài thi.</p>
+    </div>
+    <div class="tip-card">
+      <h4>🔧 Thực hành với Azure</h4>
+      <p>Tạo tài khoản Azure miễn phí và thực hành tất cả các dịch vụ. Làm các lab trong từng module học.</p>
+    </div>
+    <div class="tip-card">
+      <h4>📝 Ghi nhớ SDK patterns</h4>
+      <p>Học cách khởi tạo client, thực hiện CRUD operations và xử lý lỗi với từng SDK của Azure.</p>
+    </div>
+    <div class="tip-card">
+      <h4>⚙️ Hiểu cơ chế xác thực</h4>
+      <p>OAuth 2.0, Managed Identity, SAS tokens — hiểu khi nào dùng loại nào là rất quan trọng.</p>
+    </div>
+    <div class="tip-card">
+      <h4>🔄 Nắm vững triggers &amp; bindings</h4>
+      <p>Azure Functions triggers và bindings xuất hiện nhiều trong thi. Học cú pháp và cấu hình của từng loại.</p>
+    </div>
+    <div class="tip-card">
+      <h4>📊 Làm bài thi thử</h4>
+      <p>Làm Practice Assessment trên Microsoft Learn để quen với format câu hỏi và xác định điểm yếu.</p>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE OVERVIEW -->
+  <div class="section-title" style="margin-top: 60px;">
+    <h2>🏗️ Tổng Quan Kiến Trúc Azure Developer</h2>
+    <p>Mối quan hệ giữa các dịch vụ trong AZ-204</p>
+  </div>
+
+  <div style="background: white; border-radius: 16px; padding: 32px; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.07); margin-bottom: 40px;">
+    <div style="font-family: monospace; white-space: pre; line-height: 1.7; font-size: 0.85rem; background: #f0f4f8; padding: 24px; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border);">
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        AZURE DEVELOPER (AZ-204)                             │
+│                        Kiến Trúc Tổng Thể                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   CLIENT (Web/Mobile/API)                                                   │
+│        │                                                                    │
+│        ▼                                                                    │
+│   ┌────────────────┐    ┌─────────────────┐    ┌──────────────────┐        │
+│   │  API Management│────│  App Service    │    │  Azure Functions │        │
+│   │  (Gateway/    │    │  (Web Apps)     │    │  (Serverless)    │        │
+│   │   Policies)   │    └────────┬────────┘    └────────┬─────────┘        │
+│   └────────────────┘            │                      │                   │
+│                                 ▼                      ▼                   │
+│   ┌──────────────────────────────────────────────────────────────────┐     │
+│   │                    LƯỚI KẾT NỐI                                  │     │
+│   │   Event Grid  │  Event Hubs  │  Service Bus  │  Queue Storage   │     │
+│   └──────────────────────────────────────────────────────────────────┘     │
+│                                 │                                           │
+│        ┌────────────────────────┼─────────────────────────┐                │
+│        ▼                        ▼                         ▼                │
+│   ┌─────────────┐    ┌──────────────────┐    ┌───────────────────────┐     │
+│   │  Cosmos DB  │    │   Blob Storage   │    │  Container Registry   │     │
+│   │  (NoSQL)    │    │   (Objects)      │    │  Container Instances  │     │
+│   └─────────────┘    └──────────────────┘    │  Container Apps       │     │
+│                                              └───────────────────────┘     │
+│                                                                             │
+│   ┌──────────────────────────────────────────────────────────────────┐     │
+│   │                      BẢO MẬT                                    │     │
+│   │   Key Vault  │  Managed Identity  │  Entra ID  │  App Config   │     │
+│   └──────────────────────────────────────────────────────────────────┘     │
+│                                                                             │
+│   ┌──────────────────────────────────────────────────────────────────┐     │
+│   │                    GIÁM SÁT                                      │     │
+│   │         Application Insights  │  Azure Monitor                  │     │
+│   └──────────────────────────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────────────────────┘
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>📚 Tài liệu học AZ-204 — Biên soạn bằng tiếng Việt dựa trên nội dung từ Microsoft Learn</p>
+  <p>Cập nhật theo nội dung thi <strong>kể từ ngày 14/01/2026</strong></p>
+  <p style="margin-top: 16px;"><a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-developer/">🔗 Microsoft Learn — AZ-204</a></p>
+</footer>
+
+</body>
+</html>

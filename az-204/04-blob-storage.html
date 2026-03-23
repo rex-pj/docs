@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💾 Azure Blob Storage - Hướng Dẫn AZ-204</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 04: Blob Storage ── */
+.badge-hot { background: #fde7e9; color: #d13438; }
+.badge-cool { background: #dce6f5; color: var(--blue-6); }
+.badge-cold { background: #e8f4f8; color: #006699; }
+.badge-archive { background: #f0f4f8; color: #555; }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html" class="on">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">💾</div>
+  <h1>Azure Blob Storage</h1>
+  <p>Hướng Dẫn Học Tập Toàn Diện cho Kỳ Thi AZ-204</p>
+  <div class="hero-tags">
+    <span class="hero-tag">📦 Module 3: Khám Phá</span>
+    <span class="hero-tag">🔄 Module 4: Vòng Đời</span>
+    <span class="hero-tag">💻 Module 5: Làm Việc</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 04</div>
+  <a href="#blob-m3">Module 3 – Khám Phá Blob Storage</a>
+  <a href="#blob-s31" class="sub">3.1 Tổng Quan</a>
+  <a href="#blob-s32" class="sub">3.2 Loại Tài Nguyên</a>
+  <a href="#blob-s33" class="sub">3.3 Bảo Mật</a>
+  <a href="#blob-s34" class="sub">3.4 Dự Phòng</a>
+  <a href="#blob-m4">Module 4 – Quản Lý Vòng Đời</a>
+  <a href="#blob-s41" class="sub">4.1 Vòng Đời</a>
+  <a href="#blob-s42" class="sub">4.2 Chính Sách</a>
+  <a href="#blob-s43" class="sub">4.3 Triển Khai</a>
+  <a href="#blob-m5">Module 5 – Làm Việc với Blob</a>
+  <a href="#blob-s51" class="sub">5.1 Client Library</a>
+  <a href="#blob-s52" class="sub">5.2 Tạo Client</a>
+  <a href="#blob-s53" class="sub">5.3 Metadata .NET</a>
+  <a href="#blob-s54" class="sub">5.4 Metadata REST</a>
+  <a href="#blob-summary">Tóm Tắt &amp; Exam Tips</a>
+</nav>
+<main class="content">
+
+  <!-- ==================== MODULE 3 ==================== -->
+  <div id="blob-m3">
+    <div class="mhd"><div class="mhd-ico">📦</div><div><h2>Module 3: Khám Phá Azure Blob Storage</h2><div class="mhd-sub">Tổng quan, tài nguyên, bảo mật và dự phòng</div></div></div>
+    <div class="msec">
+
+      <!-- SECTION 1: Overview -->
+      <section id="blob-s31">
+        <h3>🌐 3.1 Tổng Quan Azure Blob Storage</h3>
+
+        <p>Azure Blob storage là giải pháp lưu trữ đối tượng của Microsoft cho cloud. Blob storage được tối ưu hóa để lưu trữ lượng lớn dữ liệu phi cấu trúc. Dữ liệu phi cấu trúc là dữ liệu không tuân theo mô hình hoặc định nghĩa dữ liệu cụ thể, như văn bản hoặc dữ liệu nhị phân.</p>
+
+        <h4>Blob Storage Được Thiết Kế Cho</h4>
+        <ul>
+          <li>Phục vụ hình ảnh hoặc tài liệu trực tiếp đến trình duyệt</li>
+          <li>Lưu trữ tệp để truy cập phân tán</li>
+          <li>Phát trực tuyến video và âm thanh</li>
+          <li>Ghi vào tệp log</li>
+          <li>Lưu trữ dữ liệu để sao lưu và khôi phục, khắc phục thảm họa và lưu trữ</li>
+          <li>Lưu trữ dữ liệu để phân tích bởi dịch vụ on-premises hoặc Azure-hosted</li>
+        </ul>
+
+        <p>Người dùng hoặc ứng dụng client có thể truy cập các đối tượng trong Blob storage qua HTTP/HTTPS, từ bất cứ đâu trên thế giới. Đối tượng trong Blob storage có thể truy cập qua Azure Storage REST API, Azure PowerShell, Azure CLI hoặc thư viện client Azure Storage.</p>
+
+        <div class="callout info">
+          <strong>💡 Cấu trúc cơ bản:</strong> Tài khoản Azure Storage là container cấp cao nhất cho tất cả Azure Blob storage. Tài khoản lưu trữ cung cấp namespace duy nhất cho dữ liệu Azure Storage có thể truy cập từ bất cứ đâu trên thế giới qua HTTP hoặc HTTPS.
+        </div>
+
+        <h4>Loại Tài Khoản Lưu Trữ</h4>
+        <p>Azure Storage cung cấp hai mức hiệu suất của tài khoản lưu trữ: standard và premium.</p>
+        <ul>
+          <li><strong>Standard:</strong> Tài khoản general-purpose v2 tiêu chuẩn - được khuyến nghị cho hầu hết các kịch bản</li>
+          <li><strong>Premium:</strong> Hiệu suất cao hơn bằng solid-state drives (SSD). Có thể chọn: block blobs, page blobs hoặc file shares</li>
+        </ul>
+
+        <table>
+  <thead><tr>
+            <th>Loại Tài Khoản Lưu Trữ</th>
+            <th>Dịch Vụ Được Hỗ Trợ</th>
+            <th>Tùy Chọn Dự Phòng</th>
+            <th>Sử Dụng</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><strong>Standard general-purpose v2</strong></td>
+            <td>Blob Storage (bao gồm Data Lake Storage), Queue Storage, Table Storage, Azure Files</td>
+            <td>LRS / GRS / RA-GRS / ZRS / GZRS / RA-GZRS</td>
+            <td>Loại tài khoản lưu trữ tiêu chuẩn cho blobs, file shares, queues và tables. Được khuyến nghị cho hầu hết kịch bản Azure Storage.</td>
+          </tr><tr>
+            <td><strong>Premium block blobs</strong></td>
+            <td>Blob Storage (bao gồm Data Lake Storage)</td>
+            <td>LRS và ZRS</td>
+            <td>Loại tài khoản lưu trữ premium cho block blobs và append blobs. Khuyến nghị cho kịch bản tỷ lệ giao dịch cao hoặc sử dụng đối tượng nhỏ hơn hoặc yêu cầu độ trễ lưu trữ thấp nhất quán.</td>
+          </tr><tr>
+            <td><strong>Premium file shares</strong></td>
+            <td>Azure Files</td>
+            <td>LRS và ZRS</td>
+            <td>Loại tài khoản lưu trữ premium chỉ cho file shares. Khuyến nghị cho enterprise hoặc ứng dụng hiệu suất cao.</td>
+          </tr><tr>
+            <td><strong>Premium page blobs</strong></td>
+            <td>Chỉ Page blobs</td>
+            <td>LRS và ZRS</td>
+            <td>Loại tài khoản lưu trữ premium chỉ cho page blobs.</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <h4>Access Tiers cho Block Blob</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Trạng thái</th>
+              <th>Chi phí lưu trữ</th>
+              <th>Chi phí truy cập</th>
+              <th>Min lưu trữ</th>
+              <th>Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-hot">HOT</span></td>
+              <td>Online</td>
+              <td>Cao nhất</td>
+              <td>Thấp nhất</td>
+              <td>—</td>
+              <td>Mặc định khi tạo tài khoản. Tối ưu cho dữ liệu truy cập thường xuyên.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-cool">COOL</span></td>
+              <td>Online</td>
+              <td>Thấp hơn Hot</td>
+              <td>Cao hơn Hot</td>
+              <td>30 ngày</td>
+              <td>Tối ưu cho lượng lớn dữ liệu ít truy cập.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-cold">COLD</span></td>
+              <td>Online</td>
+              <td>Thấp hơn Cool</td>
+              <td>Cao hơn Cool</td>
+              <td>90 ngày</td>
+              <td>Tối ưu cho dữ liệu hiếm khi truy cập.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-archive">ARCHIVE</span></td>
+              <td>Ngoại tuyến</td>
+              <td>Thấp nhất</td>
+              <td>Cao nhất + độ trễ vài giờ</td>
+              <td>180 ngày</td>
+              <td>Chỉ cho block blobs riêng lẻ. Cần rehydrate trước khi đọc.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ul>
+          <li><span class="badge badge-hot">HOT</span> Tối ưu cho dữ liệu truy cập thường xuyên. Chi phí lưu trữ cao nhất, chi phí truy cập thấp nhất. <strong>Mặc định khi tạo tài khoản mới.</strong></li>
+          <li><span class="badge badge-cool">COOL</span> Tối ưu cho lưu trữ lượng lớn dữ liệu ít được truy cập và lưu tối thiểu <strong>30 ngày</strong>. Chi phí lưu trữ thấp hơn Hot, chi phí truy cập cao hơn Hot.</li>
+          <li><span class="badge badge-cold">COLD</span> Tối ưu cho dữ liệu ít được truy cập và lưu tối thiểu <strong>90 ngày</strong>. Chi phí lưu trữ thấp hơn Cool, chi phí truy cập cao hơn Cool.</li>
+          <li><span class="badge badge-archive">ARCHIVE</span> Chỉ có cho block blobs riêng lẻ. Tối ưu cho dữ liệu có thể chịu độ trễ truy xuất vài giờ và ở tier Archive tối thiểu <strong>180 ngày</strong>. Tùy chọn lưu trữ tiết kiệm nhất.</li>
+        </ul>
+      </section>
+
+      <!-- SECTION 2: Resource Types -->
+      <section id="blob-s32">
+        <h3>🗂️ 3.2 Các Loại Tài Nguyên Blob Storage</h3>
+
+        <p>Blob storage cung cấp ba loại tài nguyên:</p>
+
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num">1</div>
+            <div class="flow-body"><strong>Storage Account — Tài Khoản Lưu Trữ</strong>mystorageaccount.blob.core.windows.net — Namespace duy nhất trong Azure. Điểm truy cập cho tất cả dữ liệu. Chứa số lượng containers không giới hạn.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">2</div>
+            <div class="flow-body"><strong>Container — Tổ Chức Blobs</strong>Như thư mục trong filesystem, tổ chức một tập hợp blobs. Ví dụ: mycontainer, images, backups. Không giới hạn số lượng containers mỗi account.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="arch-grid" style="margin:.4rem 0 0 38px">
+            <div class="arch-card">
+              <div class="arch-card-hd">Block Blob</div>
+              <div class="arch-card-body">
+                <div class="arch-item">Tối đa ~190.7 TiB</div>
+                <div class="arch-item">Văn bản và dữ liệu nhị phân</div>
+                <div class="arch-item">Tệp văn bản, hình ảnh, video</div>
+              </div>
+            </div>
+            <div class="arch-card">
+              <div class="arch-card-hd">Append Blob</div>
+              <div class="arch-card-body">
+                <div class="arch-item">Tối ưu cho thao tác append</div>
+                <div class="arch-item">Ghi log từ máy ảo</div>
+                <div class="arch-item">Dữ liệu streaming</div>
+              </div>
+            </div>
+            <div class="arch-card" style="grid-column:1/-1">
+              <div class="arch-card-hd">Page Blob</div>
+              <div class="arch-card-body" style="display:flex;gap:20px;flex-wrap:wrap">
+                <div class="arch-item">Tối đa 8 TB</div>
+                <div class="arch-item">Truy cập ngẫu nhiên</div>
+                <div class="arch-item">Lưu tệp VHD, đĩa Azure VM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h4>Storage Accounts (Tài Khoản Lưu Trữ)</h4>
+        <p>Tài khoản lưu trữ cung cấp namespace duy nhất trong Azure cho dữ liệu của bạn. Ví dụ, nếu tài khoản lưu trữ có tên <em>mystorageaccount</em>, endpoint mặc định cho Blob storage là:</p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">Code</span></div>
+<pre><code class="language-plaintext">http://mystorageaccount.blob.core.windows.net</code></pre>
+</div>
+
+        <h4>Containers (Container)</h4>
+        <p>Container tổ chức một tập hợp blobs, tương tự thư mục trong hệ thống tệp. Tài khoản lưu trữ có thể chứa số lượng container không giới hạn, và container có thể lưu trữ số lượng blobs không giới hạn.</p>
+
+        <p>Quy tắc đặt tên container:</p>
+        <ul>
+          <li>Tên container phải từ <strong>3 đến 63 ký tự</strong></li>
+          <li>Phải bắt đầu bằng chữ cái hoặc số</li>
+          <li>Chỉ chứa chữ thường, số và ký tự gạch ngang (-)</li>
+          <li>Hai hoặc nhiều ký tự gạch ngang liên tiếp không được phép</li>
+        </ul>
+
+        <p>URI cho container:</p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">Code</span></div>
+<pre><code class="language-plaintext">https://myaccount.blob.core.windows.net/mycontainer</code></pre>
+</div>
+
+        <h4>Ba Loại Blobs</h4>
+        <table>
+  <thead><tr>
+            <th>Loại Blob</th>
+            <th>Mô Tả</th>
+            <th>Kích Thước Tối Đa</th>
+            <th>Trường Hợp Sử Dụng</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><strong>Block blobs</strong></td>
+            <td>Lưu văn bản và dữ liệu nhị phân. Được tạo từ các blocks dữ liệu có thể quản lý riêng lẻ.</td>
+            <td>~190.7 TiB</td>
+            <td>Tệp văn bản, hình ảnh, video, tài liệu</td>
+          </tr><tr>
+            <td><strong>Append blobs</strong></td>
+            <td>Được tạo từ blocks như block blobs, nhưng được tối ưu hóa cho thao tác append.</td>
+            <td>Rất lớn</td>
+            <td>Ghi log từ máy ảo, dữ liệu streaming</td>
+          </tr><tr>
+            <td><strong>Page blobs</strong></td>
+            <td>Lưu tệp truy cập ngẫu nhiên. Lưu tệp VHD và phục vụ như đĩa cho Azure VM.</td>
+            <td>8 TB</td>
+            <td>Đĩa máy ảo Azure (VHD)</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <p>URI cho blob:</p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">https://myaccount.blob.core.windows.net/mycontainer/myblob
+
+# hoặc với virtual directory:
+https://myaccount.blob.core.windows.net/mycontainer/myvirtualdirectory/myblob</code></pre>
+</div>
+      </section>
+
+      <!-- SECTION 3: Security -->
+      <section id="blob-s33">
+        <h3>🔐 3.3 Tính Năng Bảo Mật Azure Storage</h3>
+
+        <p>Azure Storage sử dụng mã hóa phía dịch vụ (SSE - Service-Side Encryption) để tự động mã hóa dữ liệu khi lưu vào cloud. Mã hóa Azure Storage bảo vệ dữ liệu và giúp đáp ứng cam kết bảo mật và tuân thủ tổ chức.</p>
+
+        <h4>Mã Hóa Dữ Liệu Tại Chỗ (Data at Rest)</h4>
+        <ul>
+          <li>Tự động mã hóa và giải mã dữ liệu trong Azure Storage một cách minh bạch</li>
+          <li>Sử dụng mã hóa AES <strong>256-bit</strong> - một trong những mật mã khối mạnh nhất</li>
+          <li>Tuân thủ FIPS 140-2</li>
+          <li>Tương tự mã hóa BitLocker trên Windows</li>
+          <li><strong>Được bật cho tất cả tài khoản lưu trữ và không thể tắt</strong></li>
+          <li>Không tốn thêm chi phí</li>
+        </ul>
+
+        <p>Dữ liệu được mã hóa bất kể:</p>
+        <ul>
+          <li>Mức hiệu suất, access tier hoặc mô hình triển khai</li>
+          <li>Tất cả block blobs, append blobs và page blobs mới và hiện có</li>
+          <li>Khi geo-replication được bật, cả vùng chính và phụ đều được mã hóa</li>
+          <li>Tất cả tài nguyên Azure Storage: blobs, disks, files, queues, tables</li>
+          <li>Tất cả metadata đối tượng cũng được mã hóa</li>
+        </ul>
+
+        <h4>Quản Lý Khóa Mã Hóa</h4>
+        <p>Dữ liệu trong tài khoản lưu trữ mới được mã hóa bằng Microsoft-managed keys theo mặc định.</p>
+
+        <table>
+  <thead><tr>
+            <th>Tham Số</th>
+            <th>Microsoft-managed keys</th>
+            <th>Customer-managed keys</th>
+            <th>Customer-provided keys</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td>Thao tác mã hóa/giải mã</td>
+            <td>Azure</td>
+            <td>Azure</td>
+            <td>Azure</td>
+          </tr><tr>
+            <td>Dịch vụ Azure Storage được hỗ trợ</td>
+            <td>Tất cả</td>
+            <td>Blob Storage, Azure Files</td>
+            <td>Blob Storage</td>
+          </tr><tr>
+            <td>Lưu trữ khóa</td>
+            <td>Microsoft key store</td>
+            <td>Azure Key Vault hoặc Key Vault HSM</td>
+            <td>Key store của khách hàng</td>
+          </tr><tr>
+            <td>Trách nhiệm xoay vòng khóa</td>
+            <td>Microsoft</td>
+            <td>Khách hàng</td>
+            <td>Khách hàng</td>
+          </tr><tr>
+            <td>Kiểm soát khóa</td>
+            <td>Microsoft</td>
+            <td>Khách hàng</td>
+            <td>Khách hàng</td>
+          </tr><tr>
+            <td>Phạm vi khóa</td>
+            <td>Account (mặc định), container, hoặc blob</td>
+            <td>Account (mặc định), container, hoặc blob</td>
+            <td>N/A</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <h4>Mã Hóa Phía Client (Client-side Encryption)</h4>
+        <p>Thư viện client Azure Blob Storage cho .NET, Java và Python hỗ trợ mã hóa dữ liệu trong ứng dụng client trước khi upload lên Azure Storage và giải mã khi download.</p>
+
+        <p>Thư viện Blob Storage và Queue Storage sử dụng AES để mã hóa dữ liệu người dùng. Có hai phiên bản:</p>
+        <ul>
+          <li><strong>Version 2</strong>: Sử dụng chế độ Galois/Counter Mode (GCM) với AES. Blob Storage và Queue Storage SDKs hỗ trợ v2.</li>
+          <li><strong>Version 1</strong>: Sử dụng chế độ Cipher Block Chaining (CBC) với AES. Blob Storage, Queue Storage và Table Storage SDKs hỗ trợ v1.</li>
+        </ul>
+
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-hd">1. Transport Layer</div>
+            <div class="arch-card-body">
+              <div class="arch-item">HTTPS/TLS cho tất cả requests</div>
+              <div class="arch-item">Mã hóa dữ liệu in-transit</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">2. Service-Side Encryption (SSE)</div>
+            <div class="arch-card-body">
+              <div class="arch-item">AES-256-bit tự động, FIPS 140-2</div>
+              <div class="arch-item">Không thể tắt, không tốn thêm tiền</div>
+              <div class="arch-item">Keys: Microsoft / Customer-managed / Provided</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">3. Client-Side Encryption</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Mã hóa trước khi upload lên Azure</div>
+              <div class="arch-item">AES-GCM (v2) hoặc AES-CBC (v1)</div>
+              <div class="arch-item">Hỗ trợ: .NET, Java, Python</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">4. Azure Key Vault</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Lưu trữ Customer-managed keys</div>
+              <div class="arch-item">HSM (Hardware Security Module) support</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: Redundancy (from overview content) -->
+      <section id="blob-s34">
+        <h3>🔁 3.4 Dự Phòng Azure Blob Storage</h3>
+
+        <p>Azure Storage luôn lưu trữ nhiều bản sao dữ liệu để bảo vệ khỏi các sự kiện có kế hoạch và không có kế hoạch. Các tùy chọn dự phòng khác nhau có sẵn:</p>
+
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-hd">LRS — Locally Redundant</div>
+            <div class="arch-card-body">
+              <div class="arch-item">3 bản sao trong cùng 1 data center</div>
+              <div class="arch-item">Bảo vệ khỏi lỗi phần cứng server/rack</div>
+              <div class="arch-item">Chi phí thấp nhất</div>
+              <div class="arch-item">Durability: 11 nines (99.999999999%)</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">ZRS — Zone-Redundant</div>
+            <div class="arch-card-body">
+              <div class="arch-item">3 bản sao qua 3 Availability Zones</div>
+              <div class="arch-item">Bảo vệ khỏi lỗi toàn bộ zone</div>
+              <div class="arch-item">Durability: 12 nines (99.9999999999%)</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">GRS — Geo-Redundant</div>
+            <div class="arch-card-body">
+              <div class="arch-item">LRS vùng chính + nhân bản sang vùng phụ (LRS)</div>
+              <div class="arch-item">Vùng chính và phụ cách nhau hàng trăm dặm</div>
+              <div class="arch-item">Durability: 16 nines (99.99999999999999%)</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">RA-GRS — Read-Access Geo-Redundant</div>
+            <div class="arch-card-body">
+              <div class="arch-item">GRS + cho phép đọc từ vùng phụ</div>
+              <div class="arch-item">Durability: 16 nines</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">GZRS — Geo-Zone-Redundant</div>
+            <div class="arch-card-body">
+              <div class="arch-item">ZRS vùng chính + nhân bản sang vùng phụ (LRS)</div>
+              <div class="arch-item">= ZRS + GRS, bảo vệ tốt nhất</div>
+              <div class="arch-item">Durability: 16 nines</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">RA-GZRS — Read-Access Geo-Zone-Redundant</div>
+            <div class="arch-card-body">
+              <div class="arch-item">GZRS + cho phép đọc từ vùng phụ</div>
+              <div class="arch-item">Tùy chọn dự phòng toàn diện nhất</div>
+              <div class="arch-item">Durability: 16 nines</div>
+            </div>
+          </div>
+        </div>
+
+        <table>
+  <thead><tr>
+            <th>Tùy Chọn Dự Phòng</th>
+            <th>Mô Tả Ngắn</th>
+            <th>Durability</th>
+            <th>Tài Khoản Được Hỗ Trợ</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><strong>LRS</strong></td>
+            <td>3 bản sao trong 1 data center</td>
+            <td>99.999999999%</td>
+            <td>Standard general-purpose v2, Premium</td>
+          </tr><tr>
+            <td><strong>ZRS</strong></td>
+            <td>3 bản sao qua 3 availability zones</td>
+            <td>99.9999999999%</td>
+            <td>Standard general-purpose v2, Premium</td>
+          </tr><tr>
+            <td><strong>GRS</strong></td>
+            <td>LRS + nhân bản sang vùng thứ hai</td>
+            <td>99.99999999999999%</td>
+            <td>Standard general-purpose v2</td>
+          </tr><tr>
+            <td><strong>RA-GRS</strong></td>
+            <td>GRS + đọc từ vùng phụ</td>
+            <td>99.99999999999999%</td>
+            <td>Standard general-purpose v2</td>
+          </tr><tr>
+            <td><strong>GZRS</strong></td>
+            <td>ZRS + nhân bản sang vùng thứ hai</td>
+            <td>99.99999999999999%</td>
+            <td>Standard general-purpose v2</td>
+          </tr><tr>
+            <td><strong>RA-GZRS</strong></td>
+            <td>GZRS + đọc từ vùng phụ</td>
+            <td>99.99999999999999%</td>
+            <td>Standard general-purpose v2</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout info">
+          <strong>💡 Quan trọng:</strong> Khi geo-replication được bật, tất cả dữ liệu ở cả vùng chính và vùng phụ đều được mã hóa. Tất cả các tùy chọn dự phòng Azure Storage đều hỗ trợ mã hóa.
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 4 ==================== -->
+  <div id="blob-m4">
+    <div class="mhd"><div class="mhd-ico">🔄</div><div><h2>Module 4: Quản Lý Vòng Đời Azure Blob Storage</h2><div class="mhd-sub">Lifecycle management, chính sách, và triển khai</div></div></div>
+    <div class="msec">
+
+      <!-- SECTION 5: Lifecycle -->
+      <section id="blob-s41">
+        <h3>⏳ 4.1 Khám Phá Vòng Đời Blob Storage</h3>
+
+        <p>Các tập dữ liệu có vòng đời độc đáo. Đầu vòng đời, người ta truy cập một số dữ liệu thường xuyên. Nhưng nhu cầu truy cập giảm đáng kể khi dữ liệu già đi. Một số dữ liệu không hoạt động trên cloud và hiếm khi được truy cập sau khi lưu trữ. Một số dữ liệu hết hạn sau vài ngày hoặc tháng sau khi tạo.</p>
+
+        <h4>Access Tiers trong Quản Lý Vòng Đời</h4>
+        <ul>
+          <li><span class="badge badge-hot">HOT</span> Tier online tối ưu cho dữ liệu truy cập thường xuyên.</li>
+          <li><span class="badge badge-cool">COOL</span> Tier online tối ưu cho dữ liệu ít truy cập, lưu tối thiểu <strong>30 ngày</strong>.</li>
+          <li><span class="badge badge-cold">COLD</span> Tier online tối ưu cho dữ liệu ít truy cập, lưu tối thiểu <strong>90 ngày</strong>. Chi phí lưu trữ thấp hơn cool nhưng chi phí truy cập cao hơn.</li>
+          <li><span class="badge badge-archive">ARCHIVE</span> Tier ngoại tuyến tối ưu cho dữ liệu hiếm khi truy cập, lưu tối thiểu <strong>180 ngày</strong> với yêu cầu độ trễ linh hoạt (tính bằng giờ).</li>
+        </ul>
+
+        <div class="callout info">
+          <strong>💡 Quan trọng:</strong> Giới hạn lưu trữ dữ liệu được đặt ở cấp tài khoản và không phải theo access tier. Bạn có thể chọn sử dụng toàn bộ giới hạn trong một tier hoặc trên cả ba tier.
+        </div>
+
+        <h4>Quản Lý Vòng Đời Dữ Liệu</h4>
+        <p>Azure Blob Storage lifecycle management cung cấp chính sách dựa trên quy tắc mà bạn có thể sử dụng để chuyển dữ liệu blob sang access tier thích hợp hoặc hết hạn dữ liệu vào cuối vòng đời dữ liệu.</p>
+
+        <p>Với chính sách lifecycle management, bạn có thể:</p>
+        <ul>
+          <li>Chuyển blobs từ cool sang hot ngay khi được truy cập, để tối ưu hiệu suất</li>
+          <li>Chuyển phiên bản hiện tại, phiên bản trước hoặc blob snapshots sang tier lưu trữ mát hơn nếu không được truy cập hoặc sửa đổi trong một khoảng thời gian</li>
+          <li>Xóa phiên bản hiện tại, phiên bản trước hoặc blob snapshots vào cuối vòng đời</li>
+          <li>Áp dụng quy tắc cho toàn bộ tài khoản lưu trữ, container được chọn hoặc tập hợp blobs sử dụng name prefixes hoặc blob index tags làm bộ lọc</li>
+        </ul>
+
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num" style="background:#d13438">0d</div>
+            <div class="flow-body"><strong>HOT — Truy cập thường xuyên</strong>Tạo blob, truy cập thường xuyên. Lưu trữ cao nhất, truy cập thấp nhất.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num" style="background:#0078d4">30d</div>
+            <div class="flow-body"><strong>COOL — Truy cập thỉnh thoảng</strong>Sau ~30 ngày. Lifecycle Policy tự động chuyển sang Cool tier. Chi phí lưu trữ giảm.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num" style="background:#005a9e">90d</div>
+            <div class="flow-body"><strong>ARCHIVE — Lưu trữ lâu dài</strong>Sau ~90 ngày. Dữ liệu ngoại tuyến, độ trễ truy cập tính bằng giờ. Chi phí rất thấp.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:#555">7yr</div>
+            <div class="flow-body"><strong>DELETE — Hết hạn</strong>Sau 2.555 ngày (7 năm). Policy tự động xóa blob khi hết vòng đời.</div>
+          </div>
+          <div class="callout info" style="margin:.6rem 0 0">
+            <strong>Lifecycle Policy</strong> chuyển tier tự động dựa trên: <code>daysAfterModificationGreaterThan</code> · <code>daysAfterCreationGreaterThan</code> · <code>daysAfterLastAccessTimeGreaterThan</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 6: Lifecycle Policies -->
+      <section id="blob-s42">
+        <h3>📋 4.2 Khám Phá Chính Sách Vòng Đời Blob Storage</h3>
+
+        <p>Chính sách lifecycle management là tập hợp các quy tắc trong tài liệu JSON. Mỗi định nghĩa quy tắc trong chính sách bao gồm filter set và action set.</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+  "rules": [
+    {
+      "name": "rule1",
+      "enabled": true,
+      "type": "Lifecycle",
+      "definition": {...}
+    },
+    {
+      "name": "rule2",
+      "type": "Lifecycle",
+      "definition": {...}
+    }
+  ]
+}</code></pre>
+</div>
+
+        <h4>Tham Số Chính Sách (Policy)</h4>
+        <table>
+  <thead><tr>
+            <th>Tên Tham Số</th>
+            <th>Loại Tham Số</th>
+            <th>Ghi Chú</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><code>rules</code></td>
+            <td>Mảng rule objects</td>
+            <td>Cần ít nhất một quy tắc trong chính sách. Có thể định nghĩa tối đa 100 quy tắc.</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <h4>Tham Số Quy Tắc (Rule)</h4>
+        <table>
+  <thead><tr>
+            <th>Tên Tham Số</th>
+            <th>Loại</th>
+            <th>Ghi Chú</th>
+            <th>Bắt Buộc</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><code>name</code></td>
+            <td>String</td>
+            <td>Tên quy tắc tối đa 256 ký tự alphanumeric. Case-sensitive. Phải duy nhất trong chính sách.</td>
+            <td>Có</td>
+          </tr><tr>
+            <td><code>enabled</code></td>
+            <td>Boolean</td>
+            <td>Tùy chọn boolean để tạm thời vô hiệu hóa quy tắc. Mặc định là true.</td>
+            <td>Không</td>
+          </tr><tr>
+            <td><code>type</code></td>
+            <td>Enum</td>
+            <td>Loại hợp lệ hiện tại là Lifecycle.</td>
+            <td>Có</td>
+          </tr><tr>
+            <td><code>definition</code></td>
+            <td>Object</td>
+            <td>Mỗi definition gồm filter set và action set.</td>
+            <td>Có</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <h4>Ví Dụ Quy Tắc Đầy Đủ</h4>
+        <p>Quy tắc này lọc tài khoản để chạy các hành động trên objects trong <code>sample-container</code> bắt đầu với <code>blob1</code>:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+  "rules": [
+    {
+      "enabled": true,
+      "name": "sample-rule",
+      "type": "Lifecycle",
+      "definition": {
+        "actions": {
+          "baseBlob": {
+            "tierToCool": {
+              "daysAfterModificationGreaterThan": 30
+            },
+            "tierToArchive": {
+              "daysAfterModificationGreaterThan": 90,
+              "daysAfterLastTierChangeGreaterThan": 7
+            },
+            "delete": {
+              "daysAfterModificationGreaterThan": 2555
+            }
+          },
+          "snapshot": {
+            "delete": {
+              "daysAfterCreationGreaterThan": 90
+            }
+          }
+        },
+        "filters": {
+          "blobTypes": [
+            "blockBlob"
+          ],
+          "prefixMatch": [
+            "sample-container/blob1"
+          ]
+        }
+      }
+    }
+  ]
+}</code></pre>
+</div>
+
+        <p>Quy tắc này:</p>
+        <ul>
+          <li>Chuyển blob sang cool tier sau <strong>30 ngày</strong> kể từ lần sửa đổi cuối</li>
+          <li>Chuyển blob sang archive tier sau <strong>90 ngày</strong> kể từ lần sửa đổi cuối</li>
+          <li>Xóa blob sau <strong>2.555 ngày (7 năm)</strong> kể từ lần sửa đổi cuối</li>
+          <li>Xóa blob snapshots sau <strong>90 ngày</strong> kể từ khi tạo snapshot</li>
+        </ul>
+
+        <h4>Rule Filters (Bộ Lọc Quy Tắc)</h4>
+        <p>Bộ lọc giới hạn hành động quy tắc cho tập hợp blobs trong tài khoản lưu trữ. Nếu nhiều hơn một bộ lọc được định nghĩa, logic AND chạy trên tất cả bộ lọc.</p>
+
+        <table>
+  <thead><tr>
+            <th>Tên Bộ Lọc</th>
+            <th>Loại</th>
+            <th>Bắt Buộc</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><code>blobTypes</code></td>
+            <td>Mảng enum values được xác định trước</td>
+            <td>Có</td>
+          </tr><tr>
+            <td><code>prefixMatch</code></td>
+            <td>Mảng chuỗi cho prefix cần khớp. Mỗi quy tắc tối đa 10 prefixes. Chuỗi prefix phải bắt đầu bằng tên container.</td>
+            <td>Không</td>
+          </tr><tr>
+            <td><code>blobIndexMatch</code></td>
+            <td>Mảng dictionary values gồm điều kiện key và value của blob index tag. Mỗi quy tắc tối đa 10 điều kiện blob index tag.</td>
+            <td>Không</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <h4>Rule Actions (Hành Động Quy Tắc)</h4>
+        <table>
+  <thead><tr>
+            <th>Hành Động</th>
+            <th>Phiên Bản Hiện Tại</th>
+            <th>Snapshot</th>
+            <th>Phiên Bản Trước</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><code>tierToCool</code></td>
+            <td>Hỗ trợ blockBlob</td>
+            <td>Hỗ trợ</td>
+            <td>Hỗ trợ</td>
+          </tr><tr>
+            <td><code>tierToCold</code></td>
+            <td>Hỗ trợ blockBlob</td>
+            <td>Hỗ trợ</td>
+            <td>Hỗ trợ</td>
+          </tr><tr>
+            <td><code>enableAutoTierToHotFromCool</code></td>
+            <td>Hỗ trợ blockBlob</td>
+            <td>Không hỗ trợ</td>
+            <td>Không hỗ trợ</td>
+          </tr><tr>
+            <td><code>tierToArchive</code></td>
+            <td>Hỗ trợ blockBlob</td>
+            <td>Hỗ trợ</td>
+            <td>Hỗ trợ</td>
+          </tr><tr>
+            <td><code>delete</code></td>
+            <td>Hỗ trợ blockBlob và appendBlob</td>
+            <td>Hỗ trợ</td>
+            <td>Hỗ trợ</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout warning">
+          <strong>⚠️ Ưu tiên hành động:</strong> Nếu bạn định nghĩa nhiều hơn một hành động trên cùng blob, lifecycle management áp dụng hành động ít tốn kém nhất. Ví dụ: <code>delete</code> rẻ hơn <code>tierToArchive</code>. <code>tierToArchive</code> rẻ hơn <code>tierToCool</code>.
+        </div>
+
+        <h4>Điều Kiện Chạy (Run Conditions)</h4>
+        <table>
+  <thead><tr>
+            <th>Điều Kiện Chạy</th>
+            <th>Giá Trị</th>
+            <th>Mô Tả</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><code>daysAfterModificationGreaterThan</code></td>
+            <td>Integer (ngày)</td>
+            <td>Điều kiện cho hành động base blob. Dùng last modified time.</td>
+          </tr><tr>
+            <td><code>daysAfterCreationGreaterThan</code></td>
+            <td>Integer (ngày)</td>
+            <td>Điều kiện cho hành động blob snapshot. Dùng snapshot creation time.</td>
+          </tr><tr>
+            <td><code>daysAfterLastAccessTimeGreaterThan</code></td>
+            <td>Integer (ngày)</td>
+            <td>Điều kiện cho phiên bản hiện tại khi access tracking được bật.</td>
+          </tr><tr>
+            <td><code>daysAfterLastTierChangeGreaterThan</code></td>
+            <td>Integer (ngày)</td>
+            <td>Thời gian tối thiểu blob rehydrated được giữ ở hot/cool/cold tier trước khi trở về archive. Chỉ áp dụng cho <code>tierToArchive</code>.</td>
+          </tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <!-- SECTION 7: Implementing Policies -->
+      <section id="blob-s43">
+        <h3>⚙️ 4.3 Triển Khai Chính Sách Vòng Đời Blob Storage</h3>
+
+        <p>Bạn có thể thêm, chỉnh sửa hoặc xóa chính sách bằng bất kỳ phương pháp nào sau đây:</p>
+        <ul>
+          <li>Azure portal</li>
+          <li>Azure PowerShell</li>
+          <li>Azure CLI</li>
+          <li>REST APIs</li>
+        </ul>
+
+        <h4>Azure Portal - Code View</h4>
+        <ol>
+          <li>Trong Azure portal, điều hướng đến tài khoản lưu trữ</li>
+          <li>Dưới <strong>Data management</strong>, chọn <strong>Lifecycle Management</strong> để xem hoặc thay đổi chính sách lifecycle management</li>
+          <li>Chọn tab <strong>Code View</strong>. Trên tab này, bạn có thể định nghĩa chính sách lifecycle management bằng JSON</li>
+        </ol>
+
+        <p>Ví dụ chính sách di chuyển block blob bắt đầu với <em>log</em> sang cool tier nếu đã hơn 30 ngày kể từ khi blob được sửa đổi:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+  "rules": [
+    {
+      "enabled": true,
+      "name": "move-to-cool",
+      "type": "Lifecycle",
+      "definition": {
+        "actions": {
+          "baseBlob": {
+            "tierToCool": {
+              "daysAfterModificationGreaterThan": 30
+            }
+          }
+        },
+        "filters": {
+          "blobTypes": [
+            "blockBlob"
+          ],
+          "prefixMatch": [
+            "sample-container/log"
+          ]
+        }
+      }
+    }
+  ]
+}</code></pre>
+</div>
+
+        <h4>Azure CLI</h4>
+        <p>Để thêm chính sách lifecycle management với Azure CLI, viết chính sách vào tệp JSON, sau đó gọi lệnh <code>az storage account management-policy create</code>:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">az storage account management-policy create \
+    --account-name &lt;storage-account&gt; \
+    --policy @policy.json \
+    --resource-group &lt;resource-group&gt;</code></pre>
+</div>
+
+        <div class="callout warning">
+          <strong>⚠️ Quan trọng:</strong> Chính sách lifecycle management phải được đọc hoặc ghi hoàn toàn. Cập nhật một phần không được hỗ trợ.
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODULE 5 ==================== -->
+  <div id="blob-m5">
+    <div class="mhd"><div class="mhd-ico">💻</div><div><h2>Module 5: Làm Việc với Azure Blob Storage</h2><div class="mhd-sub">Client library, tạo client, metadata .NET và REST</div></div></div>
+    <div class="msec">
+
+      <!-- SECTION 8: Client Library Overview -->
+      <section id="blob-s51">
+        <h3>📚 5.1 Tổng Quan Thư Viện Client Azure Blob Storage</h3>
+
+        <p>Thư viện client Azure Storage cho .NET cung cấp giao diện thuận tiện để thực hiện calls đến Azure Storage. Phiên bản mới nhất của thư viện client Azure Storage là <strong>phiên bản 12.x</strong>. Microsoft khuyến nghị sử dụng phiên bản 12.x cho các ứng dụng mới.</p>
+
+        <h4>Các Class Cơ Bản</h4>
+        <table>
+  <thead><tr>
+            <th>Class</th>
+            <th>Mô Tả</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><code>BlobClient</code></td>
+            <td>Cho phép thao tác Azure Storage blobs.</td>
+          </tr><tr>
+            <td><code>BlobClientOptions</code></td>
+            <td>Cung cấp tùy chọn cấu hình client để kết nối đến Azure Blob Storage.</td>
+          </tr><tr>
+            <td><code>BlobContainerClient</code></td>
+            <td>Cho phép thao tác các container Azure Storage và blobs trong đó.</td>
+          </tr><tr>
+            <td><code>BlobServiceClient</code></td>
+            <td>Cho phép thao tác tài nguyên dịch vụ Azure Storage và blob containers. Tài khoản lưu trữ cung cấp namespace cấp cao nhất cho Blob service.</td>
+          </tr><tr>
+            <td><code>BlobUriBuilder</code></td>
+            <td>Cung cấp cách thuận tiện để sửa đổi nội dung Uri instance để trỏ đến các tài nguyên Azure Storage khác nhau như tài khoản, container hoặc blob.</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <h4>Packages NuGet</h4>
+        <ul>
+          <li><code>Azure.Storage.Blobs</code>: Chứa các class chính (client objects) để thao tác service, containers và blobs.</li>
+          <li><code>Azure.Storage.Blobs.Specialized</code>: Chứa các class để thực hiện thao tác đặc thù cho loại blob, như block blobs.</li>
+          <li><code>Azure.Storage.Blobs.Models</code>: Tất cả các class utility, structures và enumeration types khác.</li>
+        </ul>
+
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num">1</div>
+            <div class="flow-body"><strong>BlobServiceClient — Tài khoản lưu trữ (Top Level)</strong>Quản lý tài khoản, cấu hình thuộc tính, liệt kê/tạo/xóa containers. Gọi <code>GetBlobContainerClient()</code> để xuống cấp tiếp theo.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">2</div>
+            <div class="flow-body"><strong>BlobContainerClient — Container (Level 2)</strong>Thao tác trên container và blobs bên trong. Có thể tạo trực tiếp mà không qua BlobServiceClient. Gọi <code>GetBlobClient()</code> để xuống cấp tiếp theo.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">3</div>
+            <div class="flow-body"><strong>BlobClient — Blob (Level 3)</strong>Thao tác trên blob cụ thể: upload, download, delete, metadata. Có thể tạo trực tiếp từ URI nếu chỉ làm việc với 1 blob.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 9: Create Client Object -->
+      <section id="blob-s52">
+        <h3>🔧 5.2 Tạo Client Object</h3>
+
+        <p>Làm việc với bất kỳ tài nguyên Azure nào bằng SDK bắt đầu bằng việc tạo client object. Khi ứng dụng tạo client object, bạn truyền URI tham chiếu endpoint đến constructor client.</p>
+
+        <div class="callout info">
+          <strong>💡 Xác thực:</strong> Các ví dụ code sử dụng <code>DefaultAzureCredential</code> để xác thực đến Azure qua Microsoft Entra security principal. Quá trình xác thực bao gồm lấy access token để ủy quyền. Access token này được truyền như credential khi client được khởi tạo và credential tồn tại suốt vòng đời client.
+        </div>
+
+        <h4>Tạo BlobServiceClient Object</h4>
+        <p>Object <code>BlobServiceClient</code> được ủy quyền cho phép ứng dụng tương tác với tài nguyên ở mức tài khoản lưu trữ. Nó cung cấp các phương thức để lấy và cấu hình thuộc tính tài khoản, cũng như liệt kê, tạo và xóa containers.</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">using Azure.Identity;
+using Azure.Storage.Blobs;
+
+public BlobServiceClient GetBlobServiceClient(string accountName)
+{
+    BlobServiceClient client = new(
+        new Uri($"https://{accountName}.blob.core.windows.net"),
+        new DefaultAzureCredential());
+
+    return client;
+}</code></pre>
+</div>
+
+        <h4>Tạo BlobContainerClient Object</h4>
+        <p>Bạn có thể sử dụng object <code>BlobServiceClient</code> để tạo <code>BlobContainerClient</code> mới cho phép tương tác với container cụ thể:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">public BlobContainerClient GetBlobContainerClient(
+    BlobServiceClient blobServiceClient,
+    string containerName)
+{
+    // Tạo container client sử dụng service client object
+    BlobContainerClient client = blobServiceClient.GetBlobContainerClient(containerName);
+    return client;
+}</code></pre>
+</div>
+
+        <p>Nếu công việc được giới hạn trong một container duy nhất, bạn có thể tạo <code>BlobContainerClient</code> trực tiếp:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">public BlobContainerClient GetBlobContainerClient(
+    string accountName,
+    string containerName,
+    BlobClientOptions clientOptions)
+{
+    // Thêm tên container vào cuối URI
+    BlobContainerClient client = new(
+        new Uri($"https://{accountName}.blob.core.windows.net/{containerName}"),
+        new DefaultAzureCredential(),
+        clientOptions);
+
+    return client;
+}</code></pre>
+</div>
+
+        <h4>Tạo BlobClient Object</h4>
+        <p>Để tương tác với tài nguyên blob cụ thể, tạo <code>BlobClient</code> object từ service client hoặc container client:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">public BlobClient GetBlobClient(
+    BlobServiceClient blobServiceClient,
+    string containerName,
+    string blobName)
+{
+    BlobClient client =
+        blobServiceClient.GetBlobContainerClient(containerName).GetBlobClient(blobName);
+    return client;
+}</code></pre>
+</div>
+
+        <div class="arch-grid" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="arch-card">
+            <div class="arch-card-hd">Tùy Chọn 1 — Đầy đủ từ Service</div>
+            <div class="arch-card-body">
+              <div class="arch-item"><code>BlobServiceClient(Uri, Credential)</code></div>
+              <div class="arch-item">→ <code>.GetBlobContainerClient(name)</code></div>
+              <div class="arch-item">→ <code>.GetBlobClient(blobName)</code></div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">Tùy Chọn 2 — Trực tiếp Container</div>
+            <div class="arch-card-body">
+              <div class="arch-item"><code>BlobContainerClient(Uri, Credential, Options)</code></div>
+              <div class="arch-item">→ <code>.GetBlobClient(blobName)</code></div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">Tùy Chọn 3 — Trực tiếp Blob</div>
+            <div class="arch-card-body">
+              <div class="arch-item"><code>BlobClient(Uri, Credential)</code></div>
+              <div class="arch-item">Dùng khi chỉ làm việc với 1 blob cụ thể</div>
+            </div>
+          </div>
+          <div class="arch-card" style="grid-column:1/-1">
+            <div class="arch-card-hd">Auth &amp; URI Format</div>
+            <div class="arch-card-body" style="display:flex;gap:20px;flex-wrap:wrap">
+              <div class="arch-item">Xác thực: <code>DefaultAzureCredential()</code> (Microsoft Entra)</div>
+              <div class="arch-item">URI: <code>https://{account}.blob.core.windows.net/{container}/{blob}</code></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 10: Manage Container Properties and Metadata .NET -->
+      <section id="blob-s53">
+        <h3>🏷️ 5.3 Quản Lý Thuộc Tính Container và Metadata bằng .NET</h3>
+
+        <p>Blob containers hỗ trợ system properties và user-defined metadata, ngoài dữ liệu chúng chứa.</p>
+
+        <ul>
+          <li><strong>System properties (Thuộc tính hệ thống)</strong>: Tồn tại trên mỗi tài nguyên Blob storage. Một số có thể đọc hoặc đặt, một số chỉ đọc. Một số system properties tương ứng với các HTTP header tiêu chuẩn. Thư viện client Azure Storage cho .NET duy trì các thuộc tính này cho bạn.</li>
+          <li><strong>User-defined metadata (Metadata do người dùng định nghĩa)</strong>: Gồm một hoặc nhiều cặp name-value mà bạn chỉ định cho tài nguyên Blob storage. Bạn có thể sử dụng metadata để lưu trữ các giá trị bổ sung. Giá trị metadata chỉ dành cho mục đích của bạn và không ảnh hưởng đến hành vi tài nguyên.</li>
+        </ul>
+
+        <div class="callout warning">
+          <strong>⚠️ Quy tắc đặt tên Metadata:</strong> Cặp name/value metadata là HTTP headers hợp lệ, vì vậy phải tuân thủ tất cả hạn chế của HTTP headers. Tên metadata phải là HTTP header names hợp lệ và C# identifiers hợp lệ, chỉ chứa ASCII characters, và nên được xử lý case-insensitive. Giá trị metadata chứa non-ASCII characters nên được Base64-encoded hoặc URL-encoded.
+        </div>
+
+        <h4>Lấy Thuộc Tính Container</h4>
+        <p>Để lấy thuộc tính container, gọi một trong các phương thức sau của <code>BlobContainerClient</code>:</p>
+        <ul>
+          <li><code>GetProperties</code></li>
+          <li><code>GetPropertiesAsync</code></li>
+        </ul>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">private static async Task ReadContainerPropertiesAsync(BlobContainerClient container)
+{
+    try
+    {
+        // Lấy một số thuộc tính container và ghi giá trị ra console
+        var properties = await container.GetPropertiesAsync();
+        Console.WriteLine($"Properties for container {container.Uri}");
+        Console.WriteLine($"Public access level: {properties.Value.PublicAccess}");
+        Console.WriteLine($"Last modified time in UTC: {properties.Value.LastModified}");
+    }
+    catch (RequestFailedException e)
+    {
+        Console.WriteLine($"HTTP error code {e.Status}: {e.ErrorCode}");
+        Console.WriteLine(e.Message);
+        Console.ReadLine();
+    }
+}</code></pre>
+</div>
+
+        <h4>Đặt và Lấy Metadata</h4>
+        <p>Để đặt metadata, thêm cặp name-value vào object <code>IDictionary</code>, sau đó gọi một trong các phương thức sau:</p>
+        <ul>
+          <li><code>SetMetadata</code></li>
+          <li><code>SetMetadataAsync</code></li>
+        </ul>
+
+        <div class="callout warning">
+          <strong>⚠️ Lưu ý:</strong> Nếu hai hoặc nhiều metadata headers với cùng tên được gửi cho một tài nguyên, Blob service trả về status code <code>400 (Bad Request)</code>.
+        </div>
+
+        <p><strong>Đặt metadata trên container:</strong></p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">public static async Task AddContainerMetadataAsync(BlobContainerClient container)
+{
+    try
+    {
+        IDictionary&lt;string, string&gt; metadata =
+           new Dictionary&lt;string, string&gt;();
+
+        // Thêm một số metadata vào container
+        metadata.Add("docType", "textDocuments");
+        metadata.Add("category", "guidance");
+
+        // Đặt metadata của container
+        await container.SetMetadataAsync(metadata);
+    }
+    catch (RequestFailedException e)
+    {
+        Console.WriteLine($"HTTP error code {e.Status}: {e.ErrorCode}");
+        Console.WriteLine(e.Message);
+        Console.ReadLine();
+    }
+}</code></pre>
+</div>
+
+        <p><strong>Lấy metadata từ container:</strong></p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">public static async Task ReadContainerMetadataAsync(BlobContainerClient container)
+{
+    try
+    {
+        // GetPropertiesAsync cũng lấy metadata
+        var properties = await container.GetPropertiesAsync();
+
+        // Liệt kê metadata của container
+        Console.WriteLine("Container metadata:");
+        foreach (var metadataItem in properties.Value.Metadata)
+        {
+            Console.WriteLine($"\tKey: {metadataItem.Key}");
+            Console.WriteLine($"\tValue: {metadataItem.Value}");
+        }
+    }
+    catch (RequestFailedException e)
+    {
+        Console.WriteLine($"HTTP error code {e.Status}: {e.ErrorCode}");
+        Console.WriteLine(e.Message);
+        Console.ReadLine();
+    }
+}</code></pre>
+</div>
+      </section>
+
+      <!-- SECTION 11: Properties and Metadata via REST -->
+      <section id="blob-s54">
+        <h3>🌐 5.4 Đặt và Lấy Thuộc Tính và Metadata qua REST</h3>
+
+        <p>Containers và blobs hỗ trợ metadata tùy chỉnh, được biểu diễn như HTTP headers. Metadata headers có thể được đặt trên request tạo container hoặc blob mới, hoặc trên request tạo rõ ràng thuộc tính trên tài nguyên hiện có.</p>
+
+        <h4>Định Dạng Metadata Header</h4>
+        <p>Metadata headers là cặp name/value. Định dạng cho header là:</p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">Code</span></div>
+<pre><code class="language-plaintext">x-ms-meta-name:string-value</code></pre>
+</div>
+
+        <div class="callout info">
+          <strong>💡 Quy tắc về tên Metadata:</strong>
+          <ul>
+            <li>Từ phiên bản 2009-09-19, tên metadata phải tuân thủ quy tắc đặt tên cho C# identifiers</li>
+            <li>Tên là case-insensitive</li>
+            <li>Tên metadata bảo tồn chữ hoa/thường khi được tạo nhưng case-insensitive khi đặt hoặc đọc</li>
+            <li>Nếu hai hoặc nhiều metadata headers với cùng tên được gửi, Blob service trả về status code 400 (Bad Request)</li>
+            <li>Tổng kích thước của tất cả cặp metadata tối đa là <strong>8 KB</strong></li>
+          </ul>
+        </div>
+
+        <h4>Các Thao Tác trên Metadata</h4>
+        <p>Metadata trên blob hoặc container có thể được lấy hoặc đặt trực tiếp mà không trả về hoặc thay đổi nội dung tài nguyên. Giá trị metadata chỉ có thể đọc hoặc ghi đầy đủ; cập nhật một phần không được hỗ trợ.</p>
+
+        <h4>Lấy Thuộc Tính và Metadata qua REST</h4>
+        <p>Thao tác GET/HEAD lấy metadata headers cho container hoặc blob được chỉ định. Các thao tác này chỉ trả về headers, không trả về response body.</p>
+
+        <p><strong>URI syntax để lấy metadata trên container:</strong></p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+<pre><code class="language-http">GET/HEAD https://myaccount.blob.core.windows.net/mycontainer?restype=container&amp;comp=metadata</code></pre>
+</div>
+
+        <p><strong>URI syntax để lấy metadata trên blob:</strong></p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+<pre><code class="language-http">GET/HEAD https://myaccount.blob.core.windows.net/mycontainer/myblob?comp=metadata</code></pre>
+</div>
+
+        <h4>Đặt Metadata Headers qua REST</h4>
+        <p>Thao tác PUT đặt metadata headers trên container hoặc blob được chỉ định, ghi đè bất kỳ metadata hiện có nào. Gọi PUT không có headers nào trên request sẽ xóa tất cả metadata hiện có trên tài nguyên.</p>
+
+        <p><strong>URI syntax để đặt metadata trên container:</strong></p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+<pre><code class="language-http">PUT https://myaccount.blob.core.windows.net/mycontainer?comp=metadata&amp;restype=container</code></pre>
+</div>
+
+        <p><strong>URI syntax để đặt metadata trên blob:</strong></p>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+<pre><code class="language-http">PUT https://myaccount.blob.core.windows.net/mycontainer/myblob?comp=metadata</code></pre>
+</div>
+
+        <h4>Standard HTTP Properties cho Containers và Blobs</h4>
+        <p>Containers và blobs cũng hỗ trợ các standard HTTP properties. Properties và metadata đều được biểu diễn như standard HTTP headers; sự khác biệt là trong cách đặt tên: metadata headers có tiền tố <code>x-ms-meta-</code>, còn property headers sử dụng tên HTTP header tiêu chuẩn.</p>
+
+        <table>
+  <thead><tr>
+            <th>Tài Nguyên</th>
+            <th>Standard HTTP Headers Được Hỗ Trợ</th>
+          </tr>
+  </thead>
+  <tbody><tr>
+            <td><strong>Containers</strong></td>
+            <td><code>ETag</code>, <code>Last-Modified</code></td>
+          </tr><tr>
+            <td><strong>Blobs</strong></td>
+            <td><code>ETag</code>, <code>Last-Modified</code>, <code>Content-Length</code>, <code>Content-Type</code>, <code>Content-MD5</code>, <code>Content-Encoding</code>, <code>Content-Language</code>, <code>Cache-Control</code>, <code>Origin</code>, <code>Range</code></td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <div class="compare-2">
+          <div class="cmp-col">
+            <div class="cmp-hd blue">Properties — Thuộc Tính Hệ Thống</div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Standard HTTP headers được xác định trước</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>ETag, Last-Modified, Content-Length, Content-Type, Cache-Control, v.v.</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Được SDK duy trì tự động</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>REST: <code>GET/HEAD {resource}</code></div></div>
+          </div>
+          <div class="cmp-col">
+            <div class="cmp-hd dark">Metadata — Do Người Dùng Định Nghĩa</div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Custom HTTP headers tùy ý</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Tiền tố: <code>x-ms-meta-name:value</code></div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Tổng kích thước tối đa <strong>8 KB</strong>, case-insensitive names</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Chỉ đọc/ghi đầy đủ — partial update không được hỗ trợ</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>REST: <code>GET/HEAD ?comp=metadata</code> · <code>PUT ?comp=metadata</code></div></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Summary Card -->
+  <div id="blob-summary">
+    <div class="mhd"><div class="mhd-ico">📋</div><div><h2>Tóm Tắt Nhanh - Điểm Ôn Thi AZ-204</h2><div class="mhd-sub">Điểm chính cần nhớ cho kỳ thi</div></div></div>
+    <div class="msec">
+      <section>
+        <h3>🎯 Điểm Chính Cần Nhớ</h3>
+
+        <h4>Về Blob Storage Cơ Bản</h4>
+        <ul>
+          <li>3 loại tài nguyên: Storage Account → Container → Blob</li>
+          <li>3 loại blobs: Block (190.7 TiB), Append (logging), Page (8 TB, VHD)</li>
+          <li>Quy tắc container name: 3-63 chars, chữ thường/số/gạch ngang, không 2 gạch ngang liên tiếp</li>
+          <li>Endpoint format: <code>https://{account}.blob.core.windows.net/{container}/{blob}</code></li>
+        </ul>
+
+        <h4>Về Access Tiers</h4>
+        <ul>
+          <li><strong>Hot</strong>: Thường xuyên, lưu trữ cao nhất, truy cập thấp nhất, <strong>mặc định</strong></li>
+          <li><strong>Cool</strong>: Ít hơn, min <strong>30 ngày</strong>, lưu trữ thấp hơn Hot</li>
+          <li><strong>Cold</strong>: Hiếm hơn, min <strong>90 ngày</strong>, lưu trữ thấp hơn Cool</li>
+          <li><strong>Archive</strong>: Chỉ offline, min <strong>180 ngày</strong>, độ trễ tính bằng giờ, rẻ nhất</li>
+        </ul>
+
+        <h4>Về Lifecycle Management</h4>
+        <ul>
+          <li>Chính sách = tập hợp rules trong JSON</li>
+          <li>Tối đa <strong>100 rules</strong> mỗi chính sách</li>
+          <li>Filters: blobTypes (bắt buộc), prefixMatch (max 10), blobIndexMatch (max 10 tags)</li>
+          <li>Ưu tiên hành động: delete &lt; tierToArchive &lt; tierToCool (rẻ hơn = được ưu tiên)</li>
+          <li>Cập nhật chính sách: chỉ đọc/ghi toàn bộ, không hỗ trợ partial update</li>
+        </ul>
+
+        <h4>Về .NET SDK Client Library</h4>
+        <ul>
+          <li>SDK v12.x: BlobServiceClient, BlobContainerClient, BlobClient</li>
+          <li>Xác thực: DefaultAzureCredential (Microsoft Entra)</li>
+          <li>BlobServiceClient: top-level, quản lý tài khoản và containers</li>
+          <li>BlobContainerClient: quản lý container và blobs trong đó</li>
+          <li>BlobClient: thao tác blob cụ thể</li>
+        </ul>
+
+        <h4>Về Properties và Metadata</h4>
+        <ul>
+          <li>System properties: chuẩn HTTP, SDK duy trì tự động</li>
+          <li>User metadata: cặp name-value tùy ý, tối đa <strong>8 KB</strong></li>
+          <li>Metadata format: <code>x-ms-meta-{name}:{value}</code></li>
+          <li>Đặt metadata với <code>SetMetadataAsync</code>, lấy với <code>GetPropertiesAsync</code></li>
+          <li>REST: GET metadata = <code>?comp=metadata</code>, PUT metadata ghi đè toàn bộ</li>
+        </ul>
+
+        <h4>Về Bảo Mật</h4>
+        <ul>
+          <li>Mã hóa AES-256 tự động, không thể tắt, không tốn thêm tiền</li>
+          <li>3 loại key management: Microsoft-managed, Customer-managed, Customer-provided</li>
+          <li>Customer-managed keys: phải lưu trong Azure Key Vault hoặc Key Vault HSM</li>
+          <li>Client-side encryption: v2 (GCM) hoặc v1 (CBC) với AES</li>
+        </ul>
+
+        <h4>Về Dự Phòng</h4>
+        <ul>
+          <li><strong>LRS</strong>: 3 bản sao trong 1 DC, chi phí thấp nhất</li>
+          <li><strong>ZRS</strong>: 3 bản sao qua 3 zones, bảo vệ khỏi lỗi zone</li>
+          <li><strong>GRS/RA-GRS</strong>: LRS + nhân bản vùng thứ hai (RA = có thể đọc)</li>
+          <li><strong>GZRS/RA-GZRS</strong>: ZRS + nhân bản vùng thứ hai (tốt nhất)</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="03-cosmos-db.html" class="prev">← Ch.03 Cosmos DB</a>
+  <span class="pos">Chương 04 / 11</span>
+  <a href="05-containerized-solutions.html" class="next">Ch.05 Containers →</a>
+</div>
+<footer style="background: #323130; color: #c8c8c8; text-align: center; padding: 24px; margin-top: 40px;">
+  <p>Hướng Dẫn Học Tập AZ-204 | Azure Blob Storage | Được dịch sang Tiếng Việt</p>
+  <p style="font-size: 0.85rem; margin-top: 8px; opacity: 0.7;">Nội dung dựa trên Microsoft Learn Training Modules</p>
+</footer>
+
+<script>
+function toggleToc(){
+  document.getElementById('toc').classList.toggle('open');
+  document.getElementById('toc-bd').classList.toggle('open');
+}
+function closeToc(){
+  document.getElementById('toc').classList.remove('open');
+  document.getElementById('toc-bd').classList.remove('open');
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

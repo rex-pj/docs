@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-204 | Chương 08 – Giám Sát & Xử Lý Sự Cố với Application Insights</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 08: Monitoring ── */
+.hero { background: linear-gradient(135deg, #002050 0%, #0078d4 60%, #00b4d8 100%); }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin: 16px 0; }
+.feature-card { background: #f7f9fc; border: 1px solid var(--border); border-radius: 8px; padding: 14px; border-left: 3px solid var(--blue-5); }
+.feature-card h4 { color: var(--blue-5); font-size: .95rem; margin-bottom: 6px; }
+.feature-card p { font-size: .88rem; color: var(--muted); margin: 0; }
+.nav-bottom { background: white; border-top: 1px solid var(--border); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.nav-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--blue-5); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .9rem; }
+.nav-btn.outline { background: white; color: var(--blue-5); border: 2px solid var(--blue-5); }
+@media(max-width:700px) { .feature-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html" class="on">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">📊</div>
+  <h1>Giám Sát &amp; Xử Lý Sự Cố</h1>
+  <p>Azure Monitor Application Insights — giám sát hiệu suất, phân tích telemetry và availability tests</p>
+  <div class="hero-tags">
+    <span class="hero-tag">⚖️ 5–10% bài thi</span>
+    <span class="hero-tag">📊 Application Insights</span>
+    <span class="hero-tag">📈 APM</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 08</div>
+  <a href="#ai-overview">1. Application Insights Tổng Quan</a>
+  <a href="#ai-features">2. Tính Năng Chính</a>
+  <a href="#ai-data">3. Dữ Liệu Thu Thập</a>
+  <a href="#ai-setup">4. Bắt Đầu với App Insights</a>
+  <a href="#ai-availability">5. Availability Tests</a>
+  <a href="#ai-appmap">6. Application Map</a>
+  <a href="#ai-usage">7. Usage Analytics</a>
+  <a href="#ai-code">8. Code Examples</a>
+</nav>
+<main class="content">
+
+<div>
+<div class="mhd"><div class="mhd-ico">📊</div><div><h2>Module: Monitor App Performance with Application Insights</h2><div class="mhd-sub">Giám sát và phân tích hiệu suất ứng dụng với Azure Monitor Application Insights</div></div></div>
+<div class="msec">
+
+    <section id="ai-overview">
+      <h3>🔷 1. Application Insights — Tổng Quan</h3>
+      <p>Application Insights là <strong>extension của Azure Monitor</strong>, cung cấp tính năng <strong>Application Performance Monitoring (APM)</strong>. APM tools giúp monitor applications từ development, qua testing, đến production:</p>
+      <ul>
+        <li><strong>Chủ động (Proactively)</strong> — Hiểu ứng dụng đang hoạt động như thế nào</li>
+        <li><strong>Phản ứng (Reactively)</strong> — Review dữ liệu thực thi để xác định nguyên nhân sự cố</li>
+      </ul>
+
+      <p>Ngoài thu thập metrics và telemetry, Application Insights còn có thể thu thập và lưu trữ <strong>application trace logging data</strong>.</p>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="arch-card-hd">Your Application</div>
+          <div class="arch-card-body">
+            <div class="arch-item">Web App / API / Functions / Mobile</div>
+            <div class="arch-item">App Insights SDK / Agent</div>
+            <div class="arch-item">Sends telemetry automatically</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">Azure Monitor — Application Insights</div>
+          <div class="arch-card-body">
+            <div class="arch-item">Metrics — request rates, durations</div>
+            <div class="arch-item">Logs — trace &amp; diagnostic data</div>
+            <div class="arch-item">Traces — distributed transaction flow</div>
+            <div class="arch-item">Exceptions — with stack traces</div>
+            <div class="arch-item">Dashboards, Alerts, Workbooks</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ai-features">
+      <h3>🔷 2. Các Tính Năng Chính</h3>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>📡 Live Metrics</h4>
+          <p>Quan sát activity từ app đang chạy theo real-time, không ảnh hưởng host environment.</p>
+        </div>
+        <div class="feature-card">
+          <h4>🌐 Availability</h4>
+          <p>Synthetic Transaction Monitoring — probe external endpoints để test availability và responsiveness theo thời gian.</p>
+        </div>
+        <div class="feature-card">
+          <h4>🔗 GitHub/DevOps Integration</h4>
+          <p>Tạo GitHub hoặc Azure DevOps work items trong context của Application Insights data.</p>
+        </div>
+        <div class="feature-card">
+          <h4>👥 Usage Analytics</h4>
+          <p>Hiểu tính năng nào phổ biến, cách users tương tác và sử dụng ứng dụng.</p>
+        </div>
+        <div class="feature-card">
+          <h4>🤖 Smart Detection</h4>
+          <p>Tự động phát hiện failures và anomalies qua proactive telemetry analysis.</p>
+        </div>
+        <div class="feature-card">
+          <h4>🗺️ Application Map</h4>
+          <p>Top-down view kiến trúc ứng dụng với visual references về health và responsiveness của từng component.</p>
+        </div>
+        <div class="feature-card">
+          <h4>🔍 Distributed Tracing</h4>
+          <p>Search và visualize end-to-end flow của một execution hoặc transaction cụ thể.</p>
+        </div>
+        <div class="feature-card">
+          <h4>🚨 Alerts</h4>
+          <p>Cấu hình alerts dựa trên metrics, logs hoặc availability test results. Thông báo qua email, SMS, webhooks.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ai-data">
+      <h3>🔷 3. Dữ Liệu Application Insights Thu Thập</h3>
+      <table>
+        <thead><tr><th>Loại Dữ Liệu</th><th>Mô Tả</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Request rates, response times, failure rates</strong></td><td>Trang nào phổ biến, lúc nào trong ngày, users ở đâu. Trang nào perform tốt nhất. Nếu response time cao khi có nhiều requests → vấn đề resources.</td></tr>
+          <tr><td><strong>Dependency rates, response times, failure rates</strong></td><td>Xác định external services (DB, APIs) có đang làm chậm app không.</td></tr>
+          <tr><td><strong>Exceptions</strong></td><td>Aggregate statistics hoặc specific instances với stack trace và related requests. Server lẫn browser exceptions đều được report.</td></tr>
+          <tr><td><strong>Page views &amp; load performance</strong></td><td>Được report bởi user browsers.</td></tr>
+          <tr><td><strong>AJAX calls</strong></td><td>Rates, response times và failure rates của AJAX calls từ web pages.</td></tr>
+          <tr><td><strong>User &amp; session counts</strong></td><td>Số lượng users và sessions.</td></tr>
+          <tr><td><strong>Performance counters</strong></td><td>CPU, memory, network usage từ Windows hoặc Linux servers.</td></tr>
+          <tr><td><strong>Host diagnostics</strong></td><td>Diagnostics từ Docker hoặc Azure.</td></tr>
+          <tr><td><strong>Diagnostic trace logs</strong></td><td>Logs từ app để correlate trace events với requests.</td></tr>
+          <tr><td><strong>Custom events &amp; metrics</strong></td><td>Events và metrics bạn tự định nghĩa trong client/server code (ví dụ: items sold, games won).</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="ai-setup">
+      <h3>🔷 4. Bắt Đầu với Application Insights</h3>
+
+      <div class="callout info">
+        <div class="callout-title">💡 Miễn Phí Đến Ngưỡng</div>
+        <p>Application Insights miễn phí để bắt đầu. Nếu chọn basic pricing plan, <strong>không tính phí</strong> cho đến khi app có substantial usage.</p>
+      </div>
+
+      <h4>🔹 Ba Cách Bắt Đầu</h4>
+      <table>
+        <thead><tr><th>Cách</th><th>Khi Nào Dùng</th><th>Ưu Điểm</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Runtime instrumentation</strong></td><td>App đã deploy, không muốn thay đổi code</td><td>Không cần update code. Bật từ Azure Portal.</td></tr>
+          <tr><td><strong>Development time (SDK)</strong></td><td>Muốn customize telemetry, gửi thêm telemetry</td><td>Kiểm soát hoàn toàn dữ liệu thu thập.</td></tr>
+          <tr><td><strong>Web page instrumentation</strong></td><td>Track page views, AJAX, client-side telemetry</td><td>JavaScript snippet trong browser.</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🔹 Instrument ASP.NET Core App</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">dotnet add package Microsoft.ApplicationInsights.AspNetCore</code></pre>
+</div>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// Program.cs
+builder.Services.AddApplicationInsightsTelemetry(
+    builder.Configuration["ApplicationInsights:InstrumentationKey"]
+);</code></pre>
+</div>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">// appsettings.json
+{
+  "ApplicationInsights": {
+    "InstrumentationKey": "your-instrumentation-key",
+    "ConnectionString": "InstrumentationKey=xxx;IngestionEndpoint=https://..."
+  }
+}</code></pre>
+</div>
+
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Connection String vs Instrumentation Key</div>
+        <p>Microsoft khuyến nghị dùng <strong>Connection String</strong> thay vì Instrumentation Key. Connection String bao gồm Ingestion Endpoint để gửi telemetry đến đúng endpoint (quan trọng với sovereign clouds và custom endpoints).</p>
+      </div>
+    </section>
+
+    <section id="ai-availability">
+      <h3>🔷 5. Availability Tests</h3>
+      <p>Availability tests cho phép bạn <strong>giám sát liên tục</strong> availability và responsiveness của web endpoints từ nhiều locations trên thế giới.</p>
+
+      <h4>🔹 Ba Loại Availability Tests</h4>
+      <table>
+        <thead><tr><th>Loại</th><th>Mô Tả</th><th>Dùng Khi</th></tr></thead>
+        <tbody>
+          <tr><td><strong>URL Ping Test</strong> (Classic)</td><td>HTTP request đơn giản đến URL, kiểm tra response code và time</td><td>Kiểm tra cơ bản xem endpoint có khả dụng không</td></tr>
+          <tr><td><strong>Standard Test</strong></td><td>Tương tự URL ping nhưng hỗ trợ SSL validity, HTTP verbs, custom headers, custom data</td><td>Endpoints cần test với các options nâng cao</td></tr>
+          <tr><td><strong>Custom TrackAvailability Test</strong></td><td>Viết code test tùy chỉnh bằng <code>TrackAvailability()</code> API</td><td>Multi-step tests, login flows, test phức tạp</td></tr>
+        </tbody>
+      </table>
+
+      <div class="flowchart">
+        <div style="font-weight:700;font-size:.9rem;color:var(--blue-6);margin-bottom:4px;">Availability Test — Cơ Chế</div>
+        <div class="fc-branch" style="margin-bottom:4px;">
+          <div class="fc-bcol"><div class="fc-box gray" style="font-size:.78rem;padding:7px 10px;">US East</div></div>
+          <div class="fc-bcol"><div class="fc-box gray" style="font-size:.78rem;padding:7px 10px;">EU West</div></div>
+          <div class="fc-bcol"><div class="fc-box gray" style="font-size:.78rem;padding:7px 10px;">SE Asia</div></div>
+          <div class="fc-bcol"><div class="fc-box gray" style="font-size:.78rem;padding:7px 10px;">Australia E</div></div>
+          <div class="fc-bcol"><div class="fc-box gray" style="font-size:.78rem;padding:7px 10px;">UK South</div></div>
+        </div>
+        <div class="fc-label">5+ global probe locations — ping mỗi N phút</div>
+        <div class="fc-arr">↓</div>
+        <div class="fc-box">Your App Endpoint<br><span style="font-size:.78rem;font-weight:400;">https://myapp.azurewebsites.net</span></div>
+        <div class="fc-arr">↓</div>
+        <div class="fc-box yellow">Response OK? &nbsp;|&nbsp; Time &lt; limit?</div>
+        <div class="fc-arr">↓</div>
+        <div class="fc-branch">
+          <div class="fc-bcol">
+            <div class="fc-blabel">FAIL</div>
+            <div class="fc-box" style="background:#fde7e9;border-color:var(--danger);color:var(--danger);">Alert triggered!</div>
+          </div>
+          <div class="fc-bcol">
+            <div class="fc-blabel">PASS</div>
+            <div class="fc-box green">Test passed</div>
+          </div>
+        </div>
+      </div>
+
+      <h4>🔹 Cấu Hình Availability Test</h4>
+      <ul>
+        <li>Chọn <strong>ít nhất 5 locations</strong> để có kết quả tin cậy</li>
+        <li>Đặt <strong>Success criteria</strong>: response code mong đợi, timeout</li>
+        <li>Cấu hình <strong>alerts</strong> khi test fails (bao nhiêu locations fail → alert)</li>
+        <li>Dùng <strong>dependent requests</strong> để cũng load resources (images, CSS)</li>
+      </ul>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// Custom availability test với TrackAvailability()
+public class CustomAvailabilityTest
+{
+    private readonly TelemetryClient _telemetry;
+
+    public async Task RunTest()
+    {
+        var availability = new AvailabilityTelemetry
+        {
+            Name = "MyCustomTest",
+            RunLocation = "East US",
+            Success = false
+        };
+
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            // Thực hiện test logic
+            var result = await RunTestLogicAsync();
+            availability.Success = result;
+        }
+        catch (Exception ex)
+        {
+            availability.Message = ex.Message;
+            _telemetry.TrackException(ex);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            availability.Duration = stopwatch.Elapsed;
+            availability.Timestamp = DateTimeOffset.UtcNow;
+            _telemetry.TrackAvailability(availability);
+        }
+    }
+}</code></pre>
+</div>
+    </section>
+
+    <section id="ai-appmap">
+      <h3>🔷 6. Application Map</h3>
+      <p>Application Map là <strong>top-down view của kiến trúc ứng dụng</strong> — bạn có thể thấy tất cả components, dependencies và health status của chúng trong một sơ đồ.</p>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="arch-card-hd">✅ Healthy Components</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>API Gateway</strong> — 1ms avg response</div>
+            <div class="arch-item"><strong>Auth Service</strong> — healthy, low latency</div>
+            <div class="arch-item"><strong>Orders API</strong> — 2ms avg response</div>
+            <div class="arch-item"><strong>Orders DB</strong> — 5ms avg, no errors</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd" style="background:linear-gradient(135deg,#ff8c00,#d13438);">⚠️ Degraded Components</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>Payment API</strong> — 500ms avg, high latency warning</div>
+            <div class="arch-item"><strong>Payment Gateway (3rd party)</strong> — external dependency, slow upstream</div>
+            <div style="margin-top:10px;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;">
+              Color coding: ✅ &lt;5% failure rate &nbsp;|&nbsp; ⚠️ Warning &nbsp;|&nbsp; ❌ High failure rate
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p>Dùng Application Map để:</p>
+      <ul>
+        <li>Nhanh chóng xác định <strong>bottlenecks và failure points</strong></li>
+        <li>Xem <strong>dependency health</strong> (external APIs, databases)</li>
+        <li>Drill down vào component cụ thể để xem chi tiết</li>
+        <li>Identify <strong>slow external dependencies</strong></li>
+      </ul>
+    </section>
+
+    <section id="ai-usage">
+      <h3>🔷 7. Usage Analytics</h3>
+      <p>Usage Analytics giúp hiểu cách users <strong>tương tác với ứng dụng</strong>.</p>
+
+      <table>
+        <thead><tr><th>Tool</th><th>Mục Đích</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Users</strong></td><td>Bao nhiêu users trong khoảng thời gian nhất định, họ dùng features nào</td></tr>
+          <tr><td><strong>Sessions</strong></td><td>Sessions bao gồm những activities nào</td></tr>
+          <tr><td><strong>Events</strong></td><td>Custom events được track trong code (button clicks, actions)</td></tr>
+          <tr><td><strong>Funnels</strong></td><td>Tỷ lệ chuyển đổi qua các bước (VD: checkout flow)</td></tr>
+          <tr><td><strong>Cohorts</strong></td><td>Nhóm users/sessions/events theo behavior</td></tr>
+          <tr><td><strong>Retention</strong></td><td>Bao nhiêu users quay lại ứng dụng</td></tr>
+          <tr><td><strong>User Flows</strong></td><td>Users navigate như thế nào qua các pages và features</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="ai-code">
+      <h3>🔷 8. Code Examples — Track Custom Events &amp; Metrics</h3>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// Inject TelemetryClient
+public class OrderController : Controller
+{
+    private readonly TelemetryClient _telemetry;
+
+    public OrderController(TelemetryClient telemetry)
+        => _telemetry = telemetry;
+
+    public async Task&lt;IActionResult&gt; PlaceOrder(Order order)
+    {
+        // Track custom event
+        _telemetry.TrackEvent("OrderPlaced", new Dictionary&lt;string, string&gt; {
+            ["OrderId"]   = order.Id,
+            ["UserId"]    = order.UserId,
+            ["Total"]     = order.Total.ToString()
+        });
+
+        // Track custom metric
+        _telemetry.TrackMetric("OrderValue", order.Total);
+
+        // Track dependency (external call)
+        var startTime = DateTime.UtcNow;
+        var timer = Stopwatch.StartNew();
+        try {
+            await _paymentService.ProcessAsync(order);
+            _telemetry.TrackDependency(
+                "HTTP", "PaymentGateway", "ProcessPayment",
+                startTime, timer.Elapsed, success: true
+            );
+        }
+        catch (Exception ex) {
+            _telemetry.TrackException(ex, new Dictionary&lt;string, string&gt; {
+                ["OrderId"] = order.Id
+            });
+            _telemetry.TrackDependency(
+                "HTTP", "PaymentGateway", "ProcessPayment",
+                startTime, timer.Elapsed, success: false
+            );
+            throw;
+        }
+    }
+}</code></pre>
+</div>
+
+      <h4>🔹 Query Telemetry với Kusto (KQL)</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">Kusto</span></div>
+<pre><code class="language-kusto">// Top 10 slowest requests trong 24h
+requests
+| where timestamp > ago(24h)
+| top 10 by duration desc
+| project timestamp, name, duration, resultCode
+
+// Exception count theo type
+exceptions
+| where timestamp > ago(7d)
+| summarize count() by type
+| order by count_ desc
+
+// Availability test results
+availabilityResults
+| where timestamp > ago(24h)
+| summarize
+    successRate = countif(success == 1) * 100.0 / count()
+    by name, location
+| order by successRate asc</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div>
+<div class="mhd"><div class="mhd-ico">📋</div><div><h2>Tóm Tắt — Điểm Quan Trọng Cho Kỳ Thi</h2><div class="mhd-sub">Tắt — Điểm Quan Trọng Cho Kỳ Thi</div></div></div>
+<div class="msec">
+    <div class="callout info">
+      <div class="callout-title">📋 APPLICATION INSIGHTS — TÓM TẮT NHANH</div>
+      <ul style="margin:8px 0 8px 18px;">
+        <li>App Insights = extension của Azure Monitor (APM)</li>
+        <li>Có thể instrument: at runtime (no code) HOẶC at dev time (SDK)</li>
+        <li>Availability Tests: URL Ping, Standard, Custom TrackAvailability()</li>
+        <li>Application Map: visual view toàn bộ architecture + health</li>
+        <li>Distributed Tracing: end-to-end view của một transaction</li>
+        <li>Smart Detection: tự động phát hiện failures &amp; anomalies</li>
+        <li>Live Metrics: real-time monitoring (không ảnh hưởng production)</li>
+      </ul>
+      <p style="margin:6px 0 4px;"><strong>Telemetry types:</strong> Requests · Dependencies · Exceptions · Page views · Custom events · Custom metrics · Performance · Availability · Traces/Logs</p>
+      <p style="margin:4px 0;"><strong>Connection String</strong> (ưu tiên) &gt; Instrumentation Key (legacy)</p>
+      <p style="margin:4px 0 0;"><strong>Alerts:</strong> cấu hình dựa trên metric threshold, log query, hoặc availability test failure</p>
+    </div>
+  </div>
+</div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="07-security.html" class="prev">← Ch.07 Security</a>
+  <span class="pos">Chương 08 / 11</span>
+  <a href="09-api-management.html" class="next">Ch.09 API Mgmt →</a>
+</div>
+
+<script>
+function toggleToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.toggle('open');b.classList.toggle('open');}
+}
+function closeToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.remove('open');b.classList.remove('open');}
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

@@ -1,0 +1,1666 @@
+﻿<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌐 Azure Cosmos DB - Hướng Dẫn AZ-204</title>
+    <link rel="stylesheet" href="common.css" />
+    <link rel="stylesheet" href="code-diagram.css" />
+    <style>
+      /* ── Chapter 03: Cosmos DB ── */
+    </style>
+  </head>
+  <body>
+    <nav id="cnav">
+      <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+      <div id="cnav-links">
+        <a href="01-azure-app-service.html">01 App Service</a>
+        <a href="02-azure-functions.html">02 Functions</a>
+        <a href="03-cosmos-db.html" class="on">03 Cosmos DB</a>
+        <a href="04-blob-storage.html">04 Blob Storage</a>
+        <a href="05-containerized-solutions.html">05 Containers</a>
+        <a href="06-authentication.html">06 Auth</a>
+        <a href="07-security.html">07 Security</a>
+        <a href="08-monitoring.html">08 Monitoring</a>
+        <a href="09-api-management.html">09 API Mgmt</a>
+        <a href="10-event-based.html">10 Events</a>
+        <a href="11-message-based.html">11 Messages</a>
+      </div>
+      <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+    </nav>
+    <div id="toc-bd" onclick="closeToc()"></div>
+
+    <div class="hero">
+      <div class="hero-ico">🌐</div>
+      <h1>Azure Cosmos DB</h1>
+      <p>Hướng Dẫn Học Tập Toàn Diện cho Kỳ Thi AZ-204</p>
+      <div class="hero-tags">
+        <span class="hero-tag">📊 Multi-model NoSQL</span>
+        <span class="hero-tag">🌍 Globally Distributed</span>
+        <span class="hero-tag">⚡ High Throughput</span>
+        <span class="hero-tag">🔄 Change Feed</span>
+        <span class="hero-tag">💾 Multiple APIs</span>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <nav id="toc">
+        <div class="toc-lbl">Chương 03</div>
+        <a href="#m1">Module 1 – Khám Phá Cosmos DB</a>
+        <a href="#s11" class="sub">1.1 Lợi Ích Chính</a>
+        <a href="#s12" class="sub">1.2 Phân Cấp Tài Nguyên</a>
+        <a href="#s13" class="sub">1.3 Mức Độ Nhất Quán</a>
+        <a href="#s14" class="sub">1.4 Chọn Nhất Quán</a>
+        <a href="#s15" class="sub">1.5 Các API</a>
+        <a href="#s16" class="sub">1.6 Request Units</a>
+        <a href="#m2">Module 2 – Làm Việc với Cosmos DB</a>
+        <a href="#s21" class="sub">2.1 .NET SDK v3</a>
+        <a href="#s22" class="sub">2.2 Stored Procedures</a>
+        <a href="#s23" class="sub">2.3 Triggers &amp; UDFs</a>
+        <a href="#s24" class="sub">2.4 Change Feed</a>
+        <a href="#summary">Tóm Tắt &amp; Exam Tips</a>
+      </nav>
+
+      <main class="content">
+        <!-- ▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐
+     MODULE 1
+▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐ -->
+        <div id="m1">
+          <div class="mhd">
+            <div class="mhd-ico">📚</div>
+            <div>
+              <h2>Module 1: Khám Phá Azure Cosmos DB</h2>
+              <div class="mhd-sub">
+                Khái niệm cơ bản, API, consistency levels, và các tùy chọn cấu
+                hình
+              </div>
+            </div>
+          </div>
+          <div class="msec">
+            <!-- SECTION 1: Benefits -->
+            <section id="s11">
+              <h3>🌟 1.1 Lợi Ích Chính của Azure Cosmos DB</h3>
+
+              <p>
+                Azure Cosmos DB là một cơ sở dữ liệu NoSQL được quản lý hoàn
+                toàn, được thiết kế để cung cấp độ trễ thấp, khả năng mở rộng
+                thông lượng đàn hồi, ngữ nghĩa nhất quán dữ liệu được xác định
+                rõ ràng, và tính khả dụng cao.
+              </p>
+
+              <p>
+                Bạn có thể cấu hình cơ sở dữ liệu của mình để phân phối toàn cầu
+                và khả dụng ở bất kỳ vùng Azure nào. Để giảm độ trễ, hãy đặt dữ
+                liệu gần nơi người dùng của bạn. Việc chọn các vùng cần thiết
+                phụ thuộc vào phạm vi toàn cầu của ứng dụng và vị trí người
+                dùng.
+              </p>
+
+              <p>
+                Với Azure Cosmos DB, bạn có thể thêm hoặc xóa các vùng liên kết
+                với tài khoản của mình bất cứ lúc nào. Ứng dụng của bạn không
+                cần dừng hoặc triển khai lại khi thêm hoặc xóa vùng.
+              </p>
+
+              <h4>Lợi Ích Chính của Phân Phối Toàn Cầu</h4>
+              <p>
+                Với giao thức nhân bản đa chủ (multi-master) mới lạ, mọi vùng
+                đều hỗ trợ cả ghi và đọc. Khả năng đa chủ cũng cho phép:
+              </p>
+              <ul>
+                <li>Khả năng mở rộng ghi và đọc đàn hồi không giới hạn</li>
+                <li>Tính khả dụng đọc và ghi 99,999% trên toàn thế giới</li>
+                <li>
+                  Đọc và ghi được đảm bảo trong vòng dưới 10 mili giây ở phân vị
+                  thứ 99
+                </li>
+              </ul>
+
+              <div class="note info">
+                <div class="nt">💡 Quan trọng:</div>
+                Ứng dụng của bạn có thể thực hiện đọc và ghi gần thời gian thực
+                đối với tất cả các vùng bạn đã chọn cho cơ sở dữ liệu. Azure
+                Cosmos DB xử lý nội bộ việc nhân bản dữ liệu giữa các vùng với
+                bảo đảm mức độ nhất quán mà bạn đã chọn.
+              </div>
+
+              <p>
+                Chạy cơ sở dữ liệu ở nhiều vùng trên toàn thế giới giúp tăng
+                tính khả dụng. Nếu một vùng không khả dụng, các vùng khác sẽ tự
+                động xử lý yêu cầu ứng dụng. Azure Cosmos DB cung cấp tính khả
+                dụng đọc và ghi 99,999% cho cơ sở dữ liệu đa vùng.
+              </p>
+
+              <div class="arch-grid">
+                <div class="arch-card" style="grid-column:1/-1">
+                  <div class="arch-card-hd">🌍 Tài Khoản Cosmos DB — DNS duy nhất, phân phối đa vùng</div>
+                  <div class="arch-card-body" style="display:flex;gap:20px;flex-wrap:wrap">
+                    <div>🌏 Vùng Đông Á</div>
+                    <div>🌍 Vùng Tây Âu</div>
+                    <div>🌏 Vùng Đông Nam Á</div>
+                    <div>🌎 Vùng Đông Hoa Kỳ</div>
+                  </div>
+                </div>
+                <div class="arch-card">
+                  <div class="arch-card-hd">✍️ Multi-Master Write</div>
+                  <div class="arch-card-body">
+                    <div class="arch-item">Mỗi vùng hỗ trợ cả <strong>đọc VÀ ghi</strong></div>
+                    <div class="arch-item">Nhân bản tự động giữa các vùng</div>
+                    <div class="arch-item">Conflict resolution tự động</div>
+                  </div>
+                </div>
+                <div class="arch-card">
+                  <div class="arch-card-hd">⚡ SLA &amp; Hiệu Năng</div>
+                  <div class="arch-card-body">
+                    <div class="arch-item"><strong>99.999%</strong> tính khả dụng đọc/ghi</div>
+                    <div class="arch-item">Độ trễ <strong>&lt; 10ms</strong> ở P99</div>
+                    <div class="arch-item">Failover tự động khi vùng gặp sự cố</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- SECTION 2: Resource Hierarchy -->
+            <section id="s12">
+              <h3>🗂️ 1.2 Phân Cấp Tài Nguyên</h3>
+
+              <p>
+                Tài khoản Azure Cosmos DB là đơn vị cơ bản của phân phối toàn
+                cầu và tính khả dụng cao. Tài khoản Azure Cosmos DB chứa tên DNS
+                duy nhất và bạn có thể quản lý tài khoản bằng Azure portal,
+                Azure CLI, hoặc SDK theo ngôn ngữ cụ thể.
+              </p>
+
+              <div class="flow-v">
+                <div class="flow-step start">
+                  <div class="flow-num">1</div>
+                  <div class="flow-body">
+                    <strong>☁️ Azure Subscription</strong>
+                    Tối đa 50 tài khoản Cosmos DB mỗi subscription
+                  </div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step">
+                  <div class="flow-num">2</div>
+                  <div class="flow-body">
+                    <strong>🌍 Cosmos DB Account</strong>
+                    Tên DNS duy nhất · Đơn vị phân phối toàn cầu · Quản lý qua Portal / CLI / SDK
+                  </div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step">
+                  <div class="flow-num">3</div>
+                  <div class="flow-body">
+                    <strong>🗂️ Database (Cơ Sở Dữ Liệu)</strong>
+                    Namespace / đơn vị quản lý · Chứa nhiều containers
+                  </div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step">
+                  <div class="flow-num">4</div>
+                  <div class="flow-body">
+                    <strong>📦 Container</strong>
+                    Đơn vị mở rộng (RU/s) · Có partition key · Chứa items, stored procs, triggers
+                  </div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step end">
+                  <div class="flow-num">5</div>
+                  <div class="flow-body">
+                    <strong>📄 Item (Dữ Liệu Thực Tế)</strong>
+                    Document (NoSQL) · Row (Table) · Node/Edge (Gremlin) · Blob (Cassandra)
+                  </div>
+                </div>
+              </div>
+
+              <h4>Tài Khoản Azure Cosmos DB</h4>
+              <p>
+                Tài khoản Azure Cosmos DB là đơn vị cơ bản của phân phối toàn
+                cầu và tính khả dụng cao. Hiện tại, bạn có thể tạo tối đa 50 tài
+                khoản Azure Cosmos DB trong một Azure subscription (có thể tăng
+                qua yêu cầu hỗ trợ).
+              </p>
+
+              <h4>Cơ Sở Dữ Liệu Azure Cosmos DB</h4>
+              <p>
+                Bạn có thể tạo một hoặc nhiều cơ sở dữ liệu Azure Cosmos DB dưới
+                tài khoản của mình. Cơ sở dữ liệu tương tự như một namespace -
+                đây là đơn vị quản lý cho một tập hợp các container Azure Cosmos
+                DB.
+              </p>
+
+              <h4>Container Azure Cosmos DB</h4>
+              <p>
+                Container Azure Cosmos DB là đơn vị cơ bản của khả năng mở rộng.
+                Bạn có thể có thông lượng được cấp phép (RU/s) và lưu trữ gần
+                như không giới hạn trên một container.
+              </p>
+
+              <p>
+                Dữ liệu được lưu trữ trên một hoặc nhiều máy chủ gọi là
+                <em>partitions</em>. Để tăng partitions, bạn tăng thông lượng
+                hoặc chúng tự động tăng khi lưu trữ tăng.
+              </p>
+
+              <div class="note warn">
+                <div class="nt">⚠️ Partition Key quan trọng:</div>
+                Khi tạo container, bạn cần cung cấp partition key. Đây là thuộc
+                tính bạn chọn từ các item để giúp Azure Cosmos DB phân phối dữ
+                liệu hiệu quả qua các partitions.
+              </div>
+
+              <h4>Các Chế Độ Cấu Hình Thông Lượng Container</h4>
+              <table>
+  <thead><tr>
+                  <th>Chế Độ</th>
+                  <th>Mô Tả</th>
+                </tr>
+  </thead>
+  <tbody><tr>
+                  <td>
+                    <strong>Dedicated throughput (Thông lượng riêng)</strong>
+                  </td>
+                  <td>
+                    Thông lượng trên container được dành riêng cho container đó.
+                    Có hai loại: standard và autoscale.
+                  </td>
+                </tr><tr>
+                  <td>
+                    <strong>Shared throughput (Thông lượng chia sẻ)</strong>
+                  </td>
+                  <td>
+                    Thông lượng được chỉ định ở mức cơ sở dữ liệu và chia sẻ với
+                    tối đa 25 container trong cơ sở dữ liệu.
+                  </td>
+                </tr>
+              
+  </tbody>
+</table>
+
+              <h4>Giới Hạn Physical Partition</h4>
+              <ul>
+                <li>
+                  Thông lượng tối đa: <strong>10.000 Request Units/giây</strong>
+                </li>
+                <li>Lưu trữ tối đa: <strong>50 GB dữ liệu</strong></li>
+                <li>
+                  Logical partition tối đa: <strong>20 GB dữ liệu</strong>
+                </li>
+              </ul>
+
+              <h4>Item Azure Cosmos DB theo API</h4>
+              <table>
+  <thead><tr>
+                  <th>Entity Cosmos DB</th>
+                  <th>API for NoSQL</th>
+                  <th>API for Cassandra</th>
+                  <th>API for MongoDB</th>
+                  <th>API for Gremlin</th>
+                  <th>API for Table</th>
+                </tr>
+  </thead>
+  <tbody><tr>
+                  <td>Azure Cosmos DB item</td>
+                  <td>Item</td>
+                  <td>Row</td>
+                  <td>Document</td>
+                  <td>Node or edge</td>
+                  <td>Item</td>
+                </tr>
+              
+  </tbody>
+</table>
+            </section>
+
+            <!-- SECTION 3: Consistency Levels -->
+            <section id="s13">
+              <h3>⚖️ 1.3 Tổng Quan Mức Độ Nhất Quán</h3>
+
+              <p>
+                Azure Cosmos DB tiếp cận tính nhất quán dữ liệu như một phổ lựa
+                chọn thay vì hai thái cực. Nhất quán mạnh và nhất quán cuối cùng
+                nằm ở hai đầu của phổ, nhưng có nhiều lựa chọn nhất quán dọc
+                theo phổ này.
+              </p>
+
+              <p>
+                Azure Cosmos DB cung cấp năm mức độ được xác định rõ ràng. Từ
+                mạnh nhất đến yếu nhất:
+              </p>
+
+              <h5 style="font-size:.875rem;color:var(--blue-6);margin-bottom:.5rem">Phổ Mức Độ Nhất Quán — Nhất quán Mạnh ← → Nhất quán Yếu</h5>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mức độ</th>
+                    <th>Mô tả</th>
+                    <th>Đặc điểm</th>
+                    <th>Khi dùng</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Strong</strong><br><small>(Tuyến tính)</small></td>
+                    <td>Đọc luôn trả về phiên bản mới nhất</td>
+                    <td>Độ trễ CAO nhất, chỉ 1 vùng ghi</td>
+                    <td>Dữ liệu tài chính, giao dịch quan trọng</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Bounded Staleness</strong><br><small>(Giới hạn độ cũ)</small></td>
+                    <td>Đọc trễ tối đa K versions hoặc T giây</td>
+                    <td>Cân bằng giữa C&amp;P, hỗ trợ đa vùng</td>
+                    <td>Leaderboards, social aggregates</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Session</strong> ⭐<br><small>(Phiên làm việc)</small></td>
+                    <td>Nhất quán trong cùng session client</td>
+                    <td><strong>Mặc định</strong> — phù hợp hầu hết kịch bản</td>
+                    <td>Shopping cart, user preferences</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Consistent Prefix</strong><br><small>(Tiền tố nhất quán)</small></td>
+                    <td>Đọc không bao giờ thấy writes out of order</td>
+                    <td>Nhẹ hơn Session, ít tốn kém hơn</td>
+                    <td>Social media feeds, event streaming</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Eventual</strong><br><small>(Cuối cùng)</small></td>
+                    <td>Không đảm bảo thứ tự, eventual nhất quán</td>
+                    <td>Chi phí THẤP nhất, hiệu suất CAO nhất</td>
+                    <td>Non-relational data, likes/views count</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="font-size:.8rem;color:var(--muted);margin-top:.4rem">C = Consistency (Nhất quán) &nbsp;·&nbsp; P = Performance (Hiệu suất) &nbsp;·&nbsp; A = Availability (Tính khả dụng)</p>
+
+              <p>
+                Mức độ nhất quán không phụ thuộc vào vùng và được đảm bảo cho
+                tất cả các hoạt động, bất kể:
+              </p>
+              <ul>
+                <li>Vùng nơi phục vụ đọc và ghi</li>
+                <li>Số lượng vùng liên kết với tài khoản Azure Cosmos DB</li>
+                <li>Tài khoản được cấu hình với một hoặc nhiều vùng ghi</li>
+              </ul>
+
+              <div class="note info">
+                <div class="nt">💡 Lưu ý:</div>
+              </div>
+            </section>
+
+            <!-- SECTION 4: Choosing Consistency Level -->
+            <section id="s14">
+              <h3>🎯 1.4 Chọn Mức Độ Nhất Quán Phù Hợp</h3>
+
+              <h4>Cấu Hình Mức Độ Nhất Quán Mặc Định</h4>
+              <p>
+                Bạn có thể cấu hình mức độ nhất quán mặc định trên tài khoản
+                Azure Cosmos DB của mình bất cứ lúc nào. Mức độ nhất quán mặc
+                định được cấu hình trên tài khoản áp dụng cho tất cả cơ sở dữ
+                liệu và container dưới tài khoản đó.
+              </p>
+
+              <div class="note ok">
+                <div class="nt">✅ Đảm bảo:</div>
+                Azure Cosmos DB đảm bảo rằng 100% yêu cầu đọc đáp ứng bảo đảm
+                nhất quán cho mức độ nhất quán được chọn.
+              </div>
+
+              <h4>Chi Tiết Các Mức Độ Nhất Quán</h4>
+
+              <table>
+  <thead><tr>
+                  <th>Mức Độ</th>
+                  <th>Bảo Đảm</th>
+                  <th>Trường Hợp Sử Dụng</th>
+                  <th>Nhân Bản</th>
+                </tr>
+  </thead>
+  <tbody><tr>
+                  <td><strong>Strong (Mạnh)</strong></td>
+                  <td>
+                    Linearizability - luôn đọc phiên bản được commit mới nhất.
+                    Client không bao giờ thấy ghi chưa commit hoặc một phần.
+                  </td>
+                  <td>Ứng dụng yêu cầu tính nhất quán tuyệt đối</td>
+                  <td>Đồng bộ toàn bộ vùng</td>
+                </tr><tr>
+                  <td><strong>Bounded Staleness (Giới hạn độ cũ)</strong></td>
+                  <td>
+                    Độ trễ dữ liệu giữa hai vùng luôn nhỏ hơn K versions hoặc T
+                    khoảng thời gian.
+                  </td>
+                  <td>
+                    Tài khoản ghi một vùng với 2+ vùng đọc, cần đảm bảo không
+                    quá cũ
+                  </td>
+                  <td>Đa số cục bộ (3/4 replicas)</td>
+                </tr><tr>
+                  <td><strong>Session (Phiên)</strong></td>
+                  <td>
+                    Trong một phiên client: đọc-ghi-của-chính-mình,
+                    ghi-theo-đọc. Mặc định.
+                  </td>
+                  <td>
+                    Hầu hết các ứng dụng - cân bằng tốt giữa nhất quán và hiệu
+                    suất
+                  </td>
+                  <td>Đa số cục bộ (3/4 replicas)</td>
+                </tr><tr>
+                  <td>
+                    <strong>Consistent Prefix (Tiền tố nhất quán)</strong>
+                  </td>
+                  <td>
+                    Cập nhật ghi đơn thấy nhất quán cuối cùng. Cập nhật trong
+                    giao dịch batch được trả về nhất quán với giao dịch.
+                  </td>
+                  <td>
+                    Ứng dụng không cần thứ tự, nhưng cần nhất quán giao dịch
+                  </td>
+                  <td>Đa số cục bộ (3/4 replicas)</td>
+                </tr><tr>
+                  <td><strong>Eventual (Cuối cùng)</strong></td>
+                  <td>
+                    Không có đảm bảo thứ tự cho đọc. Replicas cuối cùng sẽ hội
+                    tụ.
+                  </td>
+                  <td>
+                    Đếm Retweet, Like, bình luận không theo luồng - hiệu suất
+                    cao nhất
+                  </td>
+                  <td>Đa số cục bộ (3/4 replicas)</td>
+                </tr>
+              
+  </tbody>
+</table>
+
+              <h4>Chi Tiết: Bounded Staleness</h4>
+              <p>
+                Trong nhất quán bounded staleness, độ trễ dữ liệu giữa bất kỳ
+                hai vùng nào luôn nhỏ hơn một lượng được chỉ định. Lượng này có
+                thể là:
+              </p>
+              <ul>
+                <li>
+                  <strong>K versions</strong> (tức là <em>updates</em>) của một
+                  item
+                </li>
+                <li>
+                  <strong>T time intervals</strong> - khoảng thời gian mà đọc có
+                  thể lag sau ghi
+                </li>
+              </ul>
+
+              <div class="note warn">
+                <div class="nt">
+                  ⚠️ Bounded Staleness với tài khoản một vùng:
+                </div>
+                Đối với tài khoản một vùng, Bounded Staleness cung cấp các đảm
+                bảo nhất quán ghi giống như Session và Eventual Consistency. Với
+                Bounded Staleness, dữ liệu được nhân bản đến đa số cục bộ (3
+                replica trong bộ 4 replica) trong vùng đơn.
+              </div>
+
+              <h4>Chi Tiết: Consistent Prefix</h4>
+              <p>
+                Giả sử hai thao tác ghi được thực hiện trên tài liệu
+                <em>Doc 1</em> và <em>Doc 2</em>, trong các giao dịch T1 và T2.
+                Khi client thực hiện đọc trong bất kỳ replica nào, người dùng
+                thấy:
+              </p>
+              <ul>
+                <li>"Doc 1 v1 và Doc 2 v1" HOẶC</li>
+                <li>"Doc 1 v2 và Doc 2 v2"</li>
+                <li>
+                  KHÔNG BAO GIỜ: "Doc 1 v1 và Doc 2 v2" hoặc "Doc 1 v2 và Doc 2
+                  v1"
+                </li>
+              </ul>
+            </section>
+
+            <!-- SECTION 5: Supported APIs -->
+            <section id="s15">
+              <h3>🔌 1.5 Các API Được Hỗ Trợ</h3>
+
+              <p>
+                Azure Cosmos DB cung cấp nhiều API cơ sở dữ liệu, bao gồm NoSQL,
+                MongoDB, PostgreSQL, Cassandra, Gremlin và Table. Bằng cách sử
+                dụng các API này, bạn có thể mô hình hóa dữ liệu thực tế bằng
+                cách sử dụng tài liệu, key-value, đồ thị và column-family.
+              </p>
+
+              <div class="note info">
+                <strong>💡 Lưu ý:</strong> Tất cả API đều cung cấp tự động mở
+                rộng lưu trữ và thông lượng, tính linh hoạt và bảo đảm hiệu
+                suất. Không có API nào là tốt nhất, và bạn có thể chọn bất kỳ
+                API nào để xây dựng ứng dụng.
+              </div>
+
+              <h4>Cân Nhắc Khi Chọn API</h4>
+              <p>
+                API for NoSQL là native của Azure Cosmos DB. Các API for
+                MongoDB, PostgreSQL, Cassandra, Gremlin và Table triển khai wire
+                protocol của các công cụ cơ sở dữ liệu mã nguồn mở. Chúng phù
+                hợp nhất nếu:
+              </p>
+              <ul>
+                <li>
+                  Bạn có ứng dụng MongoDB, PostgreSQL, Cassandra hoặc Gremlin
+                  hiện có
+                </li>
+                <li>Bạn không muốn viết lại toàn bộ lớp truy cập dữ liệu</li>
+                <li>
+                  Bạn muốn sử dụng hệ sinh thái mã nguồn mở, client-drivers,
+                  chuyên môn và tài nguyên cho cơ sở dữ liệu
+                </li>
+              </ul>
+
+              <table>
+  <thead><tr>
+                  <th>API</th>
+                  <th>Mô Hình Dữ Liệu</th>
+                  <th>Mô Tả</th>
+                  <th>Khi Nào Dùng</th>
+                </tr>
+  </thead>
+  <tbody><tr>
+                  <td><strong>API for NoSQL</strong></td>
+                  <td>Document (JSON)</td>
+                  <td>
+                    Native của Cosmos DB. Kinh nghiệm end-to-end tốt nhất. Tính
+                    năng mới ra mắt trên NoSQL trước. Hỗ trợ truy vấn SQL.
+                  </td>
+                  <td>Ứng dụng mới, cần tính năng Cosmos DB đầy đủ</td>
+                </tr><tr>
+                  <td><strong>API for MongoDB</strong></td>
+                  <td>Document (BSON)</td>
+                  <td>
+                    Tương thích wire protocol MongoDB. Không dùng code MongoDB
+                    native. Lưu dữ liệu dạng tài liệu qua BSON.
+                  </td>
+                  <td>Di chuyển ứng dụng MongoDB hiện có</td>
+                </tr><tr>
+                  <td><strong>API for PostgreSQL</strong></td>
+                  <td>Relational/Distributed</td>
+                  <td>
+                    Dịch vụ được quản lý chạy PostgreSQL ở bất kỳ quy mô nào,
+                    với sức mạnh Citus open source cho bảng phân tán.
+                  </td>
+                  <td>Ứng dụng PostgreSQL, workload relational</td>
+                </tr><tr>
+                  <td><strong>API for Apache Cassandra</strong></td>
+                  <td>Column-family</td>
+                  <td>
+                    Lưu dữ liệu trong schema column-oriented. Tương thích wire
+                    protocol Apache Cassandra native.
+                  </td>
+                  <td>Di chuyển ứng dụng Cassandra, dữ liệu lớn phân tán</td>
+                </tr><tr>
+                  <td><strong>API for Apache Gremlin</strong></td>
+                  <td>Graph (edges và vertices)</td>
+                  <td>
+                    Cho phép truy vấn đồ thị và lưu trữ dữ liệu dạng edges và
+                    vertices.
+                  </td>
+                  <td>
+                    Dữ liệu động, quan hệ phức tạp, không phù hợp relational
+                  </td>
+                </tr><tr>
+                  <td><strong>API for Table</strong></td>
+                  <td>Key/Value</td>
+                  <td>
+                    Lưu dữ liệu dạng key/value. Khắc phục giới hạn của Azure
+                    Table Storage. Chỉ hỗ trợ OLTP.
+                  </td>
+                  <td>
+                    Di chuyển từ Azure Table Storage, cần hiệu suất cao hơn
+                  </td>
+                </tr>
+              
+  </tbody>
+</table>
+            </section>
+
+            <!-- SECTION 6: Request Units -->
+            <section id="s16">
+              <h3>💰 1.6 Request Units (RU)</h3>
+
+              <p>
+                Với Azure Cosmos DB, bạn trả tiền cho thông lượng được cấp phép
+                và lưu trữ được sử dụng theo giờ. Thông lượng phải được cấp phép
+                để đảm bảo đủ tài nguyên hệ thống cho cơ sở dữ liệu Azure Cosmos
+                luôn khả dụng.
+              </p>
+
+              <p>
+                Chi phí của tất cả các hoạt động cơ sở dữ liệu được chuẩn hóa
+                trong Azure Cosmos DB và biểu thị bằng
+                <strong>request units</strong> (hay RU). Một request unit đại
+                diện cho tài nguyên hệ thống như CPU, IOPS và bộ nhớ cần thiết
+                để thực hiện các hoạt động cơ sở dữ liệu.
+              </p>
+
+              <div class="note info">
+                <div class="nt">💡 Quy tắc cơ bản:</div>
+                Chi phí để thực hiện point read (lấy một item bằng ID và giá trị
+                partition key) cho một item 1-KB là <strong>1 RU</strong>. Tất
+                cả các hoạt động cơ sở dữ liệu khác được gán chi phí tương tự
+                bằng RU.
+              </div>
+
+              <div class="dg-cards">
+                <div class="dg-card">
+                  <div class="dg-card-title">⚙️ RU = CPU + IOPS + Memory + Network</div>
+                  <ul>
+                    <li>Mọi thao tác DB được <strong>chuẩn hóa thành RU</strong></li>
+                    <li>Provisioned: đặt trước RU/s (tăng dần 100 RU/s)</li>
+                    <li>Serverless: trả theo số RU thực tế tiêu thụ</li>
+                    <li>Autoscale: tự điều chỉnh 10% → 100% max RU/s</li>
+                  </ul>
+                </div>
+                <div class="dg-card">
+                  <div class="dg-card-title">💰 Chi Phí Điển Hình</div>
+                  <ul>
+                    <li><strong>Point read</strong> (1KB item) = <strong>1 RU</strong></li>
+                    <li><strong>Write operation</strong> = ~5–10 RU (tùy kích thước)</li>
+                    <li><strong>Cross-partition query</strong> = nhiều RU hơn</li>
+                    <li><strong>Complex aggregation</strong> = nhiều RU nhất</li>
+                  </ul>
+                </div>
+              </div>
+
+              <h4>Các Chế Độ Tài Khoản</h4>
+              <table>
+  <thead><tr>
+                  <th>Chế Độ</th>
+                  <th>Mô Tả</th>
+                  <th>Phù Hợp Với</th>
+                </tr>
+  </thead>
+  <tbody><tr>
+                  <td>
+                    <strong
+                      >Provisioned throughput mode (Chế độ thông lượng được cấp
+                      phép)</strong
+                    >
+                  </td>
+                  <td>
+                    Bạn cấp phép số RU cho ứng dụng theo giây, tăng dần 100
+                    RU/giây. Có thể tăng hoặc giảm theo từng bước 100 RU/giây.
+                    Có thể cấp phép thông lượng ở mức container và cơ sở dữ
+                    liệu.
+                  </td>
+                  <td>Workload dự đoán được, cần SLA thông lượng</td>
+                </tr><tr>
+                  <td>
+                    <strong>Serverless mode (Chế độ không máy chủ)</strong>
+                  </td>
+                  <td>
+                    Không cần cấp phép thông lượng khi tạo tài nguyên. Cuối kỳ
+                    thanh toán, bạn được tính phí cho số request units được sử
+                    dụng bởi các hoạt động cơ sở dữ liệu.
+                  </td>
+                  <td>Workload không đều, phát triển và thử nghiệm</td>
+                </tr>
+              
+  </tbody>
+</table>
+
+              <div class="note warn">
+                <div class="nt">⚠️ Lưu ý về Autoscale:</div>
+                Ngoài Provisioned throughput standard, còn có chế độ
+                <strong>Autoscale</strong> - tự động điều chỉnh thông lượng dựa
+                trên mức sử dụng, giữa 10% đến 100% của mức tối đa được cấu
+                hình.
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- ▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐ -->
+        <div id="m2">
+          <div class="mhd">
+            <div class="mhd-ico">💻</div>
+            <div>
+              <h2>Module 2: Làm Việc với Azure Cosmos DB</h2>
+              <div class="mhd-sub">
+                SDK, stored procedures, triggers, UDFs, và change feed
+              </div>
+            </div>
+          </div>
+          <div class="msec">
+            <!-- SECTION 7: .NET SDK v3 -->
+            <section id="s21">
+              <h3>🔧 2.1 Microsoft .NET SDK v3 cho Azure Cosmos DB</h3>
+
+              <p>
+                Unit này tập trung vào Azure Cosmos DB .NET SDK v3 cho API for
+                NoSQL (NuGet package <strong>Microsoft.Azure.Cosmos</strong>).
+                Phiên bản 3 của .NET SDK sử dụng các thuật ngữ chung
+                <em>container</em> và <em>item</em>.
+              </p>
+
+              <ul>
+                <li>
+                  <strong>Container</strong> có thể là: collection, graph, hoặc
+                  table
+                </li>
+                <li>
+                  <strong>Item</strong> có thể là: document, edge/vertex, hoặc
+                  row
+                </li>
+              </ul>
+
+              <div class="note info">
+                <div class="nt">💡 Repository GitHub:</div>
+                <a
+                  href="https://github.com/Azure/azure-cosmos-dotnet-v3"
+                  style="color: var(--blue-5)"
+                  >azure-cosmos-dotnet-v3</a
+                >
+                chứa các giải pháp mẫu .NET mới nhất để thực hiện CRUD và các
+                hoạt động phổ biến khác trên tài nguyên Azure Cosmos DB.
+              </div>
+
+              <h4>CosmosClient - Kết Nối</h4>
+              <p>
+                <code>CosmosClient</code> là thread-safe. Khuyến nghị duy trì
+                một instance duy nhất của <code>CosmosClient</code> trong suốt
+                vòng đời ứng dụng để quản lý kết nối hiệu quả.
+              </p>
+
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">CosmosClient client = new CosmosClient(endpoint, key);</code></pre>
+              </div>
+
+              <h4>Ví Dụ Database</h4>
+
+              <p>
+                <strong>Tạo database (ném ngoại lệ nếu đã tồn tại):</strong>
+              </p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">// Tạo instance mới của lớp Database tham chiếu database phía server
+Database database1 = await client.CreateDatabaseAsync(
+    id: "adventureworks-1"
+);</code></pre>
+              </div>
+
+              <p><strong>Tạo database nếu chưa tồn tại:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">// Kiểm tra database tồn tại, nếu không tạo mới
+Database database2 = await client.CreateDatabaseIfNotExistsAsync(
+    id: "adventureworks-2"
+);</code></pre>
+              </div>
+
+              <p><strong>Đọc database theo ID:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">// Đọc tài nguyên Database với ID thuộc tính của Database resource bạn muốn đọc
+Database database = this.cosmosClient.GetDatabase(database_id);
+DatabaseResponse response = await database.ReadAsync();</code></pre>
+              </div>
+
+              <p><strong>Xóa database:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">await database.DeleteAsync();</code></pre>
+              </div>
+
+              <h4>Ví Dụ Container</h4>
+
+              <p><strong>Tạo container nếu chưa tồn tại:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">// Đặt thông lượng về giá trị tối thiểu 400 RU/s
+ContainerResponse simpleContainer = await database.CreateContainerIfNotExistsAsync(
+    id: containerId,
+    partitionKeyPath: partitionKey,
+    throughput: 400);</code></pre>
+              </div>
+
+              <p><strong>Lấy container theo ID:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">Container container = database.GetContainer(containerId);
+ContainerProperties containerProperties = await container.ReadContainerAsync();</code></pre>
+              </div>
+
+              <p><strong>Xóa container:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">await database.GetContainer(containerId).DeleteContainerAsync();</code></pre>
+              </div>
+
+              <h4>Ví Dụ Item</h4>
+
+              <p><strong>Tạo item:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">// Phương thức yêu cầu đối tượng JSON serializable có thuộc tính id và partitionKey
+ItemResponse&lt;SalesOrder&gt; response = await container.CreateItemAsync(
+    salesOrder,
+    new PartitionKey(salesOrder.AccountNumber));</code></pre>
+              </div>
+
+              <p><strong>Đọc item:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">string id = "[id]";
+string accountNumber = "[partition-key]";
+ItemResponse&lt;SalesOrder&gt; response = await container.ReadItemAsync(
+    id,
+    new PartitionKey(accountNumber));</code></pre>
+              </div>
+
+              <p><strong>Truy vấn item:</strong></p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">YAML</span>
+                </div>
+                <pre><code class="language-yaml">QueryDefinition query = new QueryDefinition(
+    "select * from sales s where s.AccountNumber = @AccountInput ")
+    .WithParameter("@AccountInput", "Account1");
+
+FeedIterator&lt;SalesOrder&gt; resultSet = container.GetItemQueryIterator&lt;SalesOrder&gt;(
+    query,
+    requestOptions: new QueryRequestOptions()
+    {
+        PartitionKey = new PartitionKey("Account1"),
+        MaxItemCount = 1
+    });</code></pre>
+              </div>
+
+              <div class="arch-grid">
+                <div class="arch-card">
+                  <div class="arch-card-hd">🔌 CosmosClient</div>
+                  <div class="arch-card-body">
+                    <div class="arch-item">Thread-safe — tạo <strong>1 instance duy nhất</strong></div>
+                    <div class="arch-item"><code>CreateDatabaseIfNotExistsAsync()</code></div>
+                    <div class="arch-item"><code>GetDatabase(id)</code></div>
+                    <div class="arch-item"><code>DeleteAsync()</code></div>
+                  </div>
+                </div>
+                <div class="arch-card">
+                  <div class="arch-card-hd">🗂️ Database</div>
+                  <div class="arch-card-body">
+                    <div class="arch-item"><code>CreateContainerIfNotExistsAsync()</code></div>
+                    <div class="arch-item"><code>GetContainer(id)</code></div>
+                    <div class="arch-item"><code>DeleteAsync()</code></div>
+                  </div>
+                </div>
+                <div class="arch-card">
+                  <div class="arch-card-hd">📦 Container — CRUD Operations</div>
+                  <div class="arch-card-body">
+                    <div class="arch-item"><code>CreateItemAsync()</code></div>
+                    <div class="arch-item"><code>ReadItemAsync(id, partKey)</code></div>
+                    <div class="arch-item"><code>ReplaceItemAsync()</code></div>
+                    <div class="arch-item"><code>DeleteItemAsync()</code></div>
+                    <div class="arch-item"><code>GetItemQueryIterator()</code></div>
+                  </div>
+                </div>
+                <div class="arch-card">
+                  <div class="arch-card-hd">💡 Lưu Ý</div>
+                  <div class="arch-card-body">
+                    <div class="arch-item">Tất cả phương thức đều có hậu tố <strong>Async</strong></div>
+                    <div class="arch-item">Sử dụng <code>await</code> cho mọi cuộc gọi</div>
+                    <div class="arch-item">Dùng <code>using</code> hoặc singleton pattern</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- SECTION 8: Stored Procedures -->
+            <section id="s22">
+              <h3>📝 2.2 Tạo Stored Procedures</h3>
+
+              <p>
+                Azure Cosmos DB cung cấp thực thi JavaScript tích hợp ngôn ngữ,
+                giao dịch cho phép bạn viết <strong>stored procedures</strong>,
+                <strong>triggers</strong> và
+                <strong>user-defined functions (UDFs)</strong>.
+              </p>
+
+              <div class="note info">
+                <div class="nt">💡 Lưu ý:</div>
+                Stored procedures được đăng ký theo collection và có thể hoạt
+                động trên bất kỳ tài liệu hoặc tệp đính kèm nào trong collection
+                đó.
+              </div>
+
+              <h4>Viết Stored Procedures</h4>
+              <p>
+                Đây là stored procedure đơn giản trả về phản hồi "Hello World":
+              </p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">JavaScript</span>
+                </div>
+                <pre><code class="language-javascript">var helloWorldStoredProc = {
+    id: "helloWorld",
+    serverScript: function () {
+        var context = getContext();
+        var response = context.getResponse();
+
+        response.setBody("Hello, World");
+    }
+}</code></pre>
+              </div>
+
+              <p>
+                Đối tượng <code>context</code> cung cấp quyền truy cập vào tất
+                cả các hoạt động có thể thực hiện trong Azure Cosmos DB, và
+                quyền truy cập vào các đối tượng request và response.
+              </p>
+
+              <h4>Tạo Item Bằng Stored Procedure</h4>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">JavaScript</span>
+                </div>
+                <pre><code class="language-javascript">var createDocumentStoredProc = {
+    id: "createMyDocument",
+    body: function createMyDocument(documentToCreate) {
+        var context = getContext();
+        var collection = context.getCollection();
+        var accepted = collection.createDocument(
+            collection.getSelfLink(),
+            documentToCreate,
+            function (err, documentCreated) {
+                if (err) throw new Error('Error' + err.message);
+                context.getResponse().setBody(documentCreated.id)
+            });
+        if (!accepted) return;
+    }
+}</code></pre>
+              </div>
+
+              <h4>Mảng Làm Tham Số Đầu Vào cho Stored Procedures</h4>
+              <p>
+                Khi định nghĩa stored procedure trong Azure portal, tham số đầu
+                vào luôn được gửi dưới dạng chuỗi. Ngay cả khi bạn truyền mảng
+                chuỗi, mảng sẽ được chuyển đổi thành chuỗi. Giải pháp:
+              </p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">JavaScript</span>
+                </div>
+                <pre><code class="language-javascript">function sample(arr) {
+    if (typeof arr === "string") arr = JSON.parse(arr);
+
+    arr.forEach(function(a) {
+        // làm gì đó ở đây
+        console.log(a);
+    });
+}</code></pre>
+              </div>
+
+              <h4>Giới Hạn Thực Thi (Bounded Execution)</h4>
+              <p>
+                Tất cả các hoạt động Azure Cosmos DB phải hoàn thành trong một
+                khoảng thời gian giới hạn. Stored procedures có thời gian chạy
+                giới hạn trên máy chủ. Tất cả các hàm collection trả về giá trị
+                Boolean đại diện cho việc hoạt động đó hoàn thành hay không.
+              </p>
+
+              <h4>Giao Dịch Trong Stored Procedures</h4>
+              <p>
+                Bạn có thể triển khai giao dịch trên các item trong container
+                bằng cách sử dụng stored procedure. JavaScript có thể triển khai
+                mô hình dựa trên continuation để batch hoặc tiếp tục thực thi.
+              </p>
+
+              <div class="flow-v">
+                <div class="flow-step start">
+                  <div class="flow-num">1</div>
+                  <div class="flow-body"><strong>▶️ Bắt đầu Stored Procedure</strong> — Client gọi lần đầu</div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step">
+                  <div class="flow-num">2</div>
+                  <div class="flow-body"><strong>⚙️ Xử lý batch items</strong> — Xử lý một phần dữ liệu trong transaction</div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step note">
+                  <div class="flow-num">?</div>
+                  <div class="flow-body">
+                    <strong>✅ Hoàn thành?</strong><br>
+                    <strong>YES →</strong> Trả về kết quả cuối cùng cho client<br>
+                    <strong>NO →</strong> Lưu trạng thái, trả về <em>continuation token</em>
+                  </div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step end">
+                  <div class="flow-num">3</div>
+                  <div class="flow-body"><strong>🔁 Client gọi lại với token</strong> — Tiếp tục từ điểm đã lưu, lặp lại cho đến khi hoàn thành</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- SECTION 9: Triggers and UDFs -->
+            <section id="s23">
+              <h3>⚡ 2.3 Tạo Triggers và User-Defined Functions</h3>
+
+              <p>Azure Cosmos DB hỗ trợ pretriggers và post-triggers:</p>
+              <ul>
+                <li>
+                  <strong>Pretriggers</strong>: Thực thi <em>trước</em> khi sửa
+                  đổi item cơ sở dữ liệu
+                </li>
+                <li>
+                  <strong>Post-triggers</strong>: Thực thi <em>sau</em> khi sửa
+                  đổi item cơ sở dữ liệu
+                </li>
+              </ul>
+
+              <div class="note warn">
+                <div class="nt">⚠️ Quan trọng:</div>
+                Chúng phải được chỉ định cho mỗi hoạt động cơ sở dữ liệu mà bạn
+                muốn chúng thực thi. Sau khi định nghĩa trigger, bạn nên đăng ký
+                nó bằng SDK Azure Cosmos DB.
+              </div>
+
+              <h4>Pretriggers - Ví Dụ</h4>
+              <p>
+                Pretrigger xác nhận thuộc tính của item Azure Cosmos đang được
+                tạo - thêm thuộc tính timestamp nếu chưa có:
+              </p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">JavaScript</span>
+                </div>
+                <pre><code class="language-javascript">function validateToDoItemTimestamp() {
+    var context = getContext();
+    var request = context.getRequest();
+
+    // item cần tạo trong thao tác hiện tại
+    var itemToCreate = request.getBody();
+
+    // xác nhận thuộc tính
+    if (!("timestamp" in itemToCreate)) {
+        var ts = new Date();
+        itemToCreate["timestamp"] = ts.getTime();
+    }
+
+    // cập nhật item sẽ được tạo
+    request.setBody(itemToCreate);
+}</code></pre>
+              </div>
+
+              <div class="note info">
+                <div class="nt">💡 Lưu ý:</div>
+                Đối tượng request trong trigger được sử dụng để thao tác thông
+                điệp request liên kết với hoạt động. Trigger này nên được tạo
+                với giá trị <code>TriggerOperation</code> là
+                <code>TriggerOperation.Create</code>.
+              </div>
+
+              <h4>Post-triggers - Ví Dụ</h4>
+              <p>
+                Post-trigger truy vấn item metadata và cập nhật với chi tiết về
+                item mới được tạo:
+              </p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">JavaScript</span>
+                </div>
+                <pre><code class="language-javascript">function updateMetadata() {
+var context = getContext();
+var container = context.getCollection();
+var response = context.getResponse();
+
+// item vừa được tạo
+var createdItem = response.getBody();
+
+// truy vấn tài liệu metadata
+var filterQuery = 'SELECT * FROM root r WHERE r.id = "_metadata"';
+var accept = container.queryDocuments(container.getSelfLink(), filterQuery,
+    updateMetadataCallback);
+if(!accept) throw "Unable to update metadata, abort";
+
+function updateMetadataCallback(err, items, responseOptions) {
+    if(err) throw new Error("Error" + err.message);
+        if(items.length != 1) throw 'Unable to find metadata document';
+
+        var metadataItem = items[0];
+
+        // cập nhật metadata
+        metadataItem.createdItems += 1;
+        metadataItem.createdNames += " " + createdItem.id;
+        var accept = container.replaceDocument(metadataItem._self,
+            metadataItem, function(err, itemReplaced) {
+                    if(err) throw "Unable to update metadata, abort";
+            });
+        if(!accept) throw "Unable to update metadata, abort";
+        return;
+    }
+}</code></pre>
+              </div>
+
+              <div class="note warn">
+                <div class="nt">⚠️ Thực thi giao dịch của Triggers:</div>
+                Post-trigger chạy như một phần của cùng giao dịch cho item cơ
+                sở. Ngoại lệ trong quá trình thực thi post-trigger sẽ làm thất
+                bại toàn bộ giao dịch. Bất kỳ thứ gì đã được commit sẽ bị
+                rollback và trả về ngoại lệ.
+              </div>
+
+              <h4>User-Defined Functions (UDFs)</h4>
+              <p>
+                UDF tính thuế thu nhập cho các khung thu nhập khác nhau - sẽ
+                được sử dụng trong truy vấn:
+              </p>
+
+              <p>Giả sử container "Incomes" với cấu trúc:</p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">JSON</span>
+                </div>
+                <pre><code class="language-json">{
+   "name": "User One",
+   "country": "USA",
+   "income": 70000
+}</code></pre>
+              </div>
+
+              <p>Hàm UDF tính thuế:</p>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">JavaScript</span>
+                </div>
+                <pre><code class="language-javascript">function tax(income) {
+
+        if(income == undefined)
+            throw 'no input';
+
+        if (income &lt; 1000)
+            return income * 0.1;
+        else if (income &lt; 10000)
+            return income * 0.2;
+        else
+            return income * 0.4;
+    }</code></pre>
+              </div>
+
+              <h5 style="font-size:.875rem;color:var(--blue-6);margin-bottom:.5rem">So Sánh: Stored Procedures vs Triggers vs UDFs</h5>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Đặc điểm</th>
+                    <th>Stored Procedure</th>
+                    <th>Triggers</th>
+                    <th>UDFs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Đăng ký</strong></td>
+                    <td>Per collection</td>
+                    <td>Pre (trước sửa đổi) hoặc Post (sau sửa đổi)</td>
+                    <td>Per collection</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Thao tác</strong></td>
+                    <td>CRUD operations + Transactions</td>
+                    <td>Không tự động — phải đăng ký cho mỗi operation</td>
+                    <td>Chỉ được dùng trong câu truy vấn (SELECT)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Transaction</strong></td>
+                    <td>Hỗ trợ Continuation pattern</td>
+                    <td>Post-trigger: cùng giao dịch với item</td>
+                    <td>Không có side effects</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Ngôn ngữ</strong></td>
+                    <td>JavaScript</td>
+                    <td>JavaScript</td>
+                    <td>JavaScript</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <!-- SECTION 10: Change Feed -->
+            <section id="s24">
+              <h3>🔄 2.4 Khám Phá Change Feed trong Azure Cosmos DB</h3>
+
+              <p>
+                Change feed trong Azure Cosmos DB là bản ghi liên tục các thay
+                đổi đối với container theo thứ tự xảy ra. Hỗ trợ change feed
+                hoạt động bằng cách lắng nghe container Azure Cosmos DB để phát
+                hiện bất kỳ thay đổi nào, sau đó xuất danh sách tài liệu đã thay
+                đổi theo thứ tự sửa đổi.
+              </p>
+
+              <h4>Những Gì Change Feed Ghi Lại</h4>
+              <ul>
+                <li>✅ Tất cả inserts</li>
+                <li>✅ Tất cả updates</li>
+                <li>❌ Không ghi lại delete operations</li>
+              </ul>
+
+              <div class="note warn">
+                <div class="nt">⚠️ Workaround cho Deletes:</div>
+                Thêm soft marker trên các item đang bị xóa. Ví dụ: thêm thuộc
+                tính "deleted" = true và đặt TTL (time-to-live). TTL đảm bảo
+                item bị tự động xóa.
+              </div>
+
+              <h4>Hai Mô Hình Đọc Change Feed</h4>
+
+              <table>
+  <thead><tr>
+                  <th>Đặc Điểm</th>
+                  <th>Push Model (Mô hình đẩy)</th>
+                  <th>Pull Model (Mô hình kéo)</th>
+                </tr>
+  </thead>
+  <tbody><tr>
+                  <td>Cách thức</td>
+                  <td>Change feed processor đẩy công việc đến client</td>
+                  <td>Client kéo công việc từ server</td>
+                </tr><tr>
+                  <td>Xử lý state</td>
+                  <td>Processor xử lý việc kiểm tra và lưu trữ state</td>
+                  <td>Client tự lưu trữ state cho công việc đã xử lý</td>
+                </tr><tr>
+                  <td>Load balancing</td>
+                  <td>Tự động</td>
+                  <td>Client tự xử lý</td>
+                </tr><tr>
+                  <td>Khuyến nghị</td>
+                  <td>✅ Được khuyến nghị</td>
+                  <td>Chỉ dùng khi cần kiểm soát cấp thấp</td>
+                </tr>
+              
+  </tbody>
+</table>
+
+              <h4>Khi Nào Dùng Pull Model</h4>
+              <ul>
+                <li>Đọc thay đổi từ partition key cụ thể</li>
+                <li>Kiểm soát tốc độ client nhận thay đổi để xử lý</li>
+                <li>
+                  Đọc một lần dữ liệu hiện có trong change feed (ví dụ: di
+                  chuyển dữ liệu)
+                </li>
+              </ul>
+
+              <h4>Push Model: Azure Functions</h4>
+              <p>
+                Bạn có thể tạo Azure Functions reactive nhỏ tự động kích hoạt
+                trên mỗi sự kiện mới trong change feed. Với Azure Functions
+                trigger cho Azure Cosmos DB, bạn có thể sử dụng chức năng mở
+                rộng của Change Feed Processor và phát hiện sự kiện đáng tin cậy
+                mà không cần duy trì cơ sở hạ tầng worker.
+              </p>
+
+              <h4>Push Model: Change Feed Processor</h4>
+              <p>
+                Change feed processor là một phần của Azure Cosmos DB .NET V3 và
+                Java V4 SDKs. Có bốn thành phần chính:
+              </p>
+
+              <h5 style="font-size:.875rem;color:var(--blue-6);margin-bottom:.5rem">Bốn Thành Phần của Change Feed Processor</h5>
+              <table>
+                <thead>
+                  <tr><th>Thành phần</th><th>Mô tả</th><th>Ghi chú</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Monitored Container</strong><br><small>(Container Giám sát)</small></td>
+                    <td>Chứa dữ liệu — nguồn của change feed. Mọi insert/update phản ánh ở đây.</td>
+                    <td>Nguồn dữ liệu chính</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Lease Container</strong><br><small>(Container Lease)</small></td>
+                    <td>Lưu trữ state và điều phối xử lý qua các workers.</td>
+                    <td>Có thể cùng hoặc khác tài khoản</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Compute Instance</strong><br><small>(Instance Tính toán)</small></td>
+                    <td>Lưu trữ change feed processor để nghe thay đổi. VM, K8s pod, App Service instance...</td>
+                    <td>Có tên định danh duy nhất</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Delegate</strong><br><small>(Đại biểu)</small></td>
+                    <td>Code xác định những gì developer muốn làm với mỗi batch thay đổi.</td>
+                    <td>Business logic xử lý</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h4>Triển Khai Change Feed Processor</h4>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">/// &lt;summary&gt;
+/// Khởi động Change Feed Processor để lắng nghe thay đổi và xử lý bằng HandleChangesAsync.
+/// &lt;/summary&gt;
+private static async Task&lt;ChangeFeedProcessor&gt; StartChangeFeedProcessorAsync(
+    CosmosClient cosmosClient,
+    IConfiguration configuration)
+{
+    string databaseName = configuration["SourceDatabaseName"];
+    string sourceContainerName = configuration["SourceContainerName"];
+    string leaseContainerName = configuration["LeasesContainerName"];
+
+    Container leaseContainer = cosmosClient.GetContainer(databaseName, leaseContainerName);
+    ChangeFeedProcessor changeFeedProcessor = cosmosClient.GetContainer(databaseName, sourceContainerName)
+        .GetChangeFeedProcessorBuilder&lt;ToDoItem&gt;(processorName: "changeFeedSample", onChangesDelegate: HandleChangesAsync)
+            .WithInstanceName("consoleHost")
+            .WithLeaseContainer(leaseContainer)
+            .Build();
+
+    Console.WriteLine("Starting Change Feed Processor...");
+    await changeFeedProcessor.StartAsync();
+    Console.WriteLine("Change Feed Processor started.");
+    return changeFeedProcessor;
+}</code></pre>
+              </div>
+
+              <h4>Delegate Xử Lý Thay Đổi</h4>
+              <div class="cb">
+                <div class="cb-hd">
+                  <div class="dots">
+                    <i class="dr"></i><i class="dy"></i><i class="dg"></i>
+                  </div>
+                  <span class="cb-lang">C#</span>
+                </div>
+                <pre><code class="language-csharp">/// &lt;summary&gt;
+/// Delegate nhận các batch thay đổi và xử lý chúng.
+/// &lt;/summary&gt;
+static async Task HandleChangesAsync(
+    ChangeFeedProcessorContext context,
+    IReadOnlyCollection&lt;ToDoItem&gt; changes,
+    CancellationToken cancellationToken)
+{
+    Console.WriteLine($"Started handling changes for lease {context.LeaseToken}...");
+    Console.WriteLine($"Change Feed request consumed {context.Headers.RequestCharge} RU.");
+    // SessionToken nếu cần đảm bảo Session consistency trên instance client khác
+    Console.WriteLine($"SessionToken ${context.Headers.Session}");
+
+    // Theo dõi bất kỳ hoạt động nào mất nhiều thời gian hơn ngưỡng
+    if (context.Diagnostics.GetClientElapsedTime() > TimeSpan.FromSeconds(1))
+    {
+        Console.WriteLine($"Change Feed request took longer than expected. Diagnostics:" + context.Diagnostics.ToString());
+    }
+
+    foreach (ToDoItem item in changes)
+    {
+        Console.WriteLine($"Detected operation for item with id {item.id}, created at {item.creationTime}.");
+        // Mô phỏng một số thao tác bất đồng bộ
+        await Task.Delay(10);
+    }
+
+    Console.WriteLine("Finished handling changes.");
+}</code></pre>
+              </div>
+
+              <h4>Vòng Đời Bình Thường của Change Feed Processor</h4>
+              <ol>
+                <li>Đọc change feed</li>
+                <li>
+                  Nếu không có thay đổi, ngủ trong khoảng thời gian được định
+                  trước (có thể tùy chỉnh với
+                  <code>WithPollInterval</code> trong Builder) và quay lại bước
+                  1
+                </li>
+                <li>Nếu có thay đổi, gửi chúng đến delegate</li>
+                <li>
+                  Khi delegate hoàn thành xử lý thay đổi thành công, cập nhật
+                  lease store với điểm thời gian đã xử lý mới nhất và quay lại
+                  bước 1
+                </li>
+              </ol>
+
+              <div class="flow-v">
+                <div class="flow-step start">
+                  <div class="flow-num">1</div>
+                  <div class="flow-body"><strong>📖 Đọc Change Feed</strong> — Processor poll liên tục từ monitored container</div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step note">
+                  <div class="flow-num">?</div>
+                  <div class="flow-body">
+                    <strong>Có thay đổi?</strong><br>
+                    <strong>YES →</strong> Gửi batch thay đổi đến Delegate function<br>
+                    <strong>NO →</strong> Ngủ (PollInterval) rồi poll lại
+                  </div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step">
+                  <div class="flow-num">2</div>
+                  <div class="flow-body"><strong>⚙️ Delegate xử lý thay đổi</strong> — Business logic của bạn chạy ở đây</div>
+                </div>
+                <div class="flow-connector"></div>
+                <div class="flow-step end">
+                  <div class="flow-num">3</div>
+                  <div class="flow-body"><strong>💾 Cập nhật Lease Store</strong> — Lưu checkpoint → quay lại bước 1 (vòng lặp vô hạn)</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div id="summary">
+          <div class="mhd">
+            <div class="mhd-ico">📋</div>
+            <div>
+              <h2>Tóm Tắt Nhanh - Điểm Ôn Thi AZ-204</h2>
+              <div class="mhd-sub">
+                Các điểm chính cần nhớ cho kỳ thi AZ-204
+              </div>
+            </div>
+          </div>
+          <div class="msec">
+            <section>
+              <h3>🎯 Điểm Chính Cần Nhớ</h3>
+
+              <h4>Về Cosmos DB Cơ Bản</h4>
+              <ul>
+                <li>
+                  Tối đa <strong>50 tài khoản Cosmos DB</strong> mỗi Azure
+                  subscription
+                </li>
+                <li>Container là đơn vị mở rộng cơ bản (scalability unit)</li>
+                <li>Physical partition: tối đa 10.000 RU/s và 50 GB</li>
+                <li>Logical partition: tối đa 20 GB</li>
+                <li>Point read của 1KB item = <strong>1 RU</strong></li>
+              </ul>
+
+              <h4>Về Consistency Levels</h4>
+              <ul>
+                <li>
+                  <strong>Strong</strong>: Đảm bảo linearizability, đọc phiên
+                  bản commit mới nhất
+                </li>
+                <li>
+                  <strong>Bounded Staleness</strong>: Lag &lt; K versions hoặc T
+                  thời gian
+                </li>
+                <li>
+                  <strong>Session</strong>: Mặc định, read-your-writes trong
+                  session
+                </li>
+                <li>
+                  <strong>Consistent Prefix</strong>: Không thấy thứ tự đảo
+                  ngược trong transaction
+                </li>
+                <li>
+                  <strong>Eventual</strong>: Yếu nhất, hiệu suất tốt nhất, không
+                  đảm bảo thứ tự
+                </li>
+              </ul>
+
+              <h4>Về APIs</h4>
+              <ul>
+                <li>
+                  API for NoSQL: Native, JSON, SQL syntax - tốt nhất cho ứng
+                  dụng mới
+                </li>
+                <li>API for MongoDB: BSON format, wire protocol compatible</li>
+                <li>API for Table: Key/value, chỉ OLTP</li>
+                <li>API for Gremlin: Graph data (edges và vertices)</li>
+                <li>API for Cassandra: Column-family schema</li>
+              </ul>
+
+              <h4>Về Change Feed</h4>
+              <ul>
+                <li>
+                  Ghi lại: inserts và updates, <strong>KHÔNG</strong> ghi lại
+                  deletes
+                </li>
+                <li>
+                  Push model: Được khuyến nghị (Azure Functions hoặc Change Feed
+                  Processor)
+                </li>
+                <li>
+                  4 thành phần: Monitored container, Lease container, Compute
+                  instance, Delegate
+                </li>
+              </ul>
+
+              <h4>Về Stored Procedures và Triggers</h4>
+              <ul>
+                <li>Viết bằng JavaScript</li>
+                <li>Pretriggers: không có tham số đầu vào</li>
+                <li>
+                  Post-triggers: Chạy trong cùng giao dịch, lỗi = rollback toàn
+                  bộ
+                </li>
+                <li>
+                  Tham số mảng cần được parse từ JSON string trong stored
+                  procedures
+                </li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- /wrap -->
+
+    <div class="pnav">
+      <a href="02-azure-functions.html" class="prev">← Ch.02 Functions</a>
+      <span class="pos">Chương 03 / 11</span>
+      <a href="04-blob-storage.html" class="next">Ch.04 Blob Storage →</a>
+    </div>
+    <footer
+      style="
+        background: #323130;
+        color: #c8c8c8;
+        text-align: center;
+        padding: 24px;
+        margin-top: 40px;
+      "
+    >
+      <p>
+        Hướng Dẫn Học Tập AZ-204 | Azure Cosmos DB | Được dịch sang Tiếng Việt
+      </p>
+      <p style="font-size: 0.85rem; margin-top: 8px; opacity: 0.7">
+        Nội dung dựa trên Microsoft Learn Training Modules
+      </p>
+    </footer>
+
+    <script>
+      function toggleToc() {
+        document.getElementById("toc").classList.toggle("open");
+        document.getElementById("toc-bd").classList.toggle("open");
+      }
+      function closeToc() {
+        document.getElementById("toc").classList.remove("open");
+        document.getElementById("toc-bd").classList.remove("open");
+      }
+      document.querySelectorAll("#toc a").forEach(function (a) {
+        a.addEventListener("click", function () {
+          if (window.innerWidth < 1080) closeToc();
+        });
+      });
+    </script>
+  <script src="common.js"></script>
+</body>
+</html>

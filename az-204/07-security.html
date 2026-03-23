@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-204 | Chương 07 – Bảo Mật Azure: Key Vault, Managed Identity, App Config</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 07: Security ── */
+.hero { background: linear-gradient(135deg, #1a0533 0%, #5c2d91 60%, #b146c2 100%); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:700px) { .grid-2 { grid-template-columns: 1fr; } }
+.nav-bottom { background: white; border-top: 1px solid var(--border); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.nav-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--blue-5); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .9rem; }
+.nav-btn.outline { background: white; color: var(--blue-5); border: 2px solid var(--blue-5); }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html" class="on">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">🛡️</div>
+  <h1>Bảo Mật Azure</h1>
+  <p>Key Vault, Managed Identities và Azure App Configuration</p>
+  <div class="hero-tags">
+    <span class="hero-tag">⚖️ 15–20% bài thi</span>
+    <span class="hero-tag">🔑 Key Vault</span>
+    <span class="hero-tag">👤 Managed Identity</span>
+    <span class="hero-tag">📋 App Config</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 07</div>
+  <a href="#keyvault">Module 1 – Azure Key Vault</a>
+  <a href="#kv-overview" class="sub">1.1 Tổng Quan Key Vault</a>
+  <a href="#kv-auth" class="sub">1.2 Xác Thực &amp; Phân Quyền</a>
+  <a href="#managed-id">Module 2 – Managed Identities</a>
+  <a href="#mi-types" class="sub">2.1 Managed Identity Types</a>
+  <a href="#mi-configure" class="sub">2.2 Cấu Hình</a>
+  <a href="#mi-token" class="sub">2.3 Access Token</a>
+  <a href="#appconfig">Module 3 – App Configuration</a>
+  <a href="#ac-keys" class="sub">3.2 Keys &amp; Labels</a>
+  <a href="#ac-features" class="sub">3.3 Feature Flags</a>
+</nav>
+<main class="content">
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- MODULE 1: AZURE KEY VAULT -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="keyvault">
+<div class="mhd"><div class="mhd-ico">🔑</div><div><h2>Module 1: Azure Key Vault</h2><div class="mhd-sub">Lưu trữ bảo mật và truy cập secrets, keys và certificates</div></div></div>
+<div class="msec">
+
+    <section id="kv-overview">
+      <h3>🔷 1.1 Tổng Quan Azure Key Vault</h3>
+      <p>Azure Key Vault hỗ trợ <strong>hai loại containers</strong>:</p>
+      <ul>
+        <li><strong>Vaults</strong> — Lưu trữ software và HSM-backed keys, secrets và certificates</li>
+        <li><strong>Managed HSM pools</strong> — Chỉ hỗ trợ HSM-backed keys</li>
+      </ul>
+
+      <h4>🔹 Giải Quyết Ba Vấn Đề Chính</h4>
+      <div class="arch-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="arch-card">
+          <div class="arch-card-hd">🔐 Secrets Management</div>
+          <div class="arch-card-body">
+            <div class="arch-item">Passwords</div>
+            <div class="arch-item">API keys &amp; Tokens</div>
+            <div class="arch-item">Certificates</div>
+            <div class="arch-item">Connection strings</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">🗝️ Key Management</div>
+          <div class="arch-card-body">
+            <div class="arch-item">Encryption keys</div>
+            <div class="arch-item">Create &amp; control keys</div>
+            <div class="arch-item">Encrypt data</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">📜 Certificate Management</div>
+          <div class="arch-card-body">
+            <div class="arch-item">SSL/TLS certs</div>
+            <div class="arch-item">Provision &amp; manage</div>
+            <div class="arch-item">Deploy to Azure &amp; internal resources</div>
+            <div class="arch-item">Auto-renew from CAs</div>
+          </div>
+        </div>
+      </div>
+
+      <h4>🔹 Service Tiers</h4>
+      <table>
+        <thead><tr><th>Tier</th><th>Bảo vệ Keys</th><th>Mô tả</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Standard</strong></td><td>Software key</td><td>Mã hóa bằng software key. Phù hợp hầu hết workloads.</td></tr>
+          <tr><td><strong>Premium</strong></td><td>HSM-protected key</td><td>Dùng Hardware Security Module (HSM). Tuân thủ FIPS 140-2 Level 2/3. Cho workloads yêu cầu compliance cao.</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🔹 Lợi Ích Chính</h4>
+      <table>
+        <thead><tr><th>Lợi Ích</th><th>Giải Thích</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Tập trung application secrets</strong></td><td>Thay vì lưu connection string trong code, lưu vào Key Vault. App truy cập qua URI, nhận version cụ thể của secret.</td></tr>
+          <tr><td><strong>Lưu bảo mật</strong></td><td>Truy cập cần authentication (Entra ID) + authorization (RBAC hoặc Access Policy). Software hoặc HSM-protected.</td></tr>
+          <tr><td><strong>Monitor truy cập</strong></td><td>Bật logging: lưu vào Storage Account, stream đến Event Hub, hoặc gửi đến Azure Monitor Logs.</td></tr>
+          <tr><td><strong>Đơn giản hóa quản lý</strong></td><td>Không cần kiến thức HSM nội bộ, auto-scale, geo-replication, auto-renew certificates.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="kv-auth">
+      <h3>🔷 1.2 Xác Thực và Phân Quyền với Key Vault</h3>
+
+      <h4>🔹 Hai Mô Hình Phân Quyền</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Đặc điểm</th>
+            <th>🔵 Azure RBAC <small style="font-weight:400">(Khuyến nghị)</small></th>
+            <th class="col-b">🔑 Key Vault Access Policy <small style="font-weight:400">(Legacy)</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Phạm vi kiểm soát</strong></td>
+            <td>Management plane <strong>VÀ</strong> data plane</td>
+            <td>Chỉ data plane (secrets, keys, certs)</td>
+          </tr>
+          <tr>
+            <td><strong>Granularity</strong></td>
+            <td>✅ Granular permissions theo roles</td>
+            <td>Permissions theo từng principal, ít granular hơn</td>
+          </tr>
+          <tr>
+            <td><strong>Audit</strong></td>
+            <td>✅ Qua Azure Monitor</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>Tích hợp</strong></td>
+            <td>✅ Microsoft Entra ID</td>
+            <td>Cấu hình per-vault</td>
+          </tr>
+          <tr>
+            <td><strong>Roles / Permissions</strong></td>
+            <td>Key Vault Administrator<br>Key Vault Secrets Officer<br>Key Vault Secrets User</td>
+            <td>Get, List, Set, Delete<br><small>(cho keys, secrets, certs riêng)</small></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout info">
+        <div class="callout-title">📌 Authentication Flow</div>
+        <p>Authentication vào Key Vault sử dụng <strong>Microsoft Entra ID</strong>. Caller (user hoặc app) cần xác thực với Entra ID trước, sau đó dùng token để truy cập Key Vault.</p>
+      </div>
+
+      <h4>🔹 Best Practices Bảo Mật</h4>
+      <ul>
+        <li><strong>Dùng Managed Identity</strong> — Không cần lưu credentials trong code</li>
+        <li><strong>Tách biệt Key Vaults</strong> — Mỗi môi trường (Dev/Staging/Prod) một vault riêng</li>
+        <li><strong>Bật logging</strong> — Monitor mọi truy cập vào vault</li>
+        <li><strong>Bật soft-delete và purge protection</strong> — Tránh xóa nhầm secrets</li>
+        <li><strong>Rotate secrets định kỳ</strong> — Tự động hoặc thủ công</li>
+        <li><strong>Hạn chế network access</strong> — Dùng Private Endpoints hoặc service endpoints</li>
+      </ul>
+
+      <h4>🔹 Lưu Trữ và Lấy Secret — Code Example (.NET)</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+
+// Tạo client với DefaultAzureCredential (tự động dùng Managed Identity khi deploy)
+var client = new SecretClient(
+    vaultUri: new Uri("https://myvault.vault.azure.net/"),
+    credential: new DefaultAzureCredential()
+);
+
+// Lưu secret
+await client.SetSecretAsync("my-secret", "secret-value");
+
+// Lấy secret
+KeyVaultSecret secret = await client.GetSecretAsync("my-secret");
+string secretValue = secret.Value;
+
+// Lấy version cụ thể
+KeyVaultSecret secretV2 = await client.GetSecretAsync("my-secret", "version-id");</code></pre>
+</div>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Azure CLI
+# Lưu secret
+az keyvault secret set --vault-name MyVault --name MySecret --value "MySecretValue"
+
+# Lấy secret
+az keyvault secret show --vault-name MyVault --name MySecret
+
+# List secrets
+az keyvault secret list --vault-name MyVault</code></pre>
+</div>
+
+      <h4>🔹 Key Vault URI Format</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Secret URI format:
+https://{vault-name}.vault.azure.net/secrets/{secret-name}/{version}
+
+# Ví dụ:
+https://myvault.vault.azure.net/secrets/my-db-password/abc123def456</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- MODULE 2: MANAGED IDENTITIES -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="managed-id">
+<div class="mhd"><div class="mhd-ico">👤</div><div><h2>Module 2: Managed Identities</h2><div class="mhd-sub">Danh tính được quản lý tự động — không cần credentials trong code</div></div></div>
+<div class="msec">
+
+    <section id="mi-types">
+      <h3>🔷 2.1 Managed Identities — Khái Niệm</h3>
+      <p>Managed Identities giải quyết thách thức lớn của developer: <strong>quản lý credentials, secrets và certificates</strong> để kết nối giữa các dịch vụ. Managed Identities cung cấp <strong>danh tính tự động quản lý</strong> trong Microsoft Entra ID cho applications.</p>
+
+      <div class="callout success">
+        <div class="callout-title">✅ Lợi Ích Cốt Lõi</div>
+        <p>Applications có thể dùng Managed Identity để lấy <strong>Microsoft Entra tokens mà không cần quản lý credentials</strong> nào. Nội bộ, managed identities là <strong>service principals đặc biệt</strong> — chỉ dùng được với Azure resources.</p>
+      </div>
+
+      <h4>🔹 Hai Loại Managed Identity</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Đặc điểm</th>
+            <th>⚙️ System-Assigned <small style="font-weight:400">(Gắn với 1 resource)</small></th>
+            <th class="col-green">👥 User-Assigned <small style="font-weight:400">(Resource độc lập)</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tạo</strong></td>
+            <td>Tự động khi enable trên Azure resource (VM, App, Func...)</td>
+            <td>Tạo thủ công như một Azure resource riêng biệt</td>
+          </tr>
+          <tr>
+            <td><strong>Lifecycle</strong></td>
+            <td>Gắn với resource parent — <strong>tự xóa</strong> khi resource bị xóa</td>
+            <td>Quản lý RIÊNG — phải <strong>xóa tường minh</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Sharing</strong></td>
+            <td>❌ Không thể share<br><small>(1 resource = 1 identity)</small></td>
+            <td>✅ Gán cho <strong>nhiều resources</strong> cùng lúc</td>
+          </tr>
+          <tr>
+            <td><strong>Dùng khi</strong></td>
+            <td>Workload chạy trên 1 resource duy nhất</td>
+            <td>Workload trên nhiều resources, cần shared identity, preauthorize trước khi tạo resource</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>🔹 So Sánh Chi Tiết</h4>
+      <table>
+        <thead>
+          <tr><th>Thuộc Tính</th><th>System-Assigned</th><th>User-Assigned</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Cách tạo</strong></td><td>Tạo cùng với Azure resource</td><td>Tạo như standalone Azure resource</td></tr>
+          <tr><td><strong>Vòng đời</strong></td><td>Gắn chặt với resource cha. Xóa resource → identity tự xóa</td><td>Độc lập. Phải xóa tường minh.</td></tr>
+          <tr><td><strong>Chia sẻ</strong></td><td>Không thể chia sẻ — chỉ liên kết với 1 resource</td><td>Có thể chia sẻ với nhiều resources</td></tr>
+          <tr><td><strong>Use case</strong></td><td>1 VM cần truy cập Key Vault</td><td>Nhiều VMs cần cùng 1 identity, workload recycling thường xuyên</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="mi-configure">
+      <h3>🔷 2.2 Cấu Hình Managed Identity</h3>
+
+      <h4>🔹 System-Assigned — Azure CLI</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Tạo VM với system-assigned identity
+az vm create \
+    --resource-group myResourceGroup \
+    --name myVM \
+    --image win2016datacenter \
+    --generate-ssh-keys \
+    --assign-identity \          # Bật system-assigned identity
+    --role contributor \
+    --scope mySubscription \
+    --admin-username azureuser \
+    --admin-password myPassword12
+
+# Bật system-assigned identity trên VM đã có
+az vm identity assign \
+    -g myResourceGroup \
+    -n myVM</code></pre>
+</div>
+
+      <h4>🔹 User-Assigned — Azure CLI</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Bước 1: Tạo user-assigned identity
+az identity create \
+    -g myResourceGroup \
+    -n myUserAssignedIdentity
+
+# Bước 2a: Tạo VM mới với user-assigned identity
+az vm create \
+    --resource-group myResourceGroup \
+    --name myVM \
+    --image Ubuntu2204 \
+    --admin-username azureuser \
+    --admin-password myPassword12 \
+    --assign-identity myUserAssignedIdentity \
+    --role contributor \
+    --scope /subscriptions/xxx
+
+# Bước 2b: Gán identity cho VM đã có
+az vm identity assign \
+    -g myResourceGroup \
+    -n myVM \
+    --identities myUserAssignedIdentity</code></pre>
+</div>
+    </section>
+
+    <section id="mi-token">
+      <h3>🔷 2.3 Lấy Access Token — DefaultAzureCredential</h3>
+      <p>Cách khuyến nghị để lấy access token là dùng <strong><code>DefaultAzureCredential</code></strong> từ Azure Identity library. Nó tự động thử nhiều phương thức xác thực theo thứ tự.</p>
+
+      <h4>🔹 Thứ Tự DefaultAzureCredential</h4>
+      <p style="font-size:.84rem;color:var(--muted);margin-bottom:.5rem">Thử lần lượt theo thứ tự — dừng khi tìm được credentials hợp lệ:</p>
+      <div class="flow-v">
+        <div class="flow-step start">
+          <div class="flow-num">1</div>
+          <div class="flow-body"><strong>🔧 Environment Variables</strong><span style="color:var(--muted);font-size:.82rem">AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID</span></div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-body"><strong>🖥️ Workload Identity</strong><span style="color:var(--muted);font-size:.82rem">Kubernetes workload identity</span></div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-body"><strong>☁️ Managed Identity</strong><span style="color:var(--muted);font-size:.82rem">Khi deploy trên Azure host có Managed Identity</span></div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-body"><strong>💻 Visual Studio</strong><span style="color:var(--muted);font-size:.82rem">Local development credentials</span></div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-body"><strong>🔧 Azure CLI</strong><span style="color:var(--muted);font-size:.82rem">az login</span></div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-step">
+          <div class="flow-num">6</div>
+          <div class="flow-body"><strong>🔷 Azure PowerShell</strong><span style="color:var(--muted);font-size:.82rem">Connect-AzAccount</span></div>
+        </div>
+        <div class="flow-connector"></div>
+        <div class="flow-step end">
+          <div class="flow-num">7</div>
+          <div class="flow-body"><strong>🌐 Interactive Browser</strong><span style="color:var(--muted);font-size:.82rem">Disabled by default</span></div>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <div class="callout-title">✅ Lợi Ích DefaultAzureCredential</div>
+        <p>Cùng một code hoạt động trong <strong>development</strong> (dùng Azure CLI credentials) và <strong>production</strong> (dùng Managed Identity) — <strong>không cần thay đổi code</strong>.</p>
+      </div>
+
+      <h4>🔹 Code Examples (.NET)</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Cài đặt package
+dotnet add package Azure.Identity</code></pre>
+</div>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Storage.Blobs;
+using Azure.Messaging.EventHubs;
+
+// ── Authenticate với Key Vault ──
+var secretClient = new SecretClient(
+    new Uri("https://myvault.vault.azure.net/"),
+    new DefaultAzureCredential()
+);
+
+// ── Với User-Assigned Managed Identity cụ thể ──
+string clientId = "&lt;managed-identity-client-id&gt;";
+var credential = new DefaultAzureCredential(
+    new DefaultAzureCredentialOptions { ManagedIdentityClientId = clientId }
+);
+var blobClient = new BlobClient(
+    new Uri("https://myaccount.blob.core.windows.net/mycontainer/myblob"),
+    credential
+);
+
+// ── Custom Chain (Managed Identity → Azure CLI fallback) ──
+var chainedCredential = new ChainedTokenCredential(
+    new ManagedIdentityCredential(),
+    new AzureCliCredential()
+);
+var eventHubClient = new EventHubProducerClient(
+    "myeventhub.eventhubs.windows.net",
+    "myhubpath",
+    chainedCredential
+);</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- MODULE 3: AZURE APP CONFIGURATION -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="appconfig">
+<div class="mhd"><div class="mhd-ico">⚙️</div><div><h2>Module 3: Azure App Configuration</h2><div class="mhd-sub">Quản lý cài đặt ứng dụng và feature flags tập trung</div></div></div>
+<div class="msec">
+
+    <section>
+      <h3>🔷 3.1 Tổng Quan App Configuration</h3>
+      <p>Azure App Configuration cung cấp dịch vụ <strong>quản lý tập trung</strong> application settings và feature flags. Đặc biệt hữu ích với microservices và distributed applications.</p>
+
+      <h4>🔹 App Configuration vs Key Vault</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Dùng cho</th>
+            <th>⚙️ App Configuration</th>
+            <th class="col-purple">🔐 Key Vault</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>✅ Phù hợp</strong></td>
+            <td>Non-sensitive config<br>Feature flags<br>Settings shared across services<br>Dynamic config updates<br>Label-based environments</td>
+            <td>Secrets &amp; passwords<br>Encryption keys<br>Certificates<br>Connection strings (sensitive)<br>🔒 HSM-backed security</td>
+          </tr>
+          <tr>
+            <td><strong>❌ Không phù hợp</strong></td>
+            <td>Secrets (passwords, keys)</td>
+            <td>Feature flags, non-secret config</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note info" style="margin-top:.5rem;padding:8px 14px;font-size:.83rem">💡 <strong>Thường dùng CẢ HAI:</strong> App Config lưu settings, Key Vault lưu secrets. App Config có thể reference đến Key Vault secrets.</p>
+
+      <h4>🔹 Lợi Ích</h4>
+      <ul>
+        <li>Dịch vụ <strong>fully managed</strong>, thiết lập trong vài phút</li>
+        <li>Flexible <strong>key representations</strong> và mappings</li>
+        <li><strong>Labels</strong> để phân biệt environments (Dev/Staging/Prod)</li>
+        <li><strong>Point-in-time replay</strong> — khôi phục settings tại thời điểm cụ thể</li>
+        <li><strong>Feature flag UI</strong> chuyên dụng</li>
+        <li>Thay đổi settings <strong>không cần redeploy/restart</strong></li>
+        <li>Mã hóa at rest và in transit</li>
+      </ul>
+
+      <h4>🔹 Kết Nối Theo Ngôn Ngữ</h4>
+      <table>
+        <thead><tr><th>Ngôn Ngữ / Framework</th><th>Cách Kết Nối</th></tr></thead>
+        <tbody>
+          <tr><td>.NET / ASP.NET Core</td><td>App Configuration provider cho .NET</td></tr>
+          <tr><td>.NET Framework / ASP.NET</td><td>App Configuration builder cho .NET</td></tr>
+          <tr><td>Java Spring</td><td>App Configuration provider cho Spring Cloud</td></tr>
+          <tr><td>JavaScript/Node.js</td><td>App Configuration provider cho JavaScript</td></tr>
+          <tr><td>Python</td><td>App Configuration provider cho Python</td></tr>
+          <tr><td>Khác</td><td>App Configuration REST API</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="ac-keys">
+      <h3>🔷 3.2 Keys, Values và Labels</h3>
+
+      <h4>🔹 Cấu Trúc Keys</h4>
+      <p>Keys là tên của key-value pairs. Thường tổ chức theo <strong>hierarchical namespace</strong> dùng dấu phân cách <code>/</code> hoặc <code>:</code>.</p>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Ví dụ hierarchical keys
+AppName:Service1:ApiEndpoint
+AppName:Service2:ApiEndpoint
+AppName:Database:ConnectionString
+
+# Spring Cloud format
+{application}/{profile}/key</code></pre>
+</div>
+
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Quy Tắc Đặt Tên Keys</div>
+        <ul>
+          <li>Keys là <strong>case-sensitive</strong> — <code>app1</code> và <code>App1</code> là hai keys khác nhau</li>
+          <li>Ký tự <strong>reserved</strong> (không được dùng): <code>*</code>, <code>,</code>, <code>\</code> — phải escape: <code>\{char}</code></li>
+          <li>Giới hạn 10,000 ký tự cho key-value pair (key + value + attributes)</li>
+        </ul>
+      </div>
+
+      <h4>🔹 Labels — Phân Biệt Environments</h4>
+      <p>Labels là attribute tùy chọn để phân biệt key-values có cùng key:</p>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Cùng key, khác label cho mỗi environment:
+Key = AppName:DbEndpoint &amp; Label = Test
+Key = AppName:DbEndpoint &amp; Label = Staging
+Key = AppName:DbEndpoint &amp; Label = Production
+
+# Query specific version:
+Key = AppName:DbEndpoint &amp; Label = 2024-03-01-release</code></pre>
+</div>
+
+      <div class="callout info">
+        <div class="callout-title">💡 App Config KHÔNG tự động version</div>
+        <p>Dùng <strong>labels</strong> để tạo versions: đặt app version number hoặc Git commit ID làm label để track settings theo từng software build.</p>
+      </div>
+
+      <h4>🔹 Values</h4>
+      <ul>
+        <li>Values là Unicode strings</li>
+        <li>Content type tùy chọn (ví dụ: <code>application/json</code>)</li>
+        <li>Data được mã hóa at rest và in transit</li>
+        <li><strong>KHÔNG</strong> lưu application secrets trong App Configuration — dùng Key Vault</li>
+      </ul>
+    </section>
+
+    <section id="ac-features">
+      <h3>🔷 3.3 Feature Flags (Cờ Tính Năng)</h3>
+      <p>Feature flags cho phép bật/tắt tính năng ứng dụng <strong>runtime mà không cần redeploy</strong>. App Configuration cung cấp Feature Manager tích hợp.</p>
+
+      <h4>🔹 Khái Niệm Feature Management</h4>
+      <div class="dg-cards">
+        <div class="dg-card">
+          <div class="dg-card-title">🚦 Feature Flag Structure</div>
+          <ul>
+            <li><strong>name:</strong> "BetaFeature"</li>
+            <li><strong>state:</strong> enabled | disabled</li>
+            <li><strong>Percentage filter:</strong> Value: 20 (20% users)</li>
+            <li><strong>TimeWindow filter:</strong> Start/End datetime</li>
+            <li><strong>Targeting filter:</strong> specific users/groups</li>
+          </ul>
+        </div>
+        <div class="dg-card">
+          <div class="dg-card-title">🎯 Scenarios</div>
+          <ul>
+            <li><strong>Canary release</strong> — 10% users thấy tính năng mới</li>
+            <li><strong>A/B testing</strong> — nhóm A vs nhóm B</li>
+            <li><strong>Beta testing</strong> — chỉ specific users</li>
+            <li><strong>Kill switch</strong> — tắt ngay khi có lỗi, không cần redeploy</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4>🔹 Feature Manager trong ASP.NET Core</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Cài packages
+dotnet add package Microsoft.FeatureManagement.AspNetCore</code></pre>
+</div>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// Program.cs - Đăng ký Feature Management
+builder.Services.AddFeatureManagement();
+
+// Kết nối App Configuration
+builder.Configuration.AddAzureAppConfiguration(options => {
+    options.Connect(connectionString)
+           .UseFeatureFlags();
+});
+
+// Sử dụng trong Controller
+public class HomeController : Controller
+{
+    private readonly IFeatureManager _featureManager;
+
+    public HomeController(IFeatureManager featureManager)
+        => _featureManager = featureManager;
+
+    public async Task&lt;IActionResult&gt; Index()
+    {
+        if (await _featureManager.IsEnabledAsync("BetaFeature"))
+        {
+            return View("BetaHome");
+        }
+        return View("Home");
+    }
+}
+
+// Attribute-based trong ASP.NET Core
+[FeatureGate("PremiumFeature")]
+public IActionResult PremiumContent()
+{
+    return View();
+}</code></pre>
+</div>
+
+      <h4>🔹 Lưu Feature Flag trong App Configuration</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">// Format của feature flag trong App Config:
+{
+  "id": "BetaFeature",
+  "description": "Tính năng Beta cho testing",
+  "enabled": true,
+  "conditions": {
+    "client_filters": [
+      {
+        "name": "Microsoft.Percentage",
+        "parameters": {
+          "Value": 20
+        }
+      }
+    ]
+  }
+}</code></pre>
+</div>
+    </section>
+
+    <section>
+      <h3>🔷 3.4 Bảo Mật App Configuration</h3>
+      <ul>
+        <li>Dùng <strong>Managed Identity</strong> để kết nối — không cần connection string</li>
+        <li>App Config tích hợp với <strong>Key Vault references</strong> — tham chiếu đến secrets trong Key Vault mà không copy secret sang App Config</li>
+        <li>Hỗ trợ <strong>Private Link</strong> để truy cập qua private network</li>
+        <li>RBAC để kiểm soát ai được đọc/ghi configuration</li>
+      </ul>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// Key Vault reference trong App Configuration
+// App Config lưu reference đến KV secret, không lưu giá trị thật
+{
+  "key": "Database:ConnectionString",
+  "value": "{\"uri\":\"https://myvault.vault.azure.net/secrets/db-connection\"}",
+  "contentType": "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+}</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div>
+<div class="mhd"><div class="mhd-ico">📋</div><div><h2>Tóm Tắt — Điểm Quan Trọng Cho Kỳ Thi</h2><div class="mhd-sub">Tắt — Điểm Quan Trọng Cho Kỳ Thi</div></div></div>
+<div class="msec">
+    <div class="summary-card">
+      <div class="summary-card-hd">🔐 BẢO MẬT AZURE — TÓM TẮT</div>
+      <div class="summary-card-body">
+        <div class="sum-section">
+          <div class="sum-section-hd">🔑 Key Vault</div>
+          <ul class="sum-items">
+            <li>2 containers: Vaults (keys+secrets+certs) và Managed HSM pools (chỉ keys)</li>
+            <li>2 tiers: Standard (software key) và Premium (HSM-protected)</li>
+            <li>2 auth models: RBAC (khuyến nghị) và Access Policy (legacy)</li>
+            <li>URI: https://{vault}.vault.azure.net/secrets/{name}/{version}</li>
+            <li>Bật soft-delete + purge protection để tránh mất data</li>
+          </ul>
+        </div>
+        <div class="sum-section">
+          <div class="sum-section-hd">🆔 Managed Identities</div>
+          <ul class="sum-items">
+            <li>System-assigned: gắn với 1 resource, tự xóa khi resource xóa</li>
+            <li>User-assigned: resource độc lập, có thể share với nhiều resources</li>
+            <li>DefaultAzureCredential: tự động dùng Managed Identity khi deploy</li>
+            <li>ChainedTokenCredential: custom chain (MI → CLI → etc.)</li>
+          </ul>
+        </div>
+        <div class="sum-section">
+          <div class="sum-section-hd">⚙️ App Configuration</div>
+          <ul class="sum-items">
+            <li>Keys: case-sensitive, hierarchical (dùng / hoặc :)</li>
+            <li>Labels: phân biệt environments với cùng một key</li>
+            <li>KHÔNG thay thế Key Vault — lưu settings (không phải secrets)</li>
+            <li>Feature flags: bật/tắt tính năng runtime không cần redeploy</li>
+            <li>Key Vault references: tham chiếu đến KV secrets</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <ul>
+      <li>Khi nào dùng Key Vault: <strong>secrets, encryption keys, certificates</strong></li>
+      <li>Khi nào dùng App Configuration: <strong>non-sensitive settings, feature flags</strong></li>
+      <li>Khi nào dùng System-assigned identity: <strong>1 resource, lifecycle gắn cùng</strong></li>
+      <li>Khi nào dùng User-assigned identity: <strong>nhiều resources, lifecycle độc lập</strong></li>
+      <li><code>DefaultAzureCredential</code> ưu tiên: <strong>Environment → Managed Identity → VS → CLI → PS</strong></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="06-authentication.html" class="prev">← Ch.06 Auth</a>
+  <span class="pos">Chương 07 / 11</span>
+  <a href="08-monitoring.html" class="next">Ch.08 Monitoring →</a>
+</div>
+
+<script>
+function toggleToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.toggle('open');b.classList.toggle('open');}
+}
+function closeToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.remove('open');b.classList.remove('open');}
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

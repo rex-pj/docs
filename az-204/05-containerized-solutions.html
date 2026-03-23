@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-204 | Chương 05 – Giải Pháp Container: ACR, ACI, Container Apps</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 05: Containerized Solutions ── */
+.hero { background: linear-gradient(135deg, #001f3f 0%, #0057a8 60%, #0099d4 100%); }
+.nav-bottom { background: white; border-top: 1px solid var(--border); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.nav-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--blue-5); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .9rem; }
+.nav-btn.outline { background: white; color: var(--blue-5); border: 2px solid var(--blue-5); }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html" class="on">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">🐳</div>
+  <h1>Giải Pháp Container</h1>
+  <p>Azure Container Registry (ACR), Azure Container Instances (ACI) và Azure Container Apps</p>
+  <div class="hero-tags">
+    <span class="hero-tag">⚖️ 25–30% bài thi</span>
+    <span class="hero-tag">📦 ACR</span>
+    <span class="hero-tag">📦 ACI</span>
+    <span class="hero-tag">🚀 Container Apps</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 05</div>
+  <a href="#overview">Tổng Quan Containers</a>
+  <a href="#acr">Azure Container Registry</a>
+  <a href="#acr-tiers" class="sub">Service Tiers</a>
+  <a href="#acr-tasks" class="sub">ACR Tasks</a>
+  <a href="#aci">Azure Container Instances</a>
+  <a href="#aci-groups" class="sub">Container Groups</a>
+  <a href="#aci-config" class="sub">Restart &amp; Volumes</a>
+  <a href="#aca">Azure Container Apps</a>
+  <a href="#aca-arch" class="sub">Kiến Trúc</a>
+  <a href="#aca-revisions" class="sub">Revisions &amp; Scaling</a>
+  <a href="#aca-dapr" class="sub">Dapr Integration</a>
+</nav>
+<main class="content">
+
+<!-- OVERVIEW -->
+<div id="overview">
+  <div class="mhd"><div class="mhd-ico">🗺️</div><div><h2>Tổng Quan — Chọn Dịch Vụ Container</h2><div class="mhd-sub">So sánh ACR, ACI và Container Apps</div></div></div>
+  <div class="msec">
+    <section id="overview">
+      <div class="dg-cards">
+        <div class="dg-card">
+          <div class="dg-card-title">📦 ACR — Azure Container Registry</div>
+          <ul>
+            <li>Lưu trữ và quản lý container images</li>
+            <li>Giống Docker Hub nhưng private, trên Azure</li>
+            <li>Dùng với: ACI, ACA, AKS, App Service, v.v.</li>
+          </ul>
+        </div>
+        <div class="dg-card">
+          <div class="dg-card-title">🚀 ACI — Azure Container Instances</div>
+          <ul>
+            <li>Chạy containers đơn giản, nhanh — không cần quản lý VMs</li>
+            <li>Serverless containers — trả tiền theo giây</li>
+            <li>Dùng cho: batch jobs, CI/CD, event-driven tasks</li>
+          </ul>
+        </div>
+        <div class="dg-card">
+          <div class="dg-card-title">🌐 ACA — Azure Container Apps</div>
+          <ul>
+            <li>Microservices &amp; serverless container applications</li>
+            <li>Scale to zero, KEDA-based scaling</li>
+            <li>Tích hợp Dapr, Ingress, Service Discovery</li>
+            <li>Dùng cho: microservices, APIs, background processing</li>
+          </ul>
+        </div>
+        <div class="dg-card">
+          <div class="dg-card-title">☸️ AKS — Azure Kubernetes Service</div>
+          <ul>
+            <li>Full container orchestration</li>
+            <li>Dùng khi cần kiểm soát hoàn toàn Kubernetes</li>
+            <li style="color:var(--muted);font-style:italic">⚠️ Ngoài phạm vi AZ-204</li>
+          </ul>
+        </div>
+      </div>
+
+      <table>
+        <thead><tr><th>Tiêu Chí</th><th>ACI</th><th>ACA</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Use case</strong></td><td>Simple tasks, batch jobs</td><td>Microservices, APIs, long-running apps</td></tr>
+          <tr><td><strong>Scaling</strong></td><td>Thủ công (số instances)</td><td>Auto-scale (KEDA, HTTP, CPU)</td></tr>
+          <tr><td><strong>Scale to zero</strong></td><td>❌</td><td>✅</td></tr>
+          <tr><td><strong>Networking</strong></td><td>Public IP hoặc VNet</td><td>Built-in ingress, service discovery</td></tr>
+          <tr><td><strong>Dapr</strong></td><td>❌</td><td>✅ Tích hợp sẵn</td></tr>
+          <tr><td><strong>Revisions</strong></td><td>❌</td><td>✅ Blue/green, A/B</td></tr>
+          <tr><td><strong>Giá</strong></td><td>Per-second billing</td><td>Per vCPU-second + requests</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+<!-- ACR -->
+<div id="acr">
+  <div class="mhd"><div class="mhd-ico">🗂️</div><div><h2>Azure Container Registry (ACR)</h2><div class="mhd-sub">Private Docker registry trên Azure — lưu trữ, quản lý và build container images</div></div></div>
+  <div class="msec">
+
+    <section>
+      <h3>🔷 1. Tổng Quan ACR</h3>
+      <p>Azure Container Registry (ACR) là <strong>private Docker-compatible registry</strong> cho phép lưu trữ và quản lý container images và related artifacts (Helm charts, OCI artifacts). ACR tích hợp với Azure pipelines và CI/CD workflows.</p>
+
+      <h4>🔹 Các Trường Hợp Sử Dụng</h4>
+      <ul>
+        <li><strong>Scalable orchestration systems</strong> — Kubernetes (AKS), Docker Swarm, Service Fabric</li>
+        <li><strong>Azure services</strong> — ACI, App Service, Batch, Service Fabric</li>
+        <li><strong>CI/CD</strong> — Azure DevOps, GitHub Actions, Jenkins</li>
+        <li><strong>Build pipelines</strong> — Build, test, push images từ source code</li>
+      </ul>
+    </section>
+
+    <section id="acr-tiers">
+      <h3>🔷 2. Service Tiers</h3>
+      <table>
+        <thead><tr><th>Tính Năng</th><th>Basic</th><th>Standard</th><th>Premium</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Storage (GB)</strong></td><td>10</td><td>100</td><td>500</td></tr>
+          <tr><td><strong>ReadOps/phút</strong></td><td>1,000</td><td>10,000</td><td>100,000</td></tr>
+          <tr><td><strong>WriteOps/phút</strong></td><td>200</td><td>1,000</td><td>2,000</td></tr>
+          <tr><td><strong>Geo-replication</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td><strong>Availability Zones</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td><strong>Private Link</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td><strong>Content trust</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td><strong>Webhooks</strong></td><td>2</td><td>10</td><td>500</td></tr>
+        </tbody>
+      </table>
+      <div class="callout info">
+        <div class="callout-title">📌 Chọn Tier</div>
+        <ul>
+          <li><strong>Basic</strong> — Dev/learning, thấp throughput</li>
+          <li><strong>Standard</strong> — Production hầu hết workloads</li>
+          <li><strong>Premium</strong> — Geo-replication, Private Link, high throughput</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3>🔷 3. Thao Tác Cơ Bản với ACR</h3>
+
+      <h4>🔹 Tạo Registry và Push Image</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Tạo resource group
+az group create --name myRG --location eastus
+
+# Tạo ACR (Basic tier)
+az acr create \
+    --resource-group myRG \
+    --name myregistry \
+    --sku Basic
+
+# Login vào ACR
+az acr login --name myregistry
+
+# Tag image với ACR login server
+docker tag myapp:latest myregistry.azurecr.io/myapp:v1.0
+
+# Push image
+docker push myregistry.azurecr.io/myapp:v1.0
+
+# List images trong registry
+az acr repository list --name myregistry --output table
+
+# Xem tags của image
+az acr repository show-tags \
+    --name myregistry \
+    --repository myapp \
+    --output table</code></pre>
+</div>
+    </section>
+
+    <section id="acr-tasks">
+      <h3>🔷 4. ACR Tasks — Build Images trên Cloud</h3>
+      <p>ACR Tasks cho phép <strong>build container images trên Azure</strong> — không cần Docker cài local.</p>
+
+      <h4>🔹 Quick Task — Build &amp; Push ngay lập tức</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Build từ Dockerfile trong thư mục hiện tại
+az acr build \
+    --registry myregistry \
+    --image myapp:v1.0 \
+    .
+
+# Build từ GitHub URL
+az acr build \
+    --registry myregistry \
+    --image myapp:latest \
+    https://github.com/myorg/myrepo.git</code></pre>
+</div>
+
+      <h4>🔹 Automated Task — Build khi có code changes</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Tạo task tự động build khi push lên GitHub
+az acr task create \
+    --registry myregistry \
+    --name buildtask \
+    --image myapp:{{.Run.ID}} \
+    --context https://github.com/myorg/myrepo.git \
+    --file Dockerfile \
+    --git-access-token &lt;PAT&gt;</code></pre>
+</div>
+
+      <h4>🔹 Multi-step Tasks (YAML)</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-yaml"># acr-task.yaml
+version: v1.1.0
+steps:
+  - build: -t $Registry/myapp:$ID -f Dockerfile .
+  - push: ["$Registry/myapp:$ID"]
+  - cmd: $Registry/myapp:$ID --test</code></pre>
+</div>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">az acr run --registry myregistry --file acr-task.yaml .</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ACI -->
+<div id="aci">
+  <div class="mhd"><div class="mhd-ico">📦</div><div><h2>Azure Container Instances (ACI)</h2><div class="mhd-sub">Chạy containers nhanh, đơn giản — không cần quản lý infrastructure</div></div></div>
+  <div class="msec">
+
+    <section>
+      <h3>🔷 1. Tổng Quan ACI</h3>
+      <p>ACI là cách nhanh nhất và đơn giản nhất để chạy containers trên Azure <strong>không cần quản lý VMs</strong>. Phù hợp với:</p>
+      <ul>
+        <li>Simple applications và batch jobs</li>
+        <li>Task automation và CI/CD builds</li>
+        <li>Applications cần isolation bảo mật cao (Hyper-V isolation)</li>
+        <li>Event-driven tasks (kết hợp với Azure Functions)</li>
+      </ul>
+
+      <h4>🔹 Ưu Điểm ACI</h4>
+      <table>
+        <thead><tr><th>Ưu Điểm</th><th>Mô Tả</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Nhanh</strong></td><td>Seconds để start container, không cần provision VMs</td></tr>
+          <tr><td><strong>Linh hoạt</strong></td><td>Chọn CPU, memory chính xác theo nhu cầu</td></tr>
+          <tr><td><strong>Bảo mật</strong></td><td>Hypervisor-level isolation — mỗi container group có kernel riêng</td></tr>
+          <tr><td><strong>Chi phí</strong></td><td>Per-second billing — chỉ trả khi container chạy</td></tr>
+          <tr><td><strong>Linux &amp; Windows</strong></td><td>Hỗ trợ cả Linux containers và Windows containers</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="aci-groups">
+      <h3>🔷 2. Container Groups</h3>
+      <p>Container Group là <strong>đơn vị triển khai cơ bản</strong> của ACI — tương tự như Kubernetes Pod. Một Container Group chứa một hoặc nhiều containers dùng chung:</p>
+      <ul>
+        <li>Cùng <strong>host machine</strong></li>
+        <li>Cùng <strong>lifecycle</strong> (start/stop cùng nhau)</li>
+        <li>Cùng <strong>local network</strong> (giao tiếp qua localhost)</li>
+        <li>Cùng <strong>storage volumes</strong></li>
+      </ul>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="arch-card-hd">📦 Container 1: web-app</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>Image:</strong> nginx:latest</div>
+            <div class="arch-item"><strong>Port:</strong> 80 (public)</div>
+            <div class="arch-item"><strong>CPU:</strong> 1.0 · <strong>Memory:</strong> 1.5 GB</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">External IP: 20.xxx.xxx.xxx</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">🔍 Container 2: log-sidecar</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>Image:</strong> fluentd:latest</div>
+            <div class="arch-item"><strong>Port:</strong> (no public port)</div>
+            <div class="arch-item"><strong>CPU:</strong> 0.5 · <strong>Memory:</strong> 0.5 GB</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">Giao tiếp qua localhost (shared network)</div>
+          </div>
+        </div>
+        <div class="arch-card" style="grid-column:1/-1">
+          <div class="arch-card-hd">💾 Shared Storage Volume (Azure Files Mount: /var/log)</div>
+          <div class="arch-card-body" style="display:flex;gap:24px;flex-wrap:wrap">
+            <div><strong>Linux:</strong> ✅ Multi-container groups hỗ trợ</div>
+            <div><strong>Windows:</strong> ✅ Single container only</div>
+            <div style="color:var(--txt2);font-size:.78rem">Cả 2 containers dùng chung storage volume · lifecycle · network</div>
+          </div>
+        </div>
+      </div>
+
+      <h4>🔹 Triển Khai Container Group</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Simple container (1 container)
+az container create \
+    --resource-group myRG \
+    --name mycontainer \
+    --image mcr.microsoft.com/azuredocs/aci-helloworld \
+    --dns-name-label aci-demo \
+    --ports 80</code></pre>
+</div>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-yaml"># Multi-container YAML deployment
+# multi-container.yaml
+apiVersion: 2019-12-01
+location: eastus
+name: myContainerGroup
+properties:
+  containers:
+  - name: aci-tutorial-app
+    properties:
+      image: mcr.microsoft.com/azuredocs/aci-helloworld
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5
+      ports:
+      - port: 80
+  - name: aci-tutorial-sidecar
+    properties:
+      image: mcr.microsoft.com/azuredocs/aci-tutorial-sidecar
+      resources:
+        requests:
+          cpu: 0.5
+          memoryInGb: 0.5
+  osType: Linux
+  ipAddress:
+    type: Public
+    ports:
+    - protocol: tcp
+      port: 80
+tags: null
+type: Microsoft.ContainerInstance/containerGroups</code></pre>
+</div>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">az container create --resource-group myRG --file multi-container.yaml</code></pre>
+</div>
+    </section>
+
+    <section id="aci-config">
+      <h3>🔷 3. Restart Policies, Environment Variables &amp; Volumes</h3>
+
+      <h4>🔹 Restart Policies</h4>
+      <table>
+        <thead><tr><th>Policy</th><th>Mô Tả</th><th>Dùng Khi</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Always</strong> (mặc định)</td><td>Luôn restart container khi dừng</td><td>Long-running apps (web servers)</td></tr>
+          <tr><td><strong>Never</strong></td><td>Không bao giờ restart</td><td>One-time jobs</td></tr>
+          <tr><td><strong>OnFailure</strong></td><td>Restart chỉ khi exit với non-zero code</td><td>Batch processing với error handling</td></tr>
+        </tbody>
+      </table>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">az container create \
+    --resource-group myRG \
+    --name myjob \
+    --image myregistry.azurecr.io/mytask \
+    --restart-policy OnFailure</code></pre>
+</div>
+
+      <h4>🔹 Environment Variables</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Plain text env vars
+az container create \
+    --resource-group myRG \
+    --name mycontainer \
+    --image myapp \
+    --environment-variables \
+        DB_HOST=myserver.database.windows.net \
+        DB_PORT=1433
+
+# Secure env vars (không hiển thị trong logs)
+az container create \
+    --resource-group myRG \
+    --name mycontainer \
+    --image myapp \
+    --secure-environment-variables \
+        DB_PASSWORD=MySuperSecretPassword</code></pre>
+</div>
+
+      <h4>🔹 Mount Azure File Share</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">az container create \
+    --resource-group myRG \
+    --name mycontainer \
+    --image mcr.microsoft.com/azuredocs/aci-tutorial-app \
+    --azure-file-volume-account-name mystorageaccount \
+    --azure-file-volume-account-key "$STORAGE_KEY" \
+    --azure-file-volume-share-name myshare \
+    --azure-file-volume-mount-path /var/www/html</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- CONTAINER APPS -->
+<div id="aca">
+  <div class="mhd"><div class="mhd-ico">🚀</div><div><h2>Azure Container Apps</h2><div class="mhd-sub">Serverless microservices platform — scale to zero, Dapr, built-in ingress</div></div></div>
+  <div class="msec">
+
+    <section id="aca-arch">
+      <h3>🔷 1. Kiến Trúc Container Apps</h3>
+
+      <div class="arch-grid">
+        <div class="arch-card" style="grid-column:1/-1">
+          <div class="arch-card-hd">🌍 Container Apps Environment — Shared VNet, Log Analytics, Dapr</div>
+          <div class="arch-card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <strong>Container App A (API service)</strong>
+              <div class="arch-item">Revision 1 → 10% traffic</div>
+              <div class="arch-item">Revision 2 → 90% traffic</div>
+              <div class="arch-item">Replica 1 + Replica 2 (scale out)</div>
+            </div>
+            <div>
+              <strong>Container App B (Background job)</strong>
+              <div class="arch-item">Scale: 0 → 10 replicas</div>
+              <div class="arch-item">KEDA trigger (Queue, HTTP, CPU)</div>
+              <div class="arch-item">Scale to zero khi idle</div>
+            </div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">⚙️ Platform Features</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>Dapr Sidecar</strong> — state, pub/sub, service call</div>
+            <div class="arch-item"><strong>Service Discovery</strong> — tự động trong environment</div>
+            <div class="arch-item"><strong>Managed Certs</strong> — TLS tự động</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">🌐 Ingress</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>External</strong> — accessible từ Internet</div>
+            <div class="arch-item"><strong>Internal</strong> — chỉ trong environment</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">Users/Clients → Internet/VNet → Environment</div>
+          </div>
+        </div>
+      </div>
+
+      <h4>🔹 Các Thành Phần</h4>
+      <table>
+        <thead><tr><th>Thành Phần</th><th>Mô Tả</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Environment</strong></td><td>Boundary cô lập cho Container Apps. Apps trong cùng environment dùng chung VNet, Log Analytics workspace.</td></tr>
+          <tr><td><strong>Container App</strong></td><td>Ứng dụng container với một hoặc nhiều containers. Có thể có nhiều revisions.</td></tr>
+          <tr><td><strong>Revision</strong></td><td>Immutable snapshot của Container App. Dùng cho blue/green deployments và A/B testing.</td></tr>
+          <tr><td><strong>Replica</strong></td><td>Instance của revision. Scale in/out tự động.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="aca-revisions">
+      <h3>🔷 2. Revisions, Secrets &amp; Scaling</h3>
+
+      <h4>🔹 Revisions — Immutable Deployments</h4>
+      <div class="dg-cards">
+        <div class="dg-card">
+          <div class="dg-card-title">myapi--abc123 (90% traffic)</div>
+          <ul>
+            <li>Container: myapp:v2 (stable)</li>
+            <li>Active revision — nhận đa số traffic</li>
+          </ul>
+        </div>
+        <div class="dg-card">
+          <div class="dg-card-title">myapi--def456 (10% traffic)</div>
+          <ul>
+            <li>Container: myapp:v3-beta</li>
+            <li>A/B Testing — test với 10% users</li>
+            <li>Blue/Green: swap 100% khi ready</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Deploy Container App
+az containerapp create \
+    --name myapi \
+    --resource-group myRG \
+    --environment myEnvironment \
+    --image myregistry.azurecr.io/myapi:v2 \
+    --target-port 3000 \
+    --ingress external \
+    --min-replicas 1 \
+    --max-replicas 10
+
+# Update image (tạo revision mới)
+az containerapp update \
+    --name myapi \
+    --resource-group myRG \
+    --image myregistry.azurecr.io/myapi:v3
+
+# Traffic routing giữa revisions
+az containerapp ingress traffic set \
+    --name myapi \
+    --resource-group myRG \
+    --revision-weight myapi--abc123=90 myapi--def456=10</code></pre>
+</div>
+
+      <h4>🔹 Secrets trong Container Apps</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Thêm secret
+az containerapp secret set \
+    --name myapi \
+    --resource-group myRG \
+    --secrets "db-password=MySuperSecret"
+
+# Reference secret trong environment variable
+az containerapp update \
+    --name myapi \
+    --resource-group myRG \
+    --set-env-vars "DB_PASSWORD=secretref:db-password"</code></pre>
+</div>
+
+      <h4>🔹 Scaling Rules</h4>
+      <p>Container Apps hỗ trợ scaling dựa trên <strong>KEDA (Kubernetes Event-driven Autoscaling)</strong>:</p>
+      <table>
+        <thead><tr><th>Trigger</th><th>Mô Tả</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTTP</strong></td><td>Scale dựa trên số concurrent HTTP requests</td></tr>
+          <tr><td><strong>CPU</strong></td><td>Scale khi CPU vượt ngưỡng</td></tr>
+          <tr><td><strong>Memory</strong></td><td>Scale khi memory vượt ngưỡng</td></tr>
+          <tr><td><strong>Azure Queue</strong></td><td>Scale dựa trên độ dài Azure Queue Storage</td></tr>
+          <tr><td><strong>Service Bus</strong></td><td>Scale dựa trên Service Bus queue length</td></tr>
+          <tr><td><strong>Custom KEDA scalers</strong></td><td>Kafka, Redis, SQL, v.v.</td></tr>
+        </tbody>
+      </table>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Scale dựa trên HTTP requests
+az containerapp update \
+    --name myapi \
+    --resource-group myRG \
+    --min-replicas 0 \     # Scale to zero!
+    --max-replicas 20 \
+    --scale-rule-name http-rule \
+    --scale-rule-type http \
+    --scale-rule-http-concurrency 50  # 50 concurrent requests per replica</code></pre>
+</div>
+    </section>
+
+    <section id="aca-dapr">
+      <h3>🔷 3. Dapr Integration</h3>
+      <p>Container Apps tích hợp <strong>Dapr (Distributed Application Runtime)</strong> — framework giúp xây dựng microservices dễ dàng hơn với:</p>
+
+      <h4>🔹 Dapr Building Blocks</h4>
+      <table>
+        <thead><tr><th>Building Block</th><th>Mô Tả</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Service-to-Service Invocation</strong></td><td>Gọi các services khác qua Dapr sidecar (service discovery tự động)</td></tr>
+          <tr><td><strong>State Management</strong></td><td>Lưu trữ state với Redis, Cosmos DB, v.v. — abstracted API</td></tr>
+          <tr><td><strong>Pub/Sub Messaging</strong></td><td>Publish và subscribe events qua Service Bus, Event Hubs, Redis</td></tr>
+          <tr><td><strong>Bindings</strong></td><td>Kết nối với external services (Storage, Twilio, SMTP, v.v.)</td></tr>
+          <tr><td><strong>Actors</strong></td><td>Stateful, concurrent actor model</td></tr>
+          <tr><td><strong>Secrets</strong></td><td>Đọc secrets từ Key Vault, environment variables</td></tr>
+        </tbody>
+      </table>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="arch-card-hd">🚀 Your App (Port 3000)</div>
+          <div class="arch-card-body">
+            <div class="arch-item">GET /orders · POST /pay</div>
+            <div class="arch-item">Gọi Dapr qua HTTP: <code>localhost:3500</code></div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">Không cần SDK — chỉ HTTP calls</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">⚡ Dapr Sidecar (Port 3500)</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>State mgmt</strong> → Redis, Cosmos DB</div>
+            <div class="arch-item"><strong>Pub/Sub</strong> → Service Bus, Event Hubs</div>
+            <div class="arch-item"><strong>Service call</strong> → service discovery tự động</div>
+            <div class="arch-item"><strong>Bindings</strong> → Storage, Twilio, SMTP</div>
+          </div>
+        </div>
+        <div class="arch-card" style="grid-column:1/-1">
+          <div class="arch-card-hd">☁️ External Services</div>
+          <div class="arch-card-body" style="display:flex;gap:24px;flex-wrap:wrap">
+            <div>🔴 <strong>Redis</strong> — State storage</div>
+            <div>🔵 <strong>Service Bus</strong> — Pub/Sub messaging</div>
+            <div>🔑 <strong>Key Vault</strong> — Secrets</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># Enable Dapr cho Container App
+az containerapp dapr enable \
+    --name myapi \
+    --resource-group myRG \
+    --dapr-app-id myapi \
+    --dapr-app-port 3000
+
+# Gọi service khác qua Dapr (trong code):
+# GET http://localhost:3500/v1.0/invoke/orders-service/method/orders</code></pre>
+</div>
+
+      <h4>🔹 Ingress — Expose Container Apps</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash"># External ingress (accessible từ internet)
+az containerapp create \
+    --name myapi \
+    --ingress external \
+    --target-port 3000
+
+# Internal ingress (chỉ accessible trong environment)
+az containerapp create \
+    --name myworker \
+    --ingress internal \
+    --target-port 5000
+
+# URL format:
+# External: https://myapi.&lt;unique-id&gt;.&lt;region&gt;.azurecontainerapps.io
+# Internal: https://myworker.&lt;env-name&gt;.&lt;region&gt;.azurecontainerapps.io</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div id="summary">
+  <div class="mhd"><div class="mhd-ico">📋</div><div><h2>Tóm Tắt — Điểm Quan Trọng Cho Kỳ Thi</h2><div class="mhd-sub">Những điểm cần nhớ cho kỳ thi AZ-204</div></div></div>
+  <div class="msec">
+    <div class="summary-card">
+      <div class="summary-card-hd">📦 CONTAINERIZED SOLUTIONS — TÓM TẮT NHANH</div>
+      <div class="summary-card-body">
+        <div class="sum-section">
+          <div class="sum-section-hd">🗃️ ACR — Azure Container Registry</div>
+          <ul class="sum-items">
+            <li>3 tiers: Basic (10GB) | Standard (100GB) | Premium (500GB, geo-rep)</li>
+            <li>ACR Tasks: build images cloud-side (az acr build)</li>
+            <li>Multi-step tasks: build → test → push → run</li>
+            <li>Webhook, content trust (Premium tier)</li>
+          </ul>
+        </div>
+        <div class="sum-section">
+          <div class="sum-section-hd">⚡ ACI — Azure Container Instances</div>
+          <ul class="sum-items">
+            <li>Container Groups = đơn vị triển khai (tương tự K8s Pod)</li>
+            <li>Multi-container: Linux ✅ | Windows: single container only</li>
+            <li>Restart policies: Always | Never | OnFailure</li>
+            <li>Secure env vars: --secure-environment-variables</li>
+            <li>Mount Azure File Share cho persistent storage</li>
+          </ul>
+        </div>
+        <div class="sum-section">
+          <div class="sum-section-hd">🚀 Azure Container Apps</div>
+          <ul class="sum-items">
+            <li>Revisions = immutable snapshots (blue/green, A/B)</li>
+            <li>Scale to zero với KEDA (HTTP, Queue, CPU, custom)</li>
+            <li>Dapr tích hợp sẵn (state, pub/sub, service invocation)</li>
+            <li>Ingress: external (internet) hoặc internal (env only)</li>
+            <li>Secrets: lưu trong app, reference qua secretref:</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="04-blob-storage.html" class="prev">← Ch.04 Blob Storage</a>
+  <span class="pos">Chương 05 / 11</span>
+  <a href="06-authentication.html" class="next">Ch.06 Auth →</a>
+</div>
+
+<script>
+function toggleToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.toggle('open');b.classList.toggle('open');}
+}
+function closeToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.remove('open');b.classList.remove('open');}
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

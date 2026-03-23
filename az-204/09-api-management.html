@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>API Management - AZ-204 Tiếng Việt</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 09: API Management ── */
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html" class="on">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">🔌</div>
+  <h1>API Management</h1>
+  <p>Khám phá, bảo mật và quản lý API trên Azure</p>
+  <div class="hero-tags">
+    <span class="hero-tag">🔌 APIM Gateway</span>
+    <span class="hero-tag">📜 Policies</span>
+    <span class="hero-tag">🔒 Security</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 09</div>
+  <a href="#overview">Phần 1 – Khám Phá APIM</a>
+  <a href="#gateways">Phần 2 – API Gateways</a>
+  <a href="#policies">Phần 3 – Chính Sách APIM</a>
+  <a href="#advanced-policies">Phần 4 – Chính Sách Nâng Cao</a>
+  <a href="#secure">Phần 5 – Bảo Mật API</a>
+  <a href="#expressions">Phần 6 – Biểu Thức Chính Sách</a>
+</nav>
+<main class="content">
+
+  <!-- MODULE 1: OVERVIEW -->
+  <div id="overview">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>🔌 Phần 1: Khám Phá Dịch Vụ API Management</h2><div class="mhd-sub">Phần 1: Khám Phá Dịch Vụ API Management</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Azure API Management cung cấp chức năng cốt lõi để đảm bảo chương trình API thành công thông qua sự tham gia của nhà phát triển, thông tin kinh doanh, phân tích, bảo mật và bảo vệ. Mỗi API bao gồm một hoặc nhiều thao tác, và mỗi API có thể được thêm vào một hoặc nhiều sản phẩm. Để sử dụng API, các nhà phát triển đăng ký sản phẩm có chứa API đó, sau đó họ có thể gọi thao tác của API, tùy thuộc vào các chính sách sử dụng.</p>
+
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-hd">🌐 Client → API Gateway → Backend</div>
+            <div class="arch-card-body">
+              <div class="arch-item"><strong>Client (Người dùng)</strong> — gửi requests đến API Gateway endpoint</div>
+              <div class="arch-item"><strong>API Gateway (Cổng API)</strong> — xác thực, rate-limit, transform, cache, log</div>
+              <div class="arch-item"><strong>Backend APIs (Dịch vụ hậu)</strong> — nhận proxied requests, trả response</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">🔧 Management Plane</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Cấu hình APIs, products, policies, subscriptions</div>
+              <div class="arch-item">Quản lý users, groups, roles, notifications</div>
+              <div class="arch-item">Tích hợp với Azure Portal, ARM, REST API</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">👩‍💻 Developer Portal (Cổng nhà phát triển)</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Tự phục vụ — xem docs, test APIs, đăng ký subscriptions</div>
+              <div class="arch-item">Auto-generated từ API definitions (OpenAPI)</div>
+              <div class="arch-item">Có thể tùy chỉnh giao diện theo branding</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">📋 Các Tầng Dịch Vụ</div>
+            <div class="arch-card-body">
+              <div class="arch-item"><strong>Consumption</strong> — serverless, per-call billing</div>
+              <div class="arch-item"><strong>Developer</strong> — test/dev, không có SLA</div>
+              <div class="arch-item"><strong>Basic / Standard / Premium</strong> — production workloads</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>🏗️ Các Thành Phần API Management</h3>
+        <p>Azure API Management bao gồm <strong>API gateway</strong>, <strong>management plane</strong> và <strong>developer portal</strong>. Các thành phần này được Azure lưu trữ và quản lý hoàn toàn theo mặc định.</p>
+
+        <h4>1. API Gateway (Cổng API)</h4>
+        <p>API Gateway là endpoint (điểm cuối) thực hiện các chức năng sau:</p>
+        <ul>
+          <li>✅ Chấp nhận lời gọi API và định tuyến đến backend phù hợp</li>
+          <li>✅ Xác minh API key và các thông tin xác thực khác được gửi kèm yêu cầu</li>
+          <li>✅ Thực thi hạn ngạch sử dụng và giới hạn tốc độ</li>
+          <li>✅ Biến đổi yêu cầu và phản hồi theo các câu lệnh policy</li>
+          <li>✅ Lưu cache phản hồi để cải thiện độ trễ và giảm tải cho backend</li>
+          <li>✅ Phát ra logs, metrics và traces để giám sát, báo cáo và khắc phục sự cố</li>
+        </ul>
+
+        <h4>2. Management Plane (Mặt phẳng quản lý)</h4>
+        <p>Đây là giao diện quản trị để thiết lập chương trình API. Sử dụng để:</p>
+        <ul>
+          <li>🔧 Cung cấp và cấu hình cài đặt dịch vụ API Management</li>
+          <li>🔧 Định nghĩa hoặc nhập lược đồ API</li>
+          <li>🔧 Đóng gói API vào các sản phẩm</li>
+          <li>🔧 Thiết lập các policy như hạn ngạch hoặc biến đổi trên API</li>
+          <li>🔧 Lấy thông tin từ phân tích</li>
+          <li>🔧 Quản lý người dùng</li>
+        </ul>
+
+        <h4>3. Developer Portal (Cổng nhà phát triển)</h4>
+        <p>Website được tạo tự động, có thể tùy chỉnh hoàn toàn với tài liệu API. Nhà phát triển có thể:</p>
+        <ul>
+          <li>📖 Đọc tài liệu API</li>
+          <li>🧪 Gọi API qua console tương tác</li>
+          <li>👤 Tạo tài khoản và đăng ký để lấy API key</li>
+          <li>📊 Truy cập phân tích về mức sử dụng của mình</li>
+          <li>📥 Tải xuống định nghĩa API</li>
+          <li>🔑 Quản lý API key</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>📦 Sản Phẩm (Products)</h3>
+        <p>Sản phẩm là cách các API được cung cấp cho nhà phát triển. Sản phẩm trong API Management có một hoặc nhiều API, và được cấu hình với tiêu đề, mô tả và điều khoản sử dụng.</p>
+
+        <table>
+  <thead><tr><th>Loại Sản Phẩm</th><th>Mô Tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>Open (Mở)</strong></td><td>Có thể sử dụng mà không cần đăng ký</td></tr><tr><td><strong>Protected (Được bảo vệ)</strong></td><td>Phải đăng ký trước khi sử dụng. Phê duyệt có thể yêu cầu quản trị viên hoặc tự động phê duyệt</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>👥 Nhóm (Groups)</h3>
+        <p>Nhóm được sử dụng để quản lý khả năng hiển thị của sản phẩm đối với nhà phát triển. API Management có các nhóm hệ thống bất biến sau:</p>
+
+        <table>
+  <thead><tr><th>Nhóm</th><th>Mô Tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>Administrators (Quản trị viên)</strong></td><td>Quản lý các instance dịch vụ API Management và tạo API, thao tác, sản phẩm. Quản trị viên đăng ký Azure là thành viên của nhóm này.</td></tr><tr><td><strong>Developers (Nhà phát triển)</strong></td><td>Người dùng developer portal đã xác thực, xây dựng ứng dụng sử dụng API.</td></tr><tr><td><strong>Guests (Khách)</strong></td><td>Người dùng developer portal chưa xác thực. Có thể được cấp quyền truy cập chỉ đọc nhất định.</td></tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Nhóm tùy chỉnh</div>
+          <p>Ngoài các nhóm hệ thống, quản trị viên có thể tạo nhóm tùy chỉnh hoặc sử dụng nhóm bên ngoài trong Microsoft Entra tenant liên kết.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>📋 Chính Sách (Policies)</h3>
+        <p>Chính sách là tập hợp các câu lệnh được thực thi tuần tự trên yêu cầu hoặc phản hồi của API. Các câu lệnh phổ biến bao gồm chuyển đổi định dạng từ XML sang JSON và giới hạn tốc độ gọi.</p>
+
+        <p>Chính sách có thể được áp dụng ở các phạm vi khác nhau:</p>
+        <ul>
+          <li><strong>Global (Toàn cục):</strong> Áp dụng cho tất cả API</li>
+          <li><strong>Product (Sản phẩm):</strong> Áp dụng cho một sản phẩm</li>
+          <li><strong>API:</strong> Áp dụng cho một API cụ thể</li>
+          <li><strong>Operation (Thao tác):</strong> Áp dụng cho một thao tác API</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>⚙️ Các Tầng Dịch Vụ API Management</h3>
+        <table>
+  <thead><tr><th>Nhóm tầng</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>Classic</strong></td><td>Developer, Basic, Standard, Premium tiers. Premium cho doanh nghiệp yêu cầu backend riêng tư, bảo mật nâng cao, triển khai đa vùng.</td></tr><tr><td><strong>V2</strong></td><td>Bộ tầng mới với provisioning và scaling nhanh: Basic v2, Standard v2, Premium v2.</td></tr><tr><td><strong>Consumption</strong></td><td>Serverless gateway, scale theo nhu cầu, tính phí theo mỗi lần thực thi.</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 2: API GATEWAYS -->
+  <div id="gateways">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>🚪 Phần 2: Khám Phá API Gateways</h2><div class="mhd-sub">Phần 2: Khám Phá API Gateways</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Giải pháp của bạn có thể chứa nhiều dịch vụ front-end và back-end. Trong tình huống này, client cần biết endpoint nào để gọi, và cần xử lý các mối lo ngại như SSL termination, xác thực, v.v.</p>
+
+        <p>API Management gateway (còn gọi là data plane hoặc runtime) là thành phần dịch vụ chịu trách nhiệm proxy API requests, áp dụng policies và thu thập telemetry.</p>
+
+        <div class="compare-2">
+          <div class="cmp-col">
+            <div class="cmp-hd dark">❌ Không có API Gateway</div>
+            <div class="cmp-step">
+              <div class="cmp-n">1</div>Client gọi <strong>trực tiếp</strong> từng service
+            </div>
+            <div class="cmp-step">
+              <div class="cmp-n">2</div>Service A — Auth + SSL + RateLimit
+            </div>
+            <div class="cmp-step">
+              <div class="cmp-n">3</div>Service B — Auth + SSL + RateLimit
+            </div>
+            <div class="cmp-step">
+              <div class="cmp-n">4</div>Service C — Auth + SSL + RateLimit
+            </div>
+            <div class="cmp-use">
+              ❌ Client code phức tạp — nhiều endpoints<br>
+              ❌ Coupling giữa client và backend services<br>
+              ❌ Mỗi service duplicate logic auth, SSL
+            </div>
+          </div>
+          <div class="cmp-col">
+            <div class="cmp-hd blue">✅ Với API Gateway</div>
+            <div class="cmp-step">
+              <div class="cmp-n">1</div>Client gọi <strong>1 endpoint duy nhất</strong>
+            </div>
+            <div class="cmp-step">
+              <div class="cmp-n">2</div>API Gateway — Auth, SSL, Rate Limit, Cache
+            </div>
+            <div class="cmp-step">
+              <div class="cmp-n">3</div>Gateway proxy đến Service A / B / C
+            </div>
+            <div class="cmp-step">
+              <div class="cmp-n">4</div>Services nhận requests đã được xử lý sẵn
+            </div>
+            <div class="cmp-use">
+              ✅ Client code đơn giản — 1 endpoint<br>
+              ✅ Tách biệt client và backend<br>
+              ✅ Cross-cutting concerns tập trung tại gateway
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>❓ Tại Sao Cần API Gateway?</h3>
+        <p>Các vấn đề khi expose dịch vụ trực tiếp cho client:</p>
+        <ul>
+          <li>❌ <strong>Code client phức tạp:</strong> Client phải theo dõi nhiều endpoint và xử lý lỗi một cách bền vững</li>
+          <li>❌ <strong>Tạo sự coupling:</strong> Client cần biết cách các dịch vụ được phân tách, khó bảo trì và refactor</li>
+          <li>❌ <strong>Một thao tác cần nhiều service:</strong> Một yêu cầu có thể cần gọi nhiều dịch vụ</li>
+          <li>❌ <strong>Mỗi service phải xử lý cross-cutting concerns:</strong> Auth, SSL, rate limiting, v.v.</li>
+          <li>❌ <strong>Giới hạn giao thức:</strong> Service phải expose giao thức thân thiện với client như HTTP/WebSocket</li>
+          <li>❌ <strong>Bề mặt tấn công:</strong> Service có endpoint công khai là mục tiêu tấn công tiềm năng</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>🏠 Gateway Managed và Self-hosted</h3>
+        <p>API Management cung cấp cả gateway managed và self-hosted:</p>
+
+        <table>
+  <thead><tr><th>Loại Gateway</th><th>Mô Tả</th><th>Khi Nào Dùng</th></tr>
+  </thead>
+  <tbody><tr>
+            <td><strong>Managed (Được quản lý)</strong></td>
+            <td>Gateway mặc định được triển khai trong Azure cho mọi instance API Management trong mọi tầng dịch vụ. Tất cả lưu lượng API chạy qua Azure bất kể backend được lưu trữ ở đâu.</td>
+            <td>Hầu hết các trường hợp thông thường khi backend trên Azure</td>
+          </tr><tr>
+            <td><strong>Self-hosted (Tự lưu trữ)</strong></td>
+            <td>Phiên bản containerized tùy chọn của gateway managed mặc định. Được đóng gói dưới dạng Docker container dựa trên Linux, thường được triển khai lên Kubernetes.</td>
+            <td>Hybrid và multicloud; backend on-premises; tuân thủ quy định địa phương</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Self-hosted Gateway</div>
+          <p>Self-hosted gateway cho phép khách hàng với cơ sở hạ tầng IT hybrid quản lý API được lưu trữ on-premises và trên nhiều đám mây từ một dịch vụ API Management duy nhất trong Azure. Nó thường được triển khai lên Azure Kubernetes Service và Azure Arc-enabled Kubernetes.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 3: POLICIES -->
+  <div id="policies">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>📜 Phần 3: Khám Phá Chính Sách API Management</h2><div class="mhd-sub">Phần 3: Khám Phá Chính Sách API Management</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Trong Azure API Management, các chính sách cho phép nhà xuất bản thay đổi hành vi của API thông qua cấu hình. Chính sách là tập hợp các câu lệnh được thực thi tuần tự trên yêu cầu hoặc phản hồi của API.</p>
+
+        <div class="flow-v">
+          <div class="flow-step start">
+            <div class="flow-num">1</div>
+            <div class="flow-body">
+              <strong>📥 INBOUND — Xử lý Request đến</strong>
+              Xác thực subscription key · Kiểm tra rate limit · Thêm/sửa headers · Chuyển đổi request format
+            </div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-body">
+              <strong>🔀 BACKEND — Chuyển tiếp đến Service</strong>
+              Forward request tới backend URL · Thiết lập timeout · Load balancing · Circuit breaker
+            </div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-body">
+              <strong>📤 OUTBOUND — Xử lý Response trả về</strong>
+              Biến đổi response body · Lọc sensitive data · Thêm CORS headers · Cache response
+            </div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step end">
+            <div class="flow-num">4</div>
+            <div class="flow-body">
+              <strong>⚠️ ON-ERROR — Xử lý Lỗi</strong>
+              Bắt exception từ bất kỳ giai đoạn nào · Tùy chỉnh thông báo lỗi · Logging và alerting
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>📝 Hiểu Cấu Hình Chính Sách</h3>
+        <p>Định nghĩa chính sách là tài liệu XML đơn giản mô tả chuỗi các câu lệnh inbound và outbound. Cấu hình được chia thành các phần <code>inbound</code>, <code>backend</code>, <code>outbound</code> và <code>on-error</code>.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;policies&gt;
+  &lt;inbound&gt;
+    &lt;!-- statements to be applied to the request go here --&gt;
+  &lt;/inbound&gt;
+  &lt;backend&gt;
+    &lt;!-- statements to be applied before the request is forwarded to
+         the backend service go here --&gt;
+  &lt;/backend&gt;
+  &lt;outbound&gt;
+    &lt;!-- statements to be applied to the response go here --&gt;
+  &lt;/outbound&gt;
+  &lt;on-error&gt;
+    &lt;!-- statements to be applied if there is an error condition go here --&gt;
+  &lt;/on-error&gt;
+&lt;/policies&gt;</code></pre>
+</div>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Xử Lý Lỗi</div>
+          <p>Nếu xảy ra lỗi trong quá trình xử lý yêu cầu, các bước còn lại trong phần <code>inbound</code>, <code>backend</code> hoặc <code>outbound</code> sẽ bị bỏ qua và thực thi nhảy đến các câu lệnh trong phần <code>on-error</code>. Bằng cách đặt câu lệnh chính sách trong phần <code>on-error</code>, bạn có thể xem xét lỗi bằng thuộc tính <code>context.LastError</code>.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>💻 Biểu Thức Chính Sách (Policy Expressions)</h3>
+        <p>Biểu thức chính sách cung cấp phương tiện tinh vi để kiểm soát lưu lượng và sửa đổi hành vi API mà không cần viết code chuyên biệt. Biểu thức chính sách là:</p>
+        <ul>
+          <li><strong>Câu lệnh C# đơn:</strong> được đặt trong <code>@(expression)</code></li>
+          <li><strong>Khối code C# nhiều câu lệnh:</strong> được đặt trong <code>@{expression}</code> và phải trả về giá trị</li>
+        </ul>
+
+        <p>Ví dụ sử dụng biểu thức chính sách và policy set-header để thêm dữ liệu người dùng vào request đến:</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;policies&gt;
+    &lt;inbound&gt;
+        &lt;base /&gt;
+        &lt;set-header name="x-request-context-data" exists-action="override"&gt;
+            &lt;value&gt;@(context.User.Id)&lt;/value&gt;
+            &lt;value&gt;@(context.Deployment.Region)&lt;/value&gt;
+        &lt;/set-header&gt;
+    &lt;/inbound&gt;
+&lt;/policies&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>📐 Áp Dụng Chính Sách Ở Các Phạm Vi Khác Nhau</h3>
+        <p>Nếu bạn có chính sách ở cấp global và chính sách được cấu hình cho một API, thì mỗi khi API đó được sử dụng, cả hai chính sách đều được áp dụng. API Management cho phép sắp xếp xác định của các câu lệnh chính sách kết hợp thông qua phần tử <code>base</code>.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;policies&gt;
+    &lt;inbound&gt;
+        &lt;cross-domain /&gt;
+        &lt;base /&gt;
+        &lt;find-and-replace from="xyz" to="abc" /&gt;
+    &lt;/inbound&gt;
+&lt;/policies&gt;</code></pre>
+</div>
+
+        <p>Trong ví dụ trên:</p>
+        <ol>
+          <li>Câu lệnh <code>cross-domain</code> sẽ thực thi trước</li>
+          <li>Câu lệnh <code>find-and-replace</code> sẽ thực thi sau bất kỳ chính sách nào ở phạm vi rộng hơn</li>
+        </ol>
+      </section>
+
+      <section>
+        <h3>🔍 Lọc Nội Dung Phản Hồi (Filter Response Content)</h3>
+        <p>Ví dụ sau minh họa cách lọc các phần tử dữ liệu từ payload phản hồi dựa trên sản phẩm liên kết với yêu cầu. Đoạn code giả định nội dung phản hồi định dạng JSON chứa các thuộc tính <em>minutely</em>, <em>hourly</em>, <em>daily</em> và <em>flags</em>:</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;policies&gt;
+  &lt;inbound&gt;
+    &lt;base /&gt;
+  &lt;/inbound&gt;
+  &lt;backend&gt;
+    &lt;base /&gt;
+  &lt;/backend&gt;
+  &lt;outbound&gt;
+    &lt;base /&gt;
+    &lt;choose&gt;
+      &lt;when condition="@(context.Response.StatusCode == 200 &amp;&amp; context.Product.Name.Equals("Starter"))"&gt;
+        &lt;set-body&gt;
+          @{
+            var response = context.Response.Body.As&lt;JObject&gt;();
+            foreach (var key in new [] {"minutely", "hourly", "daily", "flags"}) {
+              response.Property(key).Remove();
+            }
+            return response.ToString();
+          }
+        &lt;/set-body&gt;
+      &lt;/when&gt;
+    &lt;/choose&gt;
+  &lt;/outbound&gt;
+  &lt;on-error&gt;
+    &lt;base /&gt;
+  &lt;/on-error&gt;
+&lt;/policies&gt;</code></pre>
+</div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 4: ADVANCED POLICIES -->
+  <div id="advanced-policies">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>⚡ Phần 4: Tạo Chính Sách Nâng Cao</h2><div class="mhd-sub">Phần 4: Tạo Chính Sách Nâng Cao</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Phần này cung cấp tài liệu tham khảo cho các chính sách API Management nâng cao sau:</p>
+        <ul>
+          <li><strong>Control flow:</strong> Áp dụng câu lệnh chính sách có điều kiện dựa trên kết quả đánh giá biểu thức Boolean</li>
+          <li><strong>Forward request:</strong> Chuyển tiếp yêu cầu đến dịch vụ backend</li>
+          <li><strong>Limit concurrency:</strong> Ngăn các chính sách được thực thi bởi nhiều hơn số yêu cầu được chỉ định cùng một lúc</li>
+          <li><strong>Log to Event Hubs:</strong> Gửi tin nhắn theo định dạng được chỉ định đến event hub</li>
+          <li><strong>Mock response:</strong> Hủy bỏ thực thi pipeline và trả về phản hồi giả trực tiếp cho caller</li>
+          <li><strong>Retry:</strong> Thực thi lại các câu lệnh chính sách con cho đến khi điều kiện được đáp ứng</li>
+          <li><strong>Return response:</strong> Hủy bỏ thực thi pipeline và trả về phản hồi tùy chỉnh</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>🔀 Control Flow (Luồng điều khiển)</h3>
+        <p>Chính sách <code>choose</code> áp dụng các câu lệnh chính sách được đặt trong nó dựa trên kết quả đánh giá biểu thức boolean, tương tự như cấu trúc if-then-else hoặc switch trong ngôn ngữ lập trình.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;choose&gt;
+    &lt;when condition="Boolean expression | Boolean constant"&gt;
+        &lt;!-- một hoặc nhiều câu lệnh chính sách áp dụng khi điều kiện trên là true --&gt;
+    &lt;/when&gt;
+    &lt;when condition="Boolean expression | Boolean constant"&gt;
+        &lt;!-- một hoặc nhiều câu lệnh chính sách áp dụng khi điều kiện trên là true --&gt;
+    &lt;/when&gt;
+    &lt;otherwise&gt;
+        &lt;!-- một hoặc nhiều câu lệnh chính sách áp dụng nếu không có điều kiện nào ở trên là true --&gt;
+    &lt;/otherwise&gt;
+&lt;/choose&gt;</code></pre>
+</div>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Lưu ý</div>
+          <p>Chính sách control flow phải chứa ít nhất một phần tử <code>&lt;when/&gt;</code>. Phần tử <code>&lt;otherwise/&gt;</code> là tùy chọn. Điều kiện trong các phần tử <code>&lt;when/&gt;</code> được đánh giá theo thứ tự xuất hiện.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>➡️ Forward Request (Chuyển tiếp yêu cầu)</h3>
+        <p>Chính sách <code>forward-request</code> chuyển tiếp yêu cầu đến dịch vụ backend được chỉ định trong request context. URL dịch vụ backend được chỉ định trong cài đặt API.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;forward-request timeout="time in seconds" follow-redirects="true | false"/&gt;</code></pre>
+</div>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Quan trọng</div>
+          <p>Việc xóa policy này dẫn đến yêu cầu không được chuyển tiếp đến dịch vụ backend. Các chính sách trong phần outbound được đánh giá ngay sau khi hoàn thành thành công các chính sách trong phần inbound.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>🚦 Limit Concurrency (Giới hạn đồng thời)</h3>
+        <p>Chính sách <code>limit-concurrency</code> ngăn các chính sách được đặt trong nó được thực thi bởi nhiều hơn số yêu cầu được chỉ định tại bất kỳ thời điểm nào. Khi vượt quá số đó, các yêu cầu mới thất bại ngay lập tức với mã trạng thái <strong>429 Too Many Requests</strong>.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;limit-concurrency key="expression" max-count="number"&gt;
+    &lt;!-- nested policy statements --&gt;
+&lt;/limit-concurrency&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>📡 Log to Event Hubs (Ghi log đến Event Hubs)</h3>
+        <p>Chính sách <code>log-to-eventhub</code> gửi tin nhắn theo định dạng được chỉ định đến event hub được xác định bởi entity Logger. Policy được sử dụng để lưu thông tin context yêu cầu/phản hồi được chọn để phân tích trực tuyến hoặc ngoại tuyến.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;log-to-eventhub logger-id="id of the logger entity"
+    partition-id="index of the partition where messages are sent"
+    partition-key="value used for partition assignment"&gt;
+  Expression returning a string to be logged
+&lt;/log-to-eventhub&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>🎭 Mock Response (Phản hồi giả)</h3>
+        <p>Chính sách <code>mock-response</code> được sử dụng để mock API và thao tác. Nó hủy bỏ thực thi pipeline thông thường và trả về phản hồi giả cho caller. Policy luôn cố gắng trả về phản hồi có độ trung thực cao nhất:</p>
+        <ul>
+          <li>Ưu tiên các ví dụ nội dung phản hồi khi có</li>
+          <li>Tạo phản hồi mẫu từ schema khi được cung cấp</li>
+          <li>Trả về phản hồi không có nội dung nếu không tìm thấy ví dụ hoặc schema</li>
+        </ul>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;mock-response status-code="code" content-type="media type"/&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>🔄 Retry (Thử lại)</h3>
+        <p>Chính sách <code>retry</code> thực thi các chính sách con của nó một lần và sau đó thử lại cho đến khi điều kiện <code>condition</code> của retry trở thành <code>false</code> hoặc <code>count</code> retry cạn kiệt.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;retry
+    condition="boolean expression or literal"
+    count="number of retry attempts"
+    interval="retry interval in seconds"
+    max-interval="maximum retry interval in seconds"
+    delta="retry interval delta in seconds"
+    first-fast-retry="boolean expression or literal"&gt;
+    &lt;!-- One or more child policies. No restrictions --&gt;
+&lt;/retry&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>↩️ Return Response (Trả về phản hồi)</h3>
+        <p>Chính sách <code>return-response</code> hủy bỏ thực thi pipeline và trả về phản hồi mặc định hoặc tùy chỉnh cho caller. Phản hồi mặc định là <code>200 OK</code> không có body.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;return-response response-variable-name="existing context variable"&gt;
+  &lt;set-header/&gt;
+  &lt;set-body/&gt;
+  &lt;set-status/&gt;
+&lt;/return-response&gt;</code></pre>
+</div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 5: SECURE API -->
+  <div id="secure">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>🔐 Phần 5: Bảo Mật API với Azure API Management</h2><div class="mhd-sub">Phần 5: Bảo Mật API với Azure API Management</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>🔑 Subscriptions (Đăng ký)</h3>
+        <p>Trong Azure API Management, <em>subscriptions</em> là cách phổ biến nhất để người tiêu thụ API truy cập các API được xuất bản. Bằng cách xuất bản API qua API Management, bạn có thể dễ dàng bảo mật quyền truy cập API bằng subscription key.</p>
+
+        <p>Nhà phát triển cần đưa vào subscription key hợp lệ trong các HTTP request khi gọi API. Nếu không có key hợp lệ, các lệnh gọi sẽ:</p>
+        <ul>
+          <li>❌ Bị từ chối ngay lập tức bởi API Management gateway</li>
+          <li>❌ Không được chuyển tiếp đến dịch vụ backend</li>
+        </ul>
+
+        <h4>Cách sử dụng Subscription Key</h4>
+        <p>Người đăng ký có thể sử dụng subscription key theo hai cách:</p>
+        <ul>
+          <li><strong>HTTP Header:</strong> Thêm header <code>Ocp-Apim-Subscription-Key</code> vào request</li>
+          <li><strong>Query Parameter:</strong> Thêm parameter <code>subscription-key</code> vào URL</li>
+        </ul>
+
+        <h4>Phạm vi Subscriptions</h4>
+        <table>
+  <thead><tr><th>Phạm vi</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>Product scope</strong></td><td>Liên kết với một sản phẩm cụ thể</td></tr><tr><td><strong>All APIs scope</strong></td><td>Cấp quyền truy cập tất cả API trong instance</td></tr><tr><td><strong>Single API scope</strong></td><td>Cấp quyền truy cập một API cụ thể</td></tr><tr><td><strong>All-access subscription</strong></td><td>Subscription tích hợp cấp quyền truy cập tất cả API (chỉ dùng cho test/debug)</td></tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout danger">
+          <div class="callout-title">⚠️ Cảnh Báo Bảo Mật</div>
+          <p>All-access subscription cho phép truy cập mọi API trong instance. Không bao giờ nhúng all-access subscription key vào client app hoặc sử dụng cho quyền truy cập API thường xuyên.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>🛡️ Các Cơ Chế Bảo Mật Khác</h3>
+        <p>Ngoài subscriptions, API Management hỗ trợ các cơ chế bảo mật sau:</p>
+
+        <table>
+  <thead><tr><th>Cơ chế</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>OAuth 2.0</strong></td><td>Xác thực token JWT từ Microsoft Entra ID hoặc nhà cung cấp OAuth khác</td></tr><tr><td><strong>Client Certificates</strong></td><td>Xác thực mutual TLS với client certificate</td></tr><tr><td><strong>IP Filtering</strong></td><td>Hạn chế quyền truy cập theo địa chỉ IP</td></tr><tr><td><strong>RBAC</strong></td><td>Kiểm soát truy cập dựa trên vai trò thông qua Microsoft Entra ID</td></tr><tr><td><strong>Managed Identities</strong></td><td>Danh tính được quản lý để xác thực với các dịch vụ Azure</td></tr>
+        
+  </tbody>
+</table>
+
+        <h4>Chính Sách Bảo Mật Mẫu - Validate JWT</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;policies&gt;
+    &lt;inbound&gt;
+        &lt;validate-jwt header-name="Authorization"
+                      failed-validation-httpcode="401"
+                      failed-validation-error-message="Unauthorized"&gt;
+            &lt;openid-config url="https://login.microsoftonline.com/{tenantId}/.well-known/openid-configuration" /&gt;
+            &lt;required-claims&gt;
+                &lt;claim name="aud"&gt;
+                    &lt;value&gt;{app-id}&lt;/value&gt;
+                &lt;/claim&gt;
+            &lt;/required-claims&gt;
+        &lt;/validate-jwt&gt;
+        &lt;base /&gt;
+    &lt;/inbound&gt;
+&lt;/policies&gt;</code></pre>
+</div>
+
+        <h4>Chính Sách Kiểm Tra Client Certificate</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;policies&gt;
+    &lt;inbound&gt;
+        &lt;choose&gt;
+            &lt;when condition="@(context.Request.Certificate == null ||
+                              !context.Request.Certificate.Verify() ||
+                              context.Request.Certificate.Thumbprint != 'expected-thumbprint')"&gt;
+                &lt;return-response&gt;
+                    &lt;set-status code="403" reason="Invalid client certificate" /&gt;
+                &lt;/return-response&gt;
+            &lt;/when&gt;
+        &lt;/choose&gt;
+        &lt;base /&gt;
+    &lt;/inbound&gt;
+&lt;/policies&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>📊 Cách API Management Xử Lý Yêu Cầu</h3>
+        <table>
+  <thead><tr><th>Tình huống</th><th>Kết quả</th></tr>
+  </thead>
+  <tbody><tr><td>Có subscription key hợp lệ, product yêu cầu subscription</td><td>✅ Cho phép truy cập, áp dụng chính sách tương ứng</td></tr><tr><td>Không có subscription key, API không yêu cầu subscription</td><td>✅ Cho phép truy cập (open product context)</td></tr><tr><td>Subscription key không hợp lệ, không có open product</td><td>❌ 401 Access Denied</td></tr><tr><td>Không có subscription key, API yêu cầu subscription</td><td>❌ 401 Access Denied</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 6: POLICY EXPRESSIONS -->
+  <div id="expressions">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>💡 Phần 6: Biểu Thức Chính Sách API Management</h2><div class="mhd-sub">Phần 6: Biểu Thức Chính Sách API Management</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Biểu thức chính sách sử dụng cú pháp C# 7. Mỗi biểu thức có quyền truy cập vào biến <code>context</code> được cung cấp ngầm định và một tập con được phép của các kiểu .NET Framework.</p>
+
+        <h3>📌 Cú Pháp</h3>
+        <ul>
+          <li><strong>Biểu thức đơn câu lệnh:</strong> Đặt trong <code>@(expression)</code>, là câu lệnh C# hợp lệ</li>
+          <li><strong>Biểu thức nhiều câu lệnh:</strong> Đặt trong <code>@{expression}</code>. Tất cả các đường code phải kết thúc bằng câu lệnh <code>return</code></li>
+        </ul>
+
+        <h4>Ví dụ biểu thức:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">@(true)
+
+@((1+1).ToString())
+
+@("Hi There".Length)
+
+@(Regex.Match(context.Response.Headers.GetValueOrDefault("Cache-Control",""),
+  @"max-age=(?&lt;maxAge&gt;\d+)").Groups["maxAge"]?.Value)
+
+@(context.Variables.ContainsKey("maxAge") ? int.Parse((string)context.Variables["maxAge"]) : 3600)
+
+@{
+  string[] value;
+  if (context.Request.Headers.TryGetValue("Authorization", out value))
+  {
+      if(value != null &amp;&amp; value.Length &gt; 0)
+      {
+          return Encoding.UTF8.GetString(Convert.FromBase64String(value[0]));
+      }
+  }
+  return null;
+}</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>🔧 Biến Context</h3>
+        <p>Biến <code>context</code> có sẵn ngầm trong mọi biểu thức chính sách. Các thành viên của nó cung cấp thông tin về API request/response và các thuộc tính liên quan.</p>
+
+        <table>
+  <thead><tr><th>Biến Context</th><th>Thuộc tính/Phương thức</th></tr>
+  </thead>
+  <tbody><tr><td><code>context.Api</code></td><td><code>Id</code>, <code>Name</code>, <code>Path</code>, <code>Revision</code>, <code>Version</code>, <code>ServiceUrl</code></td></tr><tr><td><code>context.Deployment</code></td><td><code>Region</code>, <code>ServiceId</code>, <code>ServiceName</code>, <code>GatewayId</code></td></tr><tr><td><code>context.Operation</code></td><td><code>Id</code>, <code>Method</code>, <code>Name</code>, <code>UrlTemplate</code></td></tr><tr><td><code>context.Product</code></td><td><code>Id</code>, <code>Name</code>, <code>State</code>, <code>SubscriptionsLimit</code></td></tr><tr><td><code>context.Request</code></td><td><code>Body</code>, <code>Certificate</code>, <code>Headers</code>, <code>IpAddress</code>, <code>Method</code>, <code>Url</code></td></tr><tr><td><code>context.Response</code></td><td><code>Body</code>, <code>Headers</code>, <code>StatusCode</code>, <code>StatusReason</code></td></tr><tr><td><code>context.Subscription</code></td><td><code>Id</code>, <code>Key</code>, <code>Name</code>, <code>PrimaryKey</code>, <code>SecondaryKey</code></td></tr><tr><td><code>context.User</code></td><td><code>Email</code>, <code>FirstName</code>, <code>Groups</code>, <code>Id</code>, <code>LastName</code></td></tr><tr><td><code>context.LastError</code></td><td><code>Source</code>, <code>Reason</code>, <code>Message</code>, <code>Scope</code></td></tr><tr><td><code>context.Variables</code></td><td><code>IReadOnlyDictionary&lt;string, object&gt;</code></td></tr><tr><td><code>context.Timestamp</code></td><td>Thời điểm nhận yêu cầu (<code>DateTime</code>)</td></tr><tr><td><code>context.Elapsed</code></td><td>Khoảng thời gian từ khi nhận request (<code>TimeSpan</code>)</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>📚 Các Kiểu .NET Framework Được Phép</h3>
+        <p>Biểu thức chính sách hỗ trợ một tập con của .NET Framework types. Một số kiểu quan trọng:</p>
+
+        <table>
+  <thead><tr><th>Kiểu</th><th>Ghi chú</th></tr>
+  </thead>
+  <tbody><tr><td><code>Newtonsoft.Json.*</code> (JObject, JArray, v.v.)</td><td>Tất cả thành viên</td></tr><tr><td><code>System.String</code></td><td>Tất cả thành viên</td></tr><tr><td><code>System.DateTime</code></td><td>Constructor, Add*, Date, Day, Hour, Now, Parse, v.v.</td></tr><tr><td><code>System.Collections.Generic.*</code></td><td>Dictionary, List, HashSet, v.v. - tất cả thành viên</td></tr><tr><td><code>System.Text.RegularExpressions.Regex</code></td><td>IsMatch, Match, Matches, Replace, Split</td></tr><tr><td><code>System.Convert</code></td><td>Tất cả thành viên</td></tr><tr><td><code>System.Math</code></td><td>Tất cả thành viên</td></tr><tr><td><code>System.Linq.Enumerable</code></td><td>Tất cả thành viên</td></tr><tr><td><code>System.Security.Cryptography.*</code></td><td>SHA, HMAC, RSA, X509 certificates, v.v.</td></tr><tr><td><code>System.Text.Encoding</code></td><td>Tất cả thành viên</td></tr><tr><td><code>System.Uri</code></td><td>Tất cả thành viên</td></tr><tr><td><code>System.Xml.Linq.*</code></td><td>XDocument, XElement, XAttribute, v.v.</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>🔐 Các Phương Thức Đặc Biệt</h3>
+
+        <h4>Xử lý JWT:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">// Parse JWT token
+Jwt AsJwt(input: this string)
+bool TryParseJwt(input: this string, result: out Jwt)
+
+// Jwt properties:
+// - Algorithm, Audiences, Claims, ExpirationTime, Id, Issuer, Subject, Type
+
+// Example: Kiểm tra audience trong JWT
+@(context.Request.Headers.GetValueOrDefault("Authorization","")
+  .AsJwt()?.Claims["aud"].FirstOrDefault() == "myapi")</code></pre>
+</div>
+
+        <h4>Xử lý Basic Auth:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">// Parse Basic Auth credentials
+BasicAuthCredentials AsBasic(input: this string)
+
+// Example: Lấy thông tin đăng nhập Basic Auth
+@{
+    var basic = context.Request.Headers.GetValueOrDefault("Authorization","")
+                .AsBasic();
+    return basic?.UserId;
+}</code></pre>
+</div>
+
+        <h4>Mã hóa/Giải mã:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">// Encrypt
+byte[] Encrypt(input: byte[], alg: string, key: byte[], iv: byte[])
+
+// Decrypt
+byte[] Decrypt(input: byte[], alg: string, key: byte[], iv: byte[])
+
+// Verify certificate (không kiểm tra revocation)
+bool VerifyNoRevocation(input: X509Certificate2)</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>📝 Ví Dụ Thực Tế</h3>
+
+        <h4>Ví dụ 1: Rate limiting theo subscription</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;rate-limit-by-key calls="10" renewal-period="60"
+    counter-key="@(context.Subscription.Id)" /&gt;</code></pre>
+</div>
+
+        <h4>Ví dụ 2: Thêm correlation ID</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;set-header name="x-correlation-id" exists-action="skip"&gt;
+    &lt;value&gt;@(context.RequestId.ToString())&lt;/value&gt;
+&lt;/set-header&gt;</code></pre>
+</div>
+
+        <h4>Ví dụ 3: Kiểm tra role từ JWT claims</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;choose&gt;
+    &lt;when condition="@{
+        var jwt = context.Request.Headers.GetValueOrDefault("Authorization","")
+                         .AsJwt();
+        return jwt != null &amp;&amp; jwt.Claims["roles"]
+                .Any(r =&gt; r == "admin");
+    }"&gt;
+        &lt;!-- Allow admin access --&gt;
+    &lt;/when&gt;
+    &lt;otherwise&gt;
+        &lt;return-response&gt;
+            &lt;set-status code="403" reason="Forbidden" /&gt;
+        &lt;/return-response&gt;
+    &lt;/otherwise&gt;
+&lt;/choose&gt;</code></pre>
+</div>
+
+        <h4>Ví dụ 4: Cache response có điều kiện</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">XML</span></div>
+<pre><code class="language-xml">&lt;cache-lookup vary-by-developer="false" vary-by-developer-groups="false"&gt;
+    &lt;vary-by-header&gt;Accept&lt;/vary-by-header&gt;
+    &lt;vary-by-query-parameter&gt;version&lt;/vary-by-query-parameter&gt;
+&lt;/cache-lookup&gt;
+
+&lt;cache-store duration="@(int.Parse(context.Variables.GetValueOrDefault("cacheTime","300")))" /&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>📋 Tóm Tắt Quan Trọng Cho Kỳ Thi</h3>
+        <div class="callout success">
+          <div class="callout-title">✅ Các điểm cần nhớ</div>
+          <ul>
+            <li>API Management có 3 thành phần chính: Gateway, Management Plane, Developer Portal</li>
+            <li>Policy được cấu trúc trong 4 section: <code>inbound</code>, <code>backend</code>, <code>outbound</code>, <code>on-error</code></li>
+            <li>Biểu thức đơn: <code>@(expression)</code>; Nhiều câu lệnh: <code>@{...return value;}</code></li>
+            <li>Biến <code>context</code> có sẵn trong mọi biểu thức chính sách</li>
+            <li>Subscription key được gửi qua header <code>Ocp-Apim-Subscription-Key</code> hoặc query param <code>subscription-key</code></li>
+            <li>Gateway có hai loại: Managed (cloud) và Self-hosted (containerized, Docker/Kubernetes)</li>
+            <li>Policy được áp dụng ở 4 phạm vi: global, product, API, operation</li>
+            <li>Phần tử <code>&lt;base /&gt;</code> xác định vị trí thực thi policy từ phạm vi cha</li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="08-monitoring.html" class="prev">← Ch.08 Monitoring</a>
+  <span class="pos">Chương 09 / 11</span>
+  <a href="10-event-based.html" class="next">Ch.10 Events →</a>
+</div>
+<footer style="background:#323130;color:#c8c8c8;text-align:center;padding:24px;margin-top:0;">
+  <p>Hướng Dẫn Học Tập AZ-204 | API Management | Được dịch sang Tiếng Việt</p>
+  <p style="font-size:0.85rem;margin-top:8px;opacity:0.7;">Nội dung dựa trên Microsoft Learn Training Modules</p>
+</footer>
+<script>
+function toggleToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.toggle('open');b.classList.toggle('open');}
+}
+function closeToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.remove('open');b.classList.remove('open');}
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Xác thực & Phân quyền - AZ-204 Tiếng Việt</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 06: Authentication ── */
+.badge { display: inline-block; background: var(--cyan); color: var(--blue-6); padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; margin-left: 8px; }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html" class="on">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">🔐</div>
+  <h1>Xác thực &amp; Phân quyền Azure</h1>
+  <p>Microsoft Identity Platform · SAS · Microsoft Graph</p>
+  <div class="hero-tags">
+    <span class="hero-tag">🔑 Identity Platform</span>
+    <span class="hero-tag">📚 MSAL</span>
+    <span class="hero-tag">🗝️ SAS</span>
+    <span class="hero-tag">📊 Microsoft Graph</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 06</div>
+  <a href="#identity-platform">Module 1 – Identity Platform</a>
+  <a href="#service-principals">Module 2 – Service Principals</a>
+  <a href="#permissions-consent">Module 3 – Permissions &amp; Consent</a>
+  <a href="#conditional-access">Module 4 – Conditional Access</a>
+  <a href="#msal">Module 5 – MSAL</a>
+  <a href="#sas-overview">Module 6 – SAS Tổng Quan</a>
+  <a href="#sas-when">Module 7 – Khi Nào Dùng SAS</a>
+  <a href="#stored-access-policies">Module 8 – Stored Access Policies</a>
+  <a href="#graph-overview">Module 9 – Microsoft Graph</a>
+</nav>
+<main class="content">
+
+  <!-- MODULE 1: Microsoft Identity Platform -->
+  <div id="identity-platform">
+<div class="mhd"><div class="mhd-ico">🔑</div><div><h2>🔑 Module 1: Microsoft Identity Platform</h2><div class="mhd-sub">Module 1: Microsoft Identity Platform</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Tổng quan về Microsoft Identity Platform</h3>
+        <p>Microsoft Identity Platform giúp bạn xây dựng các ứng dụng mà người dùng và khách hàng có thể đăng nhập bằng tài khoản Microsoft hoặc tài khoản mạng xã hội, đồng thời cung cấp quyền truy cập được ủy quyền vào các API của bạn hoặc API của Microsoft như Microsoft Graph.</p>
+
+        <h4>Các thành phần chính của Microsoft Identity Platform:</h4>
+        <ul>
+          <li>🔐 <strong>Dịch vụ xác thực tuân thủ OAuth 2.0 và OpenID Connect</strong> — cho phép các nhà phát triển xác thực nhiều loại danh tính:
+            <ul>
+              <li>Tài khoản cơ quan hoặc trường học (qua Microsoft Entra ID)</li>
+              <li>Tài khoản Microsoft cá nhân (Xbox, Outlook.com)</li>
+              <li>Tài khoản mạng xã hội hoặc địa phương (qua Azure AD B2C)</li>
+              <li>Tài khoản khách hàng (qua Microsoft Entra External ID)</li>
+            </ul>
+          </li>
+          <li>📚 <strong>Thư viện mã nguồn mở</strong> — Microsoft Authentication Libraries (MSAL) và hỗ trợ các thư viện tuân thủ tiêu chuẩn khác</li>
+          <li>🌐 <strong>Endpoint của Microsoft Identity Platform</strong> — đã được chứng nhận OIDC, hoạt động với MSAL hoặc bất kỳ thư viện tuân thủ tiêu chuẩn nào. Triển khai các phạm vi dễ đọc theo tiêu chuẩn ngành</li>
+          <li>🏢 <strong>Cổng quản lý ứng dụng</strong> — Trải nghiệm đăng ký và cấu hình trong Azure portal, cùng với các khả năng quản lý Azure khác</li>
+          <li>⚙️ <strong>API cấu hình ứng dụng và PowerShell</strong> — Cấu hình ứng dụng theo chương trình thông qua Microsoft Graph API và PowerShell để tự động hóa các tác vụ DevOps</li>
+        </ul>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Lợi ích cho nhà phát triển</div>
+          <p>Microsoft Identity Platform cung cấp tích hợp các đổi mới hiện đại trong không gian danh tính và bảo mật như xác thực không mật khẩu (passwordless), xác thực nâng cao (step-up authentication) và Conditional Access. Các ứng dụng tích hợp với nền tảng này sẽ được hưởng lợi tự động từ các đổi mới đó.</p>
+        </div>
+
+        <h4>Cấu hình Tenant:</h4>
+        <table>
+  <thead><tr><th>Loại Tenant</th><th>Mục đích</th><th>Đặc điểm</th></tr>
+  </thead>
+  <tbody><tr><td><strong>Workforce</strong></td><td>Nhân viên nội bộ, ứng dụng kinh doanh</td><td>Mặc định cho Microsoft Entra tenants; có thể mời đối tác bên ngoài làm guest</td></tr><tr><td><strong>External</strong></td><td>Khách hàng bên ngoài tổ chức</td><td>Dành riêng cho External ID; tùy chỉnh trải nghiệm đăng nhập cho khách hàng</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>Sơ đồ luồng xác thực OAuth 2.0 / OIDC</h3>
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num">1</div>
+            <div class="flow-body"><strong>Ứng dụng → Identity Platform</strong>Yêu cầu xác thực (scope, client_id, redirect_uri)</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-body"><strong>Identity Platform → Ứng dụng</strong>Hiển thị màn hình đăng nhập cho user</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">3</div>
+            <div class="flow-body"><strong>Ứng dụng → Identity Platform</strong>User đăng nhập &amp; đồng ý quyền truy cập</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div class="flow-body"><strong>Identity Platform → Ứng dụng</strong>Trả về Authorization Code (OAuth 2.0) hoặc ID Token (OIDC)</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">5</div>
+            <div class="flow-body"><strong>Ứng dụng → Identity Platform</strong>Đổi Code lấy Access Token</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">6</div>
+            <div class="flow-body"><strong>Identity Platform → Ứng dụng</strong>Trả về Access Token + Refresh Token</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">7</div>
+            <div class="flow-body"><strong>Ứng dụng → API Server</strong>Gọi API với Bearer Token (<code>Authorization: Bearer …</code>)</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">8</div>
+            <div class="flow-body"><strong>API Server → Ứng dụng</strong>Xác thực token &amp; trả về dữ liệu</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 2: Service Principals -->
+  <div id="service-principals">
+<div class="mhd"><div class="mhd-ico">👤</div><div><h2>👤 Module 2: Service Principals &amp; App Registration</h2><div class="mhd-sub">Module 2: Service Principals &amp; App Registration</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Đăng ký ứng dụng (App Registration)</h3>
+        <p>Để ủy quyền các chức năng Quản lý Danh tính và Truy cập cho Microsoft Entra ID, ứng dụng phải được đăng ký với một Microsoft Entra tenant. Khi đăng ký ứng dụng trong Azure portal, bạn chọn:</p>
+        <ul>
+          <li>🏠 <strong>Single tenant</strong> — chỉ có thể truy cập trong tenant của bạn</li>
+          <li>🌍 <strong>Multi-tenant</strong> — có thể truy cập trong các tenant khác</li>
+        </ul>
+        <div class="callout info">
+          <div class="callout-title">📌 Lưu ý quan trọng</div>
+          <p>Khi đăng ký ứng dụng trong portal, một <strong>application object</strong> (instance duy nhất toàn cầu) và một <strong>service principal object</strong> sẽ được tự động tạo trong home tenant của bạn, cùng với một ID duy nhất toàn cầu (app ID / client ID).</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>Application Object</h3>
+        <p>Một ứng dụng Microsoft Entra được giới hạn trong một application object duy nhất. Application object nằm trong Microsoft Entra tenant nơi ứng dụng được đăng ký (gọi là "home" tenant). Application object được dùng như template hoặc blueprint để tạo một hoặc nhiều service principal objects.</p>
+
+        <h4>Application object mô tả 3 khía cạnh của ứng dụng:</h4>
+        <ul>
+          <li>Cách dịch vụ có thể phát hành token để truy cập ứng dụng</li>
+          <li>Tài nguyên mà ứng dụng có thể cần truy cập</li>
+          <li>Các hành động mà ứng dụng có thể thực hiện</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Service Principal Object</h3>
+        <p>Để truy cập tài nguyên được bảo mật bởi Microsoft Entra tenant, entity yêu cầu quyền truy cập phải được đại diện bởi security principal. Có 3 loại service principal:</p>
+
+        <table>
+  <thead><tr><th>Loại</th><th>Mô tả</th><th>Đặc điểm</th></tr>
+  </thead>
+  <tbody><tr>
+            <td><strong>Application</strong></td>
+            <td>Đại diện cục bộ của global application object trong một tenant/directory</td>
+            <td>Được tạo trong mỗi tenant nơi ứng dụng được sử dụng; định nghĩa app có thể làm gì trong tenant cụ thể đó</td>
+          </tr><tr>
+            <td><strong>Managed Identity</strong></td>
+            <td>Đại diện cho managed identity</td>
+            <td>Cung cấp danh tính cho ứng dụng kết nối tới các tài nguyên hỗ trợ xác thực Microsoft Entra; có thể được cấp quyền truy cập nhưng không thể cập nhật trực tiếp</td>
+          </tr><tr>
+            <td><strong>Legacy</strong></td>
+            <td>Đại diện cho ứng dụng cũ (tạo trước khi có app registrations)</td>
+            <td>Có thể có credentials, SPNs, reply URLs; không có app registration liên kết</td>
+          </tr>
+        
+  </tbody>
+</table>
+
+        <h4>Mối quan hệ giữa Application Object và Service Principal:</h4>
+        <ul>
+          <li>Application object = <strong>đại diện toàn cầu</strong> (global) dùng cho tất cả tenants</li>
+          <li>Service principal = <strong>đại diện cục bộ</strong> (local) dùng cho tenant cụ thể</li>
+          <li>Quan hệ: Application object → 1:1 với ứng dụng phần mềm, 1:nhiều với service principal objects</li>
+          <li>Single-tenant app: chỉ có 1 service principal (trong home tenant)</li>
+          <li>Multi-tenant app: có service principal trong mỗi tenant mà user đã đồng ý</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 3: Permissions & Consent -->
+  <div id="permissions-consent">
+<div class="mhd"><div class="mhd-ico">🛡</div><div><h2>🛡️ Module 3: Permissions &amp; Consent</h2><div class="mhd-sub">Module 3: Permissions &amp; Consent</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Mô hình phân quyền OAuth 2.0</h3>
+        <p>Microsoft Identity Platform triển khai giao thức ủy quyền OAuth 2.0. Các tài nguyên web-hosted tích hợp với nền tảng có resource identifier (application ID URI). Ví dụ:</p>
+        <ul>
+          <li>Microsoft Graph: <code>https://graph.microsoft.com</code></li>
+          <li>Microsoft 365 Mail API: <code>https://outlook.office.com</code></li>
+          <li>Azure Key Vault: <code>https://vault.azure.net</code></li>
+        </ul>
+        <p>Trong OAuth 2.0, các tập hợp quyền này được gọi là <strong>scopes</strong> (hay <em>permissions</em>). Một permission được biểu diễn dưới dạng chuỗi. Ví dụ: <code>https://graph.microsoft.com/Calendars.Read</code> để đọc lịch người dùng.</p>
+      </section>
+
+      <section>
+        <h3>Loại Permission</h3>
+        <table>
+  <thead><tr><th>Loại</th><th>Mô tả</th><th>Yêu cầu đồng ý</th></tr>
+  </thead>
+  <tbody><tr>
+            <td><strong>Delegated access</strong></td>
+            <td>Dùng bởi apps có user đang đăng nhập. App được ủy quyền để thực hiện thay mặt user đã đăng nhập</td>
+            <td>User hoặc Administrator</td>
+          </tr><tr>
+            <td><strong>App-only access</strong></td>
+            <td>Dùng bởi apps chạy không có user đăng nhập (background services, daemons)</td>
+            <td>Chỉ Administrator</td>
+          </tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>Các loại Consent</h3>
+
+        <h4>1. Static User Consent</h4>
+        <p>Bạn phải chỉ định tất cả permissions cần thiết trong cấu hình app trong Azure portal. Nếu user (hoặc admin) chưa đồng ý, Microsoft Identity Platform sẽ nhắc user đồng ý.</p>
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Hạn chế của Static Consent</div>
+          <ul>
+            <li>App cần yêu cầu TẤT CẢ permissions ngay lần đăng nhập đầu tiên → danh sách dài làm nản lòng người dùng</li>
+            <li>App cần biết trước TẤT CẢ tài nguyên sẽ truy cập → khó tạo apps linh hoạt</li>
+          </ul>
+        </div>
+
+        <h4>2. Incremental and Dynamic User Consent</h4>
+        <p>Với Microsoft Identity Platform endpoint, bạn có thể bỏ qua các static permissions đã định nghĩa trong Azure portal và yêu cầu permissions dần dần. Chỉ định scopes cần thiết bất kỳ lúc nào bằng cách thêm vào tham số <code>scope</code> khi yêu cầu access token.</p>
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Quan trọng</div>
+          <p>Dynamic consent chỉ áp dụng cho delegated permissions, KHÔNG áp dụng cho app-only access permissions. Nếu cần quyền admin hoặc dùng dynamic consent, vẫn phải đăng ký TẤT CẢ permissions trong Azure portal.</p>
+        </div>
+
+        <h4>3. Admin Consent</h4>
+        <p>Bắt buộc khi app cần truy cập các high-privilege permissions. Admin consent đảm bảo administrators có quyền kiểm soát trước khi ủy quyền cho apps hoặc users truy cập dữ liệu nhạy cảm.</p>
+
+        <h4>Ví dụ yêu cầu user consent:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+        <pre><code class="language-http">GET https://login.microsoftonline.com/common/oauth2/v2.0/authorize?
+client_id=00001111-aaaa-2222-bbbb-3333cccc4444
+&response_type=code
+&redirect_uri=http%3A%2F%2Flocalhost%2Fmyapp%2F
+&response_mode=query
+&scope=
+https%3A%2F%2Fgraph.microsoft.com%2Fcalendars.read%20
+https%3A%2F%2Fgraph.microsoft.com%2Fmail.send
+&state=12345</code></pre>
+</div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 4: Conditional Access -->
+  <div id="conditional-access">
+<div class="mhd"><div class="mhd-ico">🔒</div><div><h2>🔒 Module 4: Conditional Access</h2><div class="mhd-sub">Module 4: Conditional Access</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Conditional Access là gì?</h3>
+        <p>Tính năng Conditional Access trong Microsoft Entra ID là một trong nhiều cách bảo mật app và dịch vụ. Conditional Access cho phép nhà phát triển và khách hàng doanh nghiệp bảo vệ dịch vụ theo nhiều cách:</p>
+        <ul>
+          <li>🔑 Xác thực đa yếu tố (Multifactor authentication - MFA)</li>
+          <li>📱 Chỉ cho phép thiết bị đăng ký Intune truy cập dịch vụ cụ thể</li>
+          <li>🌍 Hạn chế vị trí địa lý và dải IP của người dùng</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Khi nào Conditional Access ảnh hưởng đến app?</h3>
+        <p>Trong hầu hết các trường hợp thông thường, Conditional Access không thay đổi hành vi của app. Chỉ trong một số trường hợp khi app yêu cầu token gián tiếp hoặc âm thầm cho một dịch vụ, app mới cần thay đổi code để xử lý Conditional Access challenges.</p>
+
+        <h4>Các scenarios yêu cầu xử lý Conditional Access:</h4>
+        <ul>
+          <li>Apps thực hiện on-behalf-of flow</li>
+          <li>Apps truy cập nhiều services/resources</li>
+          <li>Single-page apps dùng MSAL.js</li>
+          <li>Web apps gọi một resource</li>
+        </ul>
+
+        <h4>Ví dụ thực tế:</h4>
+        <ul>
+          <li><strong>Scenario 1:</strong> App iOS single-tenant với Conditional Access policy → khi user đăng nhập, policy tự động được kích hoạt và user cần thực hiện MFA</li>
+          <li><strong>Scenario 2:</strong> App dùng middle-tier service truy cập downstream API có policy → middle tier nhận "claims challenge" và phải chuyển lại cho client app để xử lý</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 5: MSAL -->
+  <div id="msal">
+<div class="mhd"><div class="mhd-ico">📚</div><div><h2>📚 Module 5: Microsoft Authentication Library (MSAL)</h2><div class="mhd-sub">Module 5: Microsoft Authentication Library (MSAL)</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>MSAL là gì?</h3>
+        <p>Microsoft Authentication Library (MSAL) cho phép nhà phát triển lấy security tokens từ Microsoft Identity Platform để xác thực người dùng và truy cập các web API bảo mật. MSAL hỗ trợ nhiều kiến trúc ứng dụng và nền tảng khác nhau.</p>
+
+        <h4>Lợi ích của MSAL:</h4>
+        <ul>
+          <li>Không cần trực tiếp dùng OAuth libraries hoặc code theo protocol</li>
+          <li>Có thể lấy token thay mặt user hoặc application</li>
+          <li>Duy trì token cache và xử lý token refresh khi sắp hết hạn</li>
+          <li>Hỗ trợ chỉ định audience (personal Microsoft accounts, social identities, work/school accounts, sovereign clouds)</li>
+          <li>Cấu hình app từ configuration files</li>
+          <li>Hiển thị exceptions có thể hành động, logging và telemetry</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>MSAL Libraries theo ngôn ngữ</h3>
+        <table>
+  <thead><tr><th>Thư viện MSAL</th><th>Nền tảng/Framework hỗ trợ</th></tr>
+  </thead>
+  <tbody><tr><td>MSAL.NET</td><td>.NET Framework, .NET, .NET MAUI, WinUI</td></tr><tr><td>MSAL for Android</td><td>Android</td></tr><tr><td>MSAL Angular</td><td>Single-page apps với Angular và Angular.js</td></tr><tr><td>MSAL for iOS and macOS</td><td>iOS và macOS</td></tr><tr><td>MSAL Java</td><td>Windows, macOS, Linux</td></tr><tr><td>MSAL.js</td><td>JavaScript/TypeScript frameworks (Vue.js, Ember.js, Durandal.js)</td></tr><tr><td>MSAL Node</td><td>Web apps với Express, desktop apps với Electron</td></tr><tr><td>MSAL Python</td><td>Windows, macOS, Linux</td></tr><tr><td>MSAL React</td><td>Single-page apps với React, Next.js, Gatsby.js</td></tr><tr><td>MSAL Go (Preview)</td><td>Windows, macOS, Linux</td></tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Quan trọng - ADAL đã hết hỗ trợ</div>
+          <p>Active Directory Authentication Library (ADAL) đã kết thúc hỗ trợ. Khách hàng cần đảm bảo ứng dụng của họ được chuyển sang MSAL. MSAL tích hợp với Microsoft identity platform (v2.0) endpoint, trong khi ADAL tích hợp với v1.0 endpoint (không hỗ trợ tài khoản cá nhân).</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>Application Types và Scenarios</h3>
+        <table>
+  <thead><tr><th>Loại ứng dụng</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td>Single-page apps (JavaScript)</td><td>React, Angular, Vue SPA</td></tr><tr><td>Web applications</td><td>ASP.NET Core, Node.js web apps</td></tr><tr><td>Web APIs</td><td>ASP.NET Core API, Node.js API</td></tr><tr><td>Mobile and native applications</td><td>iOS, Android, .NET MAUI</td></tr><tr><td>Daemons and server-side applications</td><td>Background services, service-to-service</td></tr>
+        
+  </tbody>
+</table>
+
+        <div class="compare-2">
+          <div class="cmp-col">
+            <div class="cmp-hd blue">📱 Public Client Applications</div>
+            <div class="cmp-use">Chạy trên thiết bị của user — KHÔNG thể giữ bí mật client_secret</div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Desktop apps</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Mobile apps</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Browser-based SPAs</div></div>
+            <div class="cmp-step" style="background:#f0f4f8;font-size:.78rem;color:#605e5c;"><strong>Flows:</strong> Authorization Code · Device Code · Implicit (deprecated)</div>
+          </div>
+          <div class="cmp-col">
+            <div class="cmp-hd dark">🖥️ Confidential Client Applications</div>
+            <div class="cmp-use">Chạy trên server — có thể giữ bí mật client_secret/cert an toàn</div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Web apps</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Web APIs</div></div>
+            <div class="cmp-step"><div class="cmp-n">›</div><div>Daemon / service apps</div></div>
+            <div class="cmp-step" style="background:#f0f4f8;font-size:.78rem;color:#605e5c;"><strong>Flows:</strong> Client Credentials · On-behalf-of · Authorization Code · Username/Password</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 6: SAS Overview -->
+  <div id="sas-overview">
+<div class="mhd"><div class="mhd-ico">🗝</div><div><h2>🗝️ Module 6: Shared Access Signatures (SAS) - Tổng quan</h2><div class="mhd-sub">Module 6: Shared Access Signatures (SAS) - Tổng quan</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>SAS là gì?</h3>
+        <p>Một shared access signature (SAS) là một URI đã ký chứa một token với tập hợp query parameters đặc biệt, cho biết cách client có thể truy cập tài nguyên. Chữ ký được xây dựng từ các tham số SAS và ký bằng khóa tạo ra SAS, được Azure Storage dùng để ủy quyền truy cập.</p>
+
+        <div class="callout info">
+          <div class="callout-title">📌 Cấu trúc SAS URI</div>
+          <p><strong>Ví dụ URI đầy đủ:</strong></p>
+          <code>https://medicalrecords.blob.core.windows.net/patient-images/patient-116139-nq8z7f.jpg?sp=r&amp;st=2020-01-20T11:42:32Z&amp;se=2020-01-20T19:42:32Z&amp;spr=https&amp;sv=2019-02-02&amp;sr=b&amp;sig=SrW1HZ5Nb6MbRzTbXCaPm%2BJiSEn15tC91Y4umMPwVZs%3D</code>
+        </div>
+
+        <h4>Cấu trúc SAS Token:</h4>
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-hd">🔗 URI (Resource)</div>
+            <div class="arch-card-body" style="font-family:monospace;font-size:.8rem;word-break:break-all;">https://medicalrecords.blob.core.windows.net/patient-images/patient-116139-nq8z7f.jpg<span style="color:var(--blue-5)">?</span></div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">🔑 SAS Token — Query Parameters</div>
+            <div class="arch-card-body">
+              <div class="arch-item"><code>sp=r</code> — Quyền truy cập: r=read, w=write, d=delete, l=list, a=add, c=create</div>
+              <div class="arch-item"><code>st=…Z</code> — Thời gian bắt đầu (UTC)</div>
+              <div class="arch-item"><code>se=…Z</code> — Thời gian kết thúc (UTC)</div>
+              <div class="arch-item"><code>spr=https</code> — Giao thức: chỉ HTTPS</div>
+              <div class="arch-item"><code>sv=2019-02-02</code> — Phiên bản Storage API</div>
+              <div class="arch-item"><code>sr=b</code> — Loại storage: b=blob, c=container, f=file, q=queue, t=table, s=share</div>
+              <div class="arch-item"><code>sig=…</code> — Chữ ký mật mã (HMAC-SHA256)</div>
+            </div>
+          </div>
+        </div>
+
+        <h4>Phân tích chi tiết SAS Token components:</h4>
+        <table>
+  <thead><tr><th>Tham số</th><th>Mô tả</th><th>Giá trị có thể</th></tr>
+  </thead>
+  <tbody><tr><td><code>sp</code></td><td>Quyền truy cập (permissions)</td><td>a=add, c=create, d=delete, l=list, r=read, w=write</td></tr><tr><td><code>st</code></td><td>Thời điểm bắt đầu (start time)</td><td>Datetime UTC (ISO 8601)</td></tr><tr><td><code>se</code></td><td>Thời điểm hết hạn (expiry time)</td><td>Datetime UTC (ISO 8601)</td></tr><tr><td><code>sv</code></td><td>Phiên bản API (service version)</td><td>e.g., 2019-02-02</td></tr><tr><td><code>sr</code></td><td>Loại tài nguyên (resource type)</td><td>b=blob, c=container, f=file, q=queue, s=share, t=table</td></tr><tr><td><code>spr</code></td><td>Giao thức cho phép</td><td>https, https,http</td></tr><tr><td><code>sig</code></td><td>Chữ ký mật mã</td><td>Base64-encoded HMAC-SHA256</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>Ba loại SAS</h3>
+        <div class="tier-ladder">
+          <div class="tier-row t-prem">
+            <div class="tier-badge-col">⭐ USER DELEGATION SAS</div>
+            <div class="tier-info-col"><div><strong>Bảo mật: Microsoft Entra credentials</strong> — Chỉ áp dụng Blob Storage &amp; Data Lake Storage. <em>Khuyến nghị cao nhất</em> — không cần lưu account key trong code.</div></div>
+          </div>
+          <div class="tier-row t-std">
+            <div class="tier-badge-col">SERVICE SAS</div>
+            <div class="tier-info-col"><div><strong>Bảo mật: Storage Account Key</strong> — Áp dụng Blob, Queue, Table, Azure Files. Phổ biến nhất.</div></div>
+          </div>
+          <div class="tier-row t-basic">
+            <div class="tier-badge-col">ACCOUNT SAS</div>
+            <div class="tier-info-col"><div><strong>Bảo mật: Storage Account Key</strong> — Áp dụng tất cả storage services. Linh hoạt nhất nhưng quyền rộng nhất.</div></div>
+          </div>
+        </div>
+
+        <table>
+  <thead><tr><th>Loại SAS</th><th>Bảo mật bằng</th><th>Phạm vi áp dụng</th><th>Khuyến nghị</th></tr>
+  </thead>
+  <tbody><tr><td><strong>User Delegation SAS</strong></td><td>Microsoft Entra credentials + permissions SAS</td><td>Blob Storage, Data Lake Storage</td><td>✅ Khuyến nghị cao nhất</td></tr><tr><td><strong>Service SAS</strong></td><td>Storage account key</td><td>Blob, Queue, Table, Azure Files</td><td>⚠️ Dùng khi cần</td></tr><tr><td><strong>Account SAS</strong></td><td>Storage account key</td><td>Tất cả storage services</td><td>⚠️ Quyền rộng nhất</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>Best Practices khi dùng SAS</h3>
+        <ul>
+          <li>🔐 Luôn dùng <strong>HTTPS</strong> để phân phối SAS, tránh tấn công man-in-the-middle</li>
+          <li>⭐ SAS bảo mật nhất là <strong>User Delegation SAS</strong> — không cần lưu storage account key trong code</li>
+          <li>⏰ Đặt <strong>thời gian hết hạn nhỏ nhất có thể</strong> — nếu SAS key bị lộ, thiệt hại chỉ trong thời gian ngắn</li>
+          <li>📏 Áp dụng nguyên tắc <strong>ít quyền nhất</strong> (least privilege) — chỉ cấp quyền cần thiết</li>
+          <li>🏢 Trong một số tình huống, tạo <strong>middle-tier service</strong> để quản lý user và quyền truy cập storage thay vì dùng SAS</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 7: When to use SAS -->
+  <div id="sas-when">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>⏰ Module 7: Khi nào dùng SAS</h2><div class="mhd-sub">⏰ Module 7: Khi nào dùng SAS</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Kịch bản sử dụng SAS</h3>
+        <p>Dùng SAS khi bạn muốn cung cấp quyền truy cập bảo mật vào tài nguyên trong storage account cho bất kỳ client nào không có quyền truy cập trực tiếp.</p>
+
+        <p>Kịch bản phổ biến: Dịch vụ nơi user đọc và ghi dữ liệu của họ vào storage account. Có 2 mẫu thiết kế điển hình:</p>
+
+        <h4>Mẫu 1: Front-end proxy service</h4>
+        <div class="flowchart">
+          <div class="fc-box">👤 Client</div>
+          <div class="fc-arr">↕</div>
+          <div class="fc-box">🖥️ Front-end Proxy Service<br><span style="font-size:.78rem;font-weight:400">(Authentication + Business Logic)</span></div>
+          <div class="fc-arr">↕</div>
+          <div class="fc-box green">☁️ Azure Storage</div>
+          <div style="display:flex;gap:24px;margin-top:6px;font-size:.8rem;">
+            <span style="color:#107c10">✅ Kiểm tra business rules</span>
+            <span style="color:#d13438">❌ Khó scale với large data / high-volume</span>
+          </div>
+        </div>
+
+        <h4>Mẫu 2: Lightweight SAS provider service</h4>
+        <div class="flow-v">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div class="flow-body"><strong>Client → SAS Provider</strong>Yêu cầu SAS token (Lightweight Auth Service)</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-body"><strong>SAS Provider → Client</strong>Trả về SAS token</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">3</div>
+            <div class="flow-body"><strong>Client → Azure Storage (trực tiếp)</strong>Truy cập thẳng Azure Storage bằng SAS — không qua proxy</div>
+          </div>
+          <div style="margin-top:8px;font-size:.82rem;color:#107c10;padding:6px 14px;background:#dff6dd;border-radius:6px;border-left:3px solid #107c10;">✅ Không cần route ALL data qua proxy &nbsp;·&nbsp; ✅ Dễ scale</div>
+        </div>
+
+        <h4>Kịch bản yêu cầu SAS trong Copy Operations:</h4>
+        <ul>
+          <li>Copy blob sang blob ở <strong>storage account khác</strong> → cần SAS cho source blob (và tùy chọn destination)</li>
+          <li>Copy file sang file ở <strong>storage account khác</strong> → cần SAS cho source file</li>
+          <li>Copy blob sang file hoặc file sang blob → cần SAS cho source object (ngay cả khi cùng storage account)</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 8: Stored Access Policies -->
+  <div id="stored-access-policies">
+<div class="mhd"><div class="mhd-ico">📋</div><div><h2>📋 Module 8: Stored Access Policies</h2><div class="mhd-sub">Module 8: Stored Access Policies</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Stored Access Policy là gì?</h3>
+        <p>Stored access policy cung cấp một lớp kiểm soát bổ sung đối với service-level SAS ở phía server. Thiết lập stored access policy giúp nhóm các SAS và cung cấp thêm các ràng buộc cho signatures bị ràng buộc bởi policy.</p>
+
+        <p>Bạn có thể dùng stored access policy để thay đổi start time, expiry time, hoặc permissions của signature, hoặc thu hồi nó sau khi đã cấp.</p>
+
+        <div class="callout info">
+          <div class="callout-title">📌 Tài nguyên hỗ trợ Stored Access Policies</div>
+          <ul>
+            <li>Blob containers</li>
+            <li>File shares</li>
+            <li>Queues</li>
+            <li>Tables</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h3>Tạo Stored Access Policy</h3>
+        <p>Access policy cho SAS gồm: start time, expiry time, và permissions. Bạn có thể chỉ định các tham số này trên signature URI, trong stored access policy, hoặc kết hợp cả hai. Tuy nhiên, không thể chỉ định một tham số ở cả hai nơi.</p>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Lưu ý thời gian kích hoạt</div>
+          <p>Khi thiết lập stored access policy trên container, table, queue hoặc share, có thể mất đến <strong>30 giây để có hiệu lực</strong>. Trong thời gian này, requests đối với SAS liên kết với policy có thể thất bại với status code 403 (Forbidden).</p>
+        </div>
+
+        <h4>Tạo Stored Access Policy bằng C# .NET:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+        <pre><code class="language-csharp">BlobSignedIdentifier identifier = new BlobSignedIdentifier
+{
+    Id = "stored access policy identifier",
+    AccessPolicy = new BlobAccessPolicy
+    {
+        ExpiresOn = DateTimeOffset.UtcNow.AddHours(1),
+        Permissions = "rw"
+    }
+};
+
+blobContainer.SetAccessPolicy(permissions: new BlobSignedIdentifier[] { identifier });</code></pre>
+</div>
+
+        <h4>Tạo Stored Access Policy bằng Azure CLI:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+        <pre><code class="language-bash">az storage container policy create \
+    --name &lt;stored access policy identifier&gt; \
+    --container-name &lt;container name&gt; \
+    --start &lt;start time UTC datetime&gt; \
+    --expiry &lt;expiry time UTC datetime&gt; \
+    --permissions &lt;(a)dd, (c)reate, (d)elete, (l)ist, (r)ead, or (w)rite&gt; \
+    --account-key &lt;storage account key&gt; \
+    --account-name &lt;storage account name&gt;</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>Sửa đổi hoặc Thu hồi Stored Access Policy</h3>
+        <ul>
+          <li><strong>Sửa đổi:</strong> Gọi access control list operation để thay thế policy hiện có</li>
+          <li><strong>Thu hồi bằng cách xóa:</strong> Gọi <code>Set ACL</code> với empty request body</li>
+          <li><strong>Thu hồi bằng cách đổi tên:</strong> Thay đổi signed identifier → phá vỡ liên kết với SAS hiện có</li>
+          <li><strong>Thu hồi bằng cách thay đổi expiry:</strong> Đặt expiry time về quá khứ → tất cả SAS liên kết hết hạn ngay lập tức</li>
+        </ul>
+        <p>Xóa hoặc sửa đổi stored access policy sẽ ảnh hưởng ngay lập tức đến tất cả SAS liên kết với nó.</p>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 9: Microsoft Graph Overview -->
+  <div id="graph-overview">
+<div class="mhd"><div class="mhd-ico">📊</div><div><h2>📊 Module 9: Microsoft Graph - Tổng quan</h2><div class="mhd-sub">Module 9: Microsoft Graph - Tổng quan</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Microsoft Graph là gì?</h3>
+        <p>Microsoft Graph là cổng vào dữ liệu và thông minh trong Microsoft 365. Nó cung cấp mô hình lập trình thống nhất mà bạn có thể sử dụng để truy cập lượng dữ liệu khổng lồ trong Microsoft 365, Windows 10, và Enterprise Mobility + Security.</p>
+
+        <div class="arch-grid">
+          <div class="arch-card" style="grid-row:span 2">
+            <div class="arch-card-hd">🌐 Microsoft Graph API</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Single endpoint: <code>https://graph.microsoft.com</code></div>
+              <div class="arch-item">REST APIs &amp; SDKs</div>
+              <div class="arch-item">User / Device Identity</div>
+              <div class="arch-item">Access, Compliance &amp; Security</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">🔌 Microsoft Graph Connectors</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Hướng <strong>INBOUND</strong> — đưa dữ liệu bên ngoài vào Microsoft Graph</div>
+              <div class="arch-item">Box, Google Drive, Jira, Salesforce…</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">📦 Microsoft Graph Data Connect</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Hướng <strong>OUTBOUND</strong> — xuất Graph data sang Azure data stores</div>
+              <div class="arch-item">An toàn, có thể mở rộng</div>
+            </div>
+          </div>
+        </div>
+
+        <h4>Ba thành phần chính:</h4>
+        <ul>
+          <li>🌐 <strong>Microsoft Graph API</strong> — Cung cấp single endpoint <code>https://graph.microsoft.com</code>. Dùng REST APIs hoặc SDKs để truy cập. Bao gồm các services quản lý user và device identity, access, compliance, và security.</li>
+          <li>🔌 <strong>Microsoft Graph Connectors</strong> — Hoạt động theo hướng inbound, đưa dữ liệu từ bên ngoài Microsoft cloud vào Microsoft Graph services và applications. Tăng cường trải nghiệm Microsoft 365 như Microsoft Search. Có connectors cho Box, Google Drive, Jira, Salesforce...</li>
+          <li>📦 <strong>Microsoft Graph Data Connect</strong> — Cung cấp bộ công cụ để truyền dữ liệu Microsoft Graph an toàn và có thể mở rộng tới các Azure data stores phổ biến.</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 10: Microsoft Graph REST -->
+  <div id="graph-rest">
+<div class="mhd"><div class="mhd-ico">🌐</div><div><h2>🌐 Module 10: Query Microsoft Graph qua REST</h2><div class="mhd-sub">Module 10: Query Microsoft Graph qua REST</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Cấu trúc REST Request</h3>
+        <p>Microsoft Graph là một RESTful web API cho phép truy cập tài nguyên Microsoft Cloud. Để gọi một phương thức REST:</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+        <pre><code class="language-http">{HTTP method} https://graph.microsoft.com/{version}/{resource}?{query-parameters}</code></pre>
+</div>
+
+        <h4>Các thành phần của request:</h4>
+        <table>
+  <thead><tr><th>Thành phần</th><th>Mô tả</th><th>Ví dụ</th></tr>
+  </thead>
+  <tbody><tr><td><code>{HTTP method}</code></td><td>HTTP method của request</td><td>GET, POST, PATCH, PUT, DELETE</td></tr><tr><td><code>{version}</code></td><td>Phiên bản API</td><td>v1.0 (production), beta (development)</td></tr><tr><td><code>{resource}</code></td><td>Tài nguyên trong Microsoft Graph</td><td>me, users, groups, drive, site</td></tr><tr><td><code>{query-parameters}</code></td><td>OData query options tùy chọn</td><td>$filter, $select, $orderby, $top</td></tr>
+        
+  </tbody>
+</table>
+
+        <h4>HTTP Methods:</h4>
+        <table>
+  <thead><tr><th>Method</th><th>Mục đích</th><th>Request Body</th></tr>
+  </thead>
+  <tbody><tr><td><strong>GET</strong></td><td>Đọc dữ liệu từ resource</td><td>Không cần</td></tr><tr><td><strong>POST</strong></td><td>Tạo resource mới hoặc thực hiện action</td><td>JSON</td></tr><tr><td><strong>PATCH</strong></td><td>Cập nhật resource với giá trị mới</td><td>JSON</td></tr><tr><td><strong>PUT</strong></td><td>Thay thế resource bằng resource mới</td><td>JSON</td></tr><tr><td><strong>DELETE</strong></td><td>Xóa resource</td><td>Không cần</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>Versions</h3>
+        <table>
+  <thead><tr><th>Version</th><th>Mục đích</th><th>Khuyến nghị</th></tr>
+  </thead>
+  <tbody><tr><td><code>v1.0</code></td><td>APIs thường được phát hành (Generally Available)</td><td>✅ Dùng cho tất cả production apps</td></tr><tr><td><code>beta</code></td><td>APIs đang trong preview; có thể có breaking changes</td><td>❌ KHÔNG dùng trong production apps</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>Query Parameters</h3>
+        <p>Query parameters có thể là OData system query options hoặc các chuỗi khác để tùy chỉnh response.</p>
+
+        <h4>Ví dụ filter:</h4>
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+        <pre><code class="language-http">GET https://graph.microsoft.com/v1.0/me/messages?filter=emailAddress eq 'jon@contoso.com'</code></pre>
+</div>
+
+        <h4>Công cụ hỗ trợ:</h4>
+        <ul>
+          <li>🔧 <strong>Graph Explorer</strong> — <code>https://developer.microsoft.com/graph/graph-explorer</code></li>
+          <li>🔧 <strong>Postman</strong> — <code>https://www.getpostman.com/</code></li>
+        </ul>
+
+        <div class="callout info">
+          <div class="callout-title">📌 Lưu ý về Resource Identifier</div>
+          <p>Trong requests tới Microsoft Identity Platform, nếu resource identifier bị bỏ qua trong scope parameter, resource sẽ được giả định là Microsoft Graph. Ví dụ: <code>scope=User.Read</code> tương đương với <code>https://graph.microsoft.com/User.Read</code></p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 11: Microsoft Graph SDK -->
+  <div id="graph-sdk">
+<div class="mhd"><div class="mhd-ico">💻</div><div><h2>💻 Module 11: Microsoft Graph SDK</h2><div class="mhd-sub">Module 11: Microsoft Graph SDK</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Giới thiệu Microsoft Graph SDK</h3>
+        <p>Microsoft Graph SDKs được thiết kế để đơn giản hóa việc xây dựng ứng dụng chất lượng cao, hiệu quả và có khả năng phục hồi truy cập Microsoft Graph. SDK gồm hai thành phần:</p>
+        <ul>
+          <li>📦 <strong>Service library</strong> — Chứa models và request builders được tạo từ Microsoft Graph metadata, cung cấp trải nghiệm phong phú và có thể khám phá</li>
+          <li>⚙️ <strong>Core library</strong> — Cung cấp tập hợp tính năng tăng cường làm việc với tất cả Microsoft Graph services: retry handling, secure redirects, transparent authentication, payload compression, pagination, batch requests</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Cài đặt Microsoft Graph .NET SDK</h3>
+        <table>
+  <thead><tr><th>NuGet Package</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><code>Microsoft.Graph</code></td><td>Models và request builders cho v1.0 endpoint với fluent API</td></tr><tr><td><code>Microsoft.Graph.Beta</code></td><td>Models và request builders cho beta endpoint</td></tr><tr><td><code>Microsoft.Graph.Core</code></td><td>Core library cho calls tới Microsoft Graph</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>Tạo Microsoft Graph Client</h3>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+        <pre><code class="language-csharp">var scopes = new[] { "User.Read" };
+
+// Multi-tenant apps can use "common",
+// single-tenant apps must use the tenant ID from the Azure portal
+var tenantId = "common";
+
+// Value from app registration
+var clientId = "YOUR_CLIENT_ID";
+
+// using Azure.Identity;
+var options = new TokenCredentialOptions
+{
+    AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+};
+
+// Callback function that receives the user prompt
+Func&lt;DeviceCodeInfo, CancellationToken, Task&gt; callback = (code, cancellation) =&gt; {
+    Console.WriteLine(code.Message);
+    return Task.FromResult(0);
+};
+
+var deviceCodeCredential = new DeviceCodeCredential(
+    callback, tenantId, clientId, options);
+
+var graphClient = new GraphServiceClient(deviceCodeCredential, scopes);</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>Các thao tác phổ biến với SDK</h3>
+
+        <h4>Đọc thông tin từ Microsoft Graph:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+        <pre><code class="language-csharp">// GET https://graph.microsoft.com/v1.0/me
+var user = await graphClient.Me
+    .GetAsync();</code></pre>
+</div>
+
+        <h4>Lấy danh sách entities với filter:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+        <pre><code class="language-json">// GET https://graph.microsoft.com/v1.0/me/messages?
+// $select=subject,sender&$filter=subject eq 'Hello world'
+var messages = await graphClient.Me.Messages
+    .GetAsync(requestConfig =&gt;
+    {
+        requestConfig.QueryParameters.Select =
+            ["subject", "sender"];
+        requestConfig.QueryParameters.Filter =
+            "subject eq 'Hello world'";
+    });</code></pre>
+</div>
+
+        <h4>Xóa entity:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+        <pre><code class="language-csharp">// DELETE https://graph.microsoft.com/v1.0/me/messages/{message-id}
+// messageId is a string containing the id property of the message
+await graphClient.Me.Messages[messageId]
+    .DeleteAsync();</code></pre>
+</div>
+
+        <h4>Tạo entity mới:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+        <pre><code class="language-json">// POST https://graph.microsoft.com/v1.0/me/calendars
+var calendar = new Calendar
+{
+    Name = "Volunteer",
+};
+
+var newCalendar = await graphClient.Me.Calendars
+    .PostAsync(calendar);</code></pre>
+</div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 12: Microsoft Graph Best Practices -->
+  <div id="graph-best-practices">
+<div class="mhd"><div class="mhd-ico">✅</div><div><h2>✅ Module 12: Best Practices Microsoft Graph</h2><div class="mhd-sub">Module 12: Best Practices Microsoft Graph</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>Xác thực (Authentication)</h3>
+        <p>Để truy cập dữ liệu trong Microsoft Graph, ứng dụng cần lấy OAuth 2.0 access token và trình bày cho Microsoft Graph theo một trong hai cách:</p>
+        <ul>
+          <li>HTTP <em>Authorization</em> request header — dưới dạng <em>Bearer</em> token</li>
+          <li>Graph client constructor — khi sử dụng Microsoft Graph client library</li>
+        </ul>
+        <p>Dùng MSAL API để lấy access token cho Microsoft Graph.</p>
+      </section>
+
+      <section>
+        <h3>Consent và Authorization Best Practices</h3>
+        <ul>
+          <li>🔐 <strong>Dùng ít quyền nhất</strong> — Chỉ yêu cầu permissions cần thiết và chỉ khi cần. Kiểm tra phần permissions trong method topics để chọn least privileged permissions.</li>
+          <li>🎯 <strong>Dùng đúng loại permission theo scenario</strong>:
+            <ul>
+              <li>Interactive apps (có user đăng nhập) → dùng <em>delegated</em> permissions</li>
+              <li>Background services/daemons (không có user) → dùng <em>application</em> permissions</li>
+            </ul>
+          </li>
+          <li>👥 <strong>Cân nhắc trải nghiệm end user và admin</strong> — Ai đồng ý cho ứng dụng? Hiểu sự khác biệt giữa static, dynamic, và incremental consent.</li>
+          <li>🌍 <strong>Cân nhắc multi-tenant applications</strong> — Khách hàng có thể có các chính sách kiểm soát ứng dụng và consent khác nhau. Xử lý 403 errors khi cần.</li>
+        </ul>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Cảnh báo quan trọng</div>
+          <p>Dùng application permissions cho interactive scenarios có thể gây rủi ro compliance và security. Đảm bảo kiểm tra privileges của user để tránh họ truy cập thông tin không mong muốn.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>Xử lý Responses hiệu quả</h3>
+
+        <h4>Pagination (Phân trang):</h4>
+        <p>Khi query resource collections, Microsoft Graph có thể trả về kết quả theo nhiều trang do server-side page size limits. Ứng dụng <strong>phải luôn</strong> xử lý khả năng responses bị phân trang và dùng thuộc tính <code>@odata.nextLink</code> để lấy trang kết quả tiếp theo. Trang cuối không có thuộc tính <code>@odata.nextLink</code>.</p>
+
+        <h4>Evolvable Enumerations:</h4>
+        <p>Thêm members vào enumerations hiện có có thể làm hỏng ứng dụng đang dùng enums đó. Microsoft Graph API dùng <em>evolvable enums</em> để thêm members mới mà không gây breaking change. Mặc định, GET operation chỉ trả về known members. Có thể opt in nhận unknown members bằng HTTP <code>Prefer</code> request header.</p>
+      </section>
+
+      <section>
+        <h3>Lưu trữ dữ liệu cục bộ</h3>
+        <p>Ứng dụng nên thực hiện calls tới Microsoft Graph để lấy dữ liệu real-time khi cần. Chỉ cache hoặc lưu trữ dữ liệu cục bộ khi cần thiết cho scenario cụ thể, phải phù hợp với terms of use và privacy policy, và không vi phạm <strong>Microsoft APIs Terms of Use</strong>. Ứng dụng cũng phải triển khai proper retention và deletion policies.</p>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="05-containerized-solutions.html" class="prev">← Ch.05 Containers</a>
+  <span class="pos">Chương 06 / 11</span>
+  <a href="07-security.html" class="next">Ch.07 Security →</a>
+</div>
+<footer style="background:#323130;color:#c8c8c8;text-align:center;padding:24px;margin-top:0;">
+  <p>Hướng Dẫn Học Tập AZ-204 | Xác thực &amp; Phân quyền | Được dịch sang Tiếng Việt</p>
+  <p style="font-size:0.85rem;margin-top:8px;opacity:0.7;">Nội dung dựa trên Microsoft Learn Training Modules</p>
+</footer>
+<script>
+function toggleToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.toggle('open');b.classList.toggle('open');}
+}
+function closeToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.remove('open');b.classList.remove('open');}
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

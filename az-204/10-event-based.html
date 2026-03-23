@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Giải Pháp Dựa Trên Sự Kiện - AZ-204 Tiếng Việt</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 10: Event-based Solutions ── */
+.hero { background: linear-gradient(135deg, #8764b8 0%, #5c2d91 50%, #32145a 100%); }
+.callout.purple { background: #f3effe; border-color: #8764b8; }
+.divider { text-align: center; padding: 20px; font-size: 1.5rem; color: #888; }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html" class="on">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">⚡</div>
+  <h1>Giải Pháp Dựa Trên Sự Kiện</h1>
+  <p>Azure Event Grid và Azure Event Hubs</p>
+  <div class="hero-tags">
+    <span class="hero-tag">📡 Event Grid</span>
+    <span class="hero-tag">🏭 Event Hubs</span>
+    <span class="hero-tag">🔄 Pub/Sub</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 10</div>
+  <a href="#event-grid-overview">Phần 1 – Azure Event Grid</a>
+  <a href="#webhooks">Phần 2 – Webhooks</a>
+  <a href="#filtering">Phần 3 – Lọc Sự Kiện</a>
+  <a href="#schema">Phần 4 – Event Schema</a>
+  <a href="#event-hubs-overview">Phần 5 – Azure Event Hubs</a>
+  <a href="#partitions">Phần 6 – Partitions</a>
+  <a href="#capture">Phần 7 – Event Hubs Capture</a>
+  <a href="#scale">Phần 8 – Scale Processing</a>
+</nav>
+<main class="content">
+
+  <!-- ===== PHẦN A: EVENT GRID ===== -->
+
+  <div id="event-grid-overview">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>📡 Phần 1: Khám Phá Azure Event Grid</h2><div class="mhd-sub">Phần 1: Khám Phá Azure Event Grid</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Azure Event Grid là dịch vụ phân phối tin nhắn Pub/Sub được quản lý hoàn toàn, có khả năng mở rộng cao, cung cấp các mẫu tiêu thụ tin nhắn linh hoạt sử dụng giao thức HTTP và MQTT. Với Azure Event Grid, bạn có thể:</p>
+        <ul>
+          <li>📨 Xây dựng data pipelines với dữ liệu thiết bị</li>
+          <li>🔗 Tích hợp ứng dụng</li>
+          <li>⚡ Xây dựng kiến trúc serverless hướng sự kiện</li>
+          <li>🌐 Hỗ trợ MQTT v3.1.1 và v5.0 cho IoT</li>
+          <li>☁️ Hỗ trợ CloudEvents 1.0 specification</li>
+        </ul>
+
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-hd">📤 Push Delivery — Publishers</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Azure Storage</div>
+              <div class="arch-item">Azure IoT Hub</div>
+              <div class="arch-item">Custom Apps</div>
+              <div class="arch-item">Partner Events</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">📥 Push Delivery — Subscribers</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Azure Functions</div>
+              <div class="arch-item">Logic Apps</div>
+              <div class="arch-item">Event Hubs</div>
+              <div class="arch-item">Service Bus</div>
+              <div class="arch-item">Webhooks</div>
+              <div class="arch-item">Storage Queues</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">🗂️ Event Grid Topics</div>
+            <div class="arch-card-body">
+              <div class="arch-item">System Topics — dịch vụ Azure tích hợp</div>
+              <div class="arch-item">Custom Topics — ứng dụng của bạn</div>
+              <div class="arch-item">Partner Topics — đối tác bên ngoài</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">⬇️ Pull Delivery (Namespace)</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Publisher gửi event đến Event Grid Namespace</div>
+              <div class="arch-item">Subscriber chủ động kéo (pull) sự kiện về</div>
+              <div class="arch-item">Phù hợp cho workload không cần real-time push</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>🧩 Các Khái Niệm Trong Azure Event Grid</h3>
+
+        <h4>1. Publishers (Nhà xuất bản)</h4>
+        <p>Publisher là ứng dụng gửi sự kiện đến Event Grid. Có thể là cùng ứng dụng nơi sự kiện bắt nguồn, hoặc nguồn sự kiện. Các dịch vụ Azure xuất bản sự kiện để thông báo về sự kiện xảy ra trong dịch vụ của chúng.</p>
+        <p><strong>Partner (Đối tác):</strong> Là loại publisher gửi sự kiện từ hệ thống của họ để cung cấp cho khách hàng Azure. Partners không chỉ xuất bản mà còn có thể nhận sự kiện từ Event Grid thông qua tính năng <em>Partner Events</em>.</p>
+
+        <h4>2. Events và CloudEvents (Sự kiện)</h4>
+        <p>Sự kiện là lượng thông tin nhỏ nhất mô tả đầy đủ điều gì đó đã xảy ra. Mỗi sự kiện có thông tin chung như:</p>
+        <ul>
+          <li><code>source</code> - nguồn của sự kiện</li>
+          <li><code>time</code> - thời điểm xảy ra sự kiện</li>
+          <li><code>id</code> - định danh duy nhất</li>
+        </ul>
+        <p>Event Grid tuân thủ đặc tả <strong>CloudEvents 1.0</strong> của Cloud Native Computing Foundation:</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+    "specversion" : "1.0",
+    "type" : "com.yourcompany.order.created",
+    "source" : "https://yourcompany.com/orders/",
+    "subject" : "O-28964",
+    "id" : "A234-1234-1234",
+    "time" : "2018-04-05T17:31:00Z",
+    "comexampleextension1" : "value",
+    "comexampleothervalue" : 5,
+    "datacontenttype" : "application/json",
+    "data" : {
+       "orderId" : "O-28964",
+       "URL" : "https://com.yourcompany/orders/O-28964"
+    }
+}</code></pre>
+</div>
+
+        <div class="callout info">
+          <div class="callout-title">📏 Giới hạn kích thước</div>
+          <p>Kích thước tối đa cho một sự kiện là <strong>1 MB</strong>. Các sự kiện vượt quá 64 KB bị tính phí theo tăng dần 64 KB.</p>
+        </div>
+
+        <h4>3. Event Sources (Nguồn sự kiện)</h4>
+        <p>Nguồn sự kiện là nơi sự kiện xảy ra. Mỗi nguồn sự kiện liên quan đến một hoặc nhiều loại sự kiện. Ví dụ:</p>
+        <ul>
+          <li>Azure Storage → Blob created events</li>
+          <li>IoT Hub → Device created events</li>
+          <li>Ứng dụng của bạn → Custom events</li>
+        </ul>
+
+        <h4>4. Topics (Chủ đề)</h4>
+        <p>Topic lưu giữ các sự kiện đã được xuất bản đến Event Grid. Có 3 loại topic:</p>
+
+        <table>
+  <thead><tr><th>Loại Topic</th><th>Mô Tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>System Topics</strong></td><td>Topic tích hợp do các dịch vụ Azure cung cấp. Không thấy trong subscription Azure vì publisher sở hữu topic. Đăng ký bằng cách cung cấp thông tin về tài nguyên muốn nhận sự kiện.</td></tr><tr><td><strong>Custom Topics</strong></td><td>Topic của ứng dụng và bên thứ ba. Khi bạn tạo hoặc được cấp quyền truy cập vào custom topic, bạn thấy nó trong subscription.</td></tr><tr><td><strong>Partner Topics</strong></td><td>Loại topic để đăng ký sự kiện từ partner. Sử dụng tính năng Partner Events.</td></tr>
+        
+  </tbody>
+</table>
+
+        <h4>5. Event Subscriptions (Đăng ký sự kiện)</h4>
+        <p>Subscription cho Event Grid biết sự kiện nào trong topic bạn muốn nhận. Khi tạo subscription:</p>
+        <ul>
+          <li>Cung cấp endpoint để xử lý sự kiện</li>
+          <li>Có thể lọc theo loại sự kiện hoặc mẫu subject</li>
+          <li>Có thể đặt thời hạn hết hạn</li>
+        </ul>
+
+        <h4>6. Event Handlers (Xử lý sự kiện)</h4>
+        <p>Từ góc độ Event Grid, event handler là nơi sự kiện được gửi đến. Event Grid hỗ trợ nhiều loại handler:</p>
+        <ul>
+          <li>HTTP Webhook: Thử lại cho đến khi handler trả về <code>200 OK</code></li>
+          <li>Azure Storage Queue: Thử lại cho đến khi Queue service xử lý thành công</li>
+          <li>Azure Functions, Logic Apps, Event Hubs, Service Bus, v.v.</li>
+        </ul>
+
+        <h4>7. Bảo Mật (Security)</h4>
+        <p>Event Grid cung cấp bảo mật cho việc đăng ký topic và xuất bản sự kiện:</p>
+        <ul>
+          <li>Khi đăng ký, phải có quyền phù hợp trên Event Grid topic</li>
+          <li>Sử dụng managed identity để xác thực với các service Azure</li>
+          <li>Ví dụ: Để gửi đến Event Hubs, managed identity phải có vai trò <strong>Event Hubs Data Sender</strong></li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 2: WEBHOOKS -->
+  <div id="webhooks">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>🔗 Phần 2: Webhooks và Phân Phối Sự Kiện</h2><div class="mhd-sub">Phần 2: Webhooks và Phân Phối Sự Kiện</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Webhooks là một trong nhiều cách để nhận sự kiện từ Azure Event Grid. Khi một sự kiện mới sẵn sàng, dịch vụ Event Grid sẽ POST HTTP request đến endpoint đã cấu hình với thông tin sự kiện trong request body.</p>
+
+        <h3>✅ Xác Thực Endpoint (Endpoint Validation)</h3>
+        <p>Event Grid yêu cầu bạn chứng minh quyền sở hữu webhook endpoint trước khi bắt đầu phân phối sự kiện. Điều này ngăn chặn người dùng độc hại flood endpoint của bạn.</p>
+
+        <h4>Phương thức xác thực 1: Handshake đồng bộ</h4>
+        <p>Event Grid gửi sự kiện <code>Microsoft.EventGrid.SubscriptionValidationEvent</code> với <code>validationCode</code>. Endpoint phải echo lại code này trong response body.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// C# - Xử lý SubscriptionValidationEvent
+using Azure.Messaging.EventGrid;
+using Azure.Messaging.EventGrid.SystemEvents;
+
+public static async Task&lt;IActionResult&gt; Run(HttpRequest req, ILogger log)
+{
+    BinaryData events = await BinaryData.FromStreamAsync(req.Body);
+    EventGridEvent[] eventGridEvents = EventGridEvent.ParseMany(events);
+
+    foreach (EventGridEvent eventGridEvent in eventGridEvents)
+    {
+        if (eventGridEvent.TryGetSystemEventData(out object eventData))
+        {
+            if (eventData is SubscriptionValidationEventData subscriptionValidationEventData)
+            {
+                log.LogInformation($"Validation code: {subscriptionValidationEventData.ValidationCode}");
+                var responseData = new
+                {
+                    ValidationResponse = subscriptionValidationEventData.ValidationCode
+                };
+                return new OkObjectResult(responseData);
+            }
+        }
+    }
+    return new OkObjectResult(string.Empty);
+}</code></pre>
+</div>
+
+        <h4>Dữ liệu Validation Event:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">[{
+  "id": "2d1781af-3a4c-4d7c-bd0c-e34b19da4e66",
+  "topic": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "subject": "",
+  "data": {
+    "validationCode": "512d38b6-c7b8-40c8-89fe-f46f9e9622b6"
+  },
+  "eventType": "Microsoft.EventGrid.SubscriptionValidationEvent",
+  "eventTime": "2018-01-25T22:12:19.4556811Z",
+  "metadataVersion": "1",
+  "dataVersion": "1"
+}]</code></pre>
+</div>
+
+        <h4>Phương thức xác thực 2: CloudEvents v1.0 Abuse Protection</h4>
+        <p>Khi sử dụng CloudEvents schema, Event Grid sử dụng cơ chế bảo vệ lạm dụng (abuse protection) của CloudEvents v1.0 thông qua phương thức <strong>HTTP OPTIONS</strong>.</p>
+
+        <p>Luồng handshake:</p>
+        <ol>
+          <li>Event Grid gửi HTTP OPTIONS request với header <code>WebHook-Request-Origin</code></li>
+          <li>Delivery target phản hồi với <code>WebHook-Allowed-Origin</code> và <code>WebHook-Allowed-Rate</code></li>
+        </ol>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">HTTP</span></div>
+<pre><code class="language-http"># Validation Request
+WebHook-Request-Origin: eventemitter.example.com
+
+# Validation Response
+WebHook-Allowed-Origin: eventemitter.example.com
+WebHook-Allowed-Rate: 120  # requests per minute</code></pre>
+</div>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Xác thực thủ công</div>
+          <p>Nếu bạn sử dụng dịch vụ API bên thứ ba (như Zapier hoặc IFTTT) và không thể echo lại validation code theo lập trình, bạn có thể xác thực subscription thủ công bằng URL xác thực được gửi trong <code>validationUrl</code>.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>📨 Xử Lý Sự Kiện Blob Storage</h3>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">// Mở rộng để xử lý Microsoft.Storage.BlobCreated
+if (eventData is StorageBlobCreatedEventData storageBlobCreatedEventData)
+{
+    log.LogInformation($"Got BlobCreated event data, blob URI {storageBlobCreatedEventData.Url}");
+}
+
+// Test payload cho BlobCreated
+[{
+  "topic": "/subscriptions/{sub-id}/resourceGroups/Storage/providers/Microsoft.Storage/storageAccounts/xstoretestaccount",
+  "subject": "/blobServices/default/containers/testcontainer/blobs/testfile.txt",
+  "eventType": "Microsoft.Storage.BlobCreated",
+  "eventTime": "2017-06-26T18:41:00.9584103Z",
+  "id": "aaaa0a0a-bb1b-cc2c-dd3d-eeeeee4e4e4e",
+  "data": {
+    "api": "PutBlockList",
+    "contentType": "text/plain",
+    "contentLength": 524288,
+    "blobType": "BlockBlob",
+    "url": "https://example.blob.core.windows.net/testcontainer/testfile.txt"
+  },
+  "dataVersion": ""
+}]</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>📬 Message Headers</h3>
+        <p>Các thuộc tính nhận được trong message headers khi nhận sự kiện từ Event Grid:</p>
+        <table>
+  <thead><tr><th>Tên Thuộc Tính</th><th>Mô Tả</th></tr>
+  </thead>
+  <tbody><tr><td><code>aeg-subscription-name</code></td><td>Tên của event subscription</td></tr><tr><td><code>aeg-delivery-count</code></td><td>Số lần đã thử phân phối sự kiện</td></tr><tr><td><code>aeg-event-type</code></td><td>Loại sự kiện: SubscriptionValidation, Notification, hoặc SubscriptionDeletion</td></tr><tr><td><code>aeg-metadata-version</code></td><td>Phiên bản metadata của sự kiện</td></tr><tr><td><code>aeg-data-version</code></td><td>Phiên bản data của sự kiện</td></tr><tr><td><code>aeg-output-event-id</code></td><td>ID của Event Grid event</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 3: FILTERING -->
+  <div id="filtering">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>🔍 Phần 3: Lọc Sự Kiện Event Grid</h2><div class="mhd-sub">Phần 3: Lọc Sự Kiện Event Grid</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Khi tạo event subscription, bạn có ba lựa chọn để lọc sự kiện được gửi đến endpoint:</p>
+        <ol>
+          <li><strong>Event types (Loại sự kiện)</strong></li>
+          <li><strong>Subject begins with or ends with (Subject bắt đầu hoặc kết thúc bằng)</strong></li>
+          <li><strong>Advanced fields and operators (Trường nâng cao và toán tử)</strong></li>
+        </ol>
+      </section>
+
+      <section>
+        <h3>1️⃣ Lọc theo Loại Sự Kiện</h3>
+        <p>Theo mặc định, tất cả loại sự kiện cho nguồn sự kiện được gửi đến endpoint. Bạn có thể chỉ gửi một số loại nhất định.</p>
+
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+  "filter": {
+    "includedEventTypes": [
+      "Microsoft.Resources.ResourceWriteFailure",
+      "Microsoft.Resources.ResourceWriteSuccess"
+    ]
+  }
+}</code></pre>
+</div>
+
+        <p>Ví dụ với ARM template - lọc blob events:</p>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+  "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+  "properties": {
+    "destination": {
+      "properties": { "endpointUrl": "[parameters('endpoint')]" },
+      "endpointType": "WebHook"
+    },
+    "filter": {
+      "includedEventTypes": [
+        "Microsoft.Storage.BlobCreated",
+        "Microsoft.Storage.BlobDeleted"
+      ]
+    }
+  }
+}</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>2️⃣ Lọc theo Subject (Chủ đề)</h3>
+        <p>Để lọc đơn giản theo subject, chỉ định giá trị bắt đầu hoặc kết thúc cho subject.</p>
+
+        <h4>Ví dụ với Blob Storage events:</h4>
+        <p>Subject của Blob storage events có định dạng:</p>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">Code</span></div>
+<pre><code class="language-plaintext">/blobServices/default/containers/&lt;containername&gt;/blobs/&lt;blobname&gt;</code></pre>
+</div>
+
+        <table>
+  <thead><tr><th>Mục tiêu</th><th>Filter</th></tr>
+  </thead>
+  <tbody><tr><td>Tất cả sự kiện trong storage account</td><td>Để trống subject filter</td></tr><tr><td>Events từ blobs trong container có prefix</td><td><code>subjectBeginsWith: /blobServices/default/containers/containerprefix</code></td></tr><tr><td>Events từ blobs trong container cụ thể</td><td><code>subjectBeginsWith: /blobServices/default/containers/containername/</code></td></tr><tr><td>Events từ blobs có suffix</td><td><code>subjectEndsWith: .txt</code> hoặc <code>.log</code></td></tr>
+        
+  </tbody>
+</table>
+
+        <p>Cách chia nhỏ: Nếu subject là <code>/A/B/C</code>, subscriber lọc theo <code>/A</code> nhận tất cả events với subject như <code>/A/B/C</code> hoặc <code>/A/D/E</code>. Subscriber lọc theo <code>/A/B</code> nhận ít hơn.</p>
+      </section>
+
+      <section>
+        <h3>3️⃣ Lọc Nâng Cao (Advanced Filtering)</h3>
+        <p>Để lọc theo giá trị trong các trường data và chỉ định toán tử so sánh, sử dụng tùy chọn lọc nâng cao. Chỉ định:</p>
+        <ul>
+          <li><strong>operator type:</strong> Loại so sánh</li>
+          <li><strong>key:</strong> Trường trong event data để lọc (number, boolean, string, hoặc array)</li>
+          <li><strong>values:</strong> Giá trị để so sánh với key</li>
+        </ul>
+
+        <h4>Các toán tử cho số (Numbers):</h4>
+        <table>
+  <thead><tr><th>Toán tử</th><th>Mô tả</th><th>Ví dụ JSON</th></tr>
+  </thead>
+  <tbody><tr><td><code>NumberIn</code></td><td>Key bằng một trong các giá trị filter</td><td><code>"values": [5, 1]</code></td></tr><tr><td><code>NumberNotIn</code></td><td>Key không bằng bất kỳ giá trị filter nào</td><td><code>"values": [41, 0]</code></td></tr><tr><td><code>NumberLessThan</code></td><td>Key nhỏ hơn giá trị filter</td><td><code>"value": 100</code></td></tr><tr><td><code>NumberGreaterThan</code></td><td>Key lớn hơn giá trị filter</td><td><code>"value": 20</code></td></tr><tr><td><code>NumberLessThanOrEquals</code></td><td>Key nhỏ hơn hoặc bằng giá trị filter</td><td><code>"value": 100</code></td></tr><tr><td><code>NumberGreaterThanOrEquals</code></td><td>Key lớn hơn hoặc bằng giá trị filter</td><td><code>"value": 30</code></td></tr><tr><td><code>NumberInRange</code></td><td>Key nằm trong một trong các khoảng</td><td><code>"values": [[3.14, 999.95], [3000, 4000]]</code></td></tr><tr><td><code>NumberNotInRange</code></td><td>Key không nằm trong bất kỳ khoảng nào</td><td><code>"values": [[3000, 4000]]</code></td></tr>
+        
+  </tbody>
+</table>
+
+        <h4>Toán tử cho boolean:</h4>
+        <table>
+  <thead><tr><th>Toán tử</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><code>BoolEquals</code></td><td>Key bằng giá trị boolean được chỉ định</td></tr>
+        
+  </tbody>
+</table>
+
+        <h4>Các toán tử cho string:</h4>
+        <table>
+  <thead><tr><th>Toán tử</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><code>StringContains</code></td><td>Key chứa bất kỳ giá trị filter nào (substring)</td></tr><tr><td><code>StringNotContains</code></td><td>Key không chứa bất kỳ giá trị filter nào</td></tr><tr><td><code>StringBeginsWith</code></td><td>Key bắt đầu bằng bất kỳ giá trị filter nào</td></tr><tr><td><code>StringNotBeginsWith</code></td><td>Key không bắt đầu bằng bất kỳ giá trị filter nào</td></tr><tr><td><code>StringEndsWith</code></td><td>Key kết thúc bằng một trong các giá trị filter</td></tr><tr><td><code>StringNotEndsWith</code></td><td>Key không kết thúc bằng bất kỳ giá trị filter nào</td></tr><tr><td><code>StringIn</code></td><td>Key khớp chính xác với một trong các giá trị filter</td></tr><tr><td><code>StringNotIn</code></td><td>Key không khớp với bất kỳ giá trị filter nào</td></tr>
+        
+  </tbody>
+</table>
+
+        <h4>Toán tử đặc biệt:</h4>
+        <table>
+  <thead><tr><th>Toán tử</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><code>IsNullOrUndefined</code></td><td>Key là NULL hoặc undefined</td></tr><tr><td><code>IsNotNull</code></td><td>Key không phải NULL hoặc undefined</td></tr>
+        
+  </tbody>
+</table>
+
+        <h4>Ví dụ lọc nâng cao:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">// NumberIn filter
+"advancedFilters": [{
+    "operatorType": "NumberIn",
+    "key": "data.counter",
+    "values": [5, 1]
+}]
+
+// StringContains filter
+"advancedFilters": [{
+    "operatorType": "StringContains",
+    "key": "data.key1",
+    "values": ["microsoft", "azure"]
+}]
+
+// StringEndsWith filter
+"advancedFilters": [{
+    "operatorType": "StringEndsWith",
+    "key": "data.key1",
+    "values": ["jpg", "jpeg", "png"]
+}]
+
+// BoolEquals filter
+"advancedFilters": [{
+    "operatorType": "BoolEquals",
+    "key": "data.isEnabled",
+    "value": true
+}]</code></pre>
+</div>
+
+        <h4>Logic AND và OR:</h4>
+        <div class="callout info">
+          <div class="callout-title">💡 Logic Filters</div>
+          <ul>
+            <li><strong>Một filter với nhiều giá trị:</strong> Thực hiện phép <strong>OR</strong> (key phải là một trong các giá trị)</li>
+            <li><strong>Nhiều filter khác nhau:</strong> Thực hiện phép <strong>AND</strong> (mỗi điều kiện filter phải được thỏa mãn)</li>
+          </ul>
+        </div>
+
+        <h4>Giới hạn lọc nâng cao:</h4>
+        <ul>
+          <li>25 advanced filters và 25 filter values trên tất cả các filter mỗi Event Grid subscription</li>
+          <li>512 ký tự mỗi giá trị string</li>
+          <li>Key có ký tự <strong>. (dấu chấm)</strong> không được hỗ trợ escape</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>☁️ Lọc với CloudEvents Schema</h3>
+        <p>Với CloudEvents schema, sử dụng các giá trị sau cho key: <code>id</code>, <code>source</code>, <code>type</code>, <code>dataschema</code>, hoặc event data (như <code>data.key1</code>).</p>
+
+        <p>Bạn cũng có thể sử dụng extension context attributes trong CloudEvents 1.0:</p>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+    "specversion" : "1.0",
+    "type" : "com.example.someevent",
+    "source" : "/mycontext",
+    "comexampleextension1" : "value",
+    "comexampleothervalue" : 5,
+    "data" : { "appinfoA" : "abc", "appinfoB" : 123 }
+}
+
+// Filter theo extension attribute
+"advancedFilters": [{
+    "operatorType": "StringBeginsWith",
+    "key": "comexampleothervalue",
+    "values": ["5", "1"]
+}]</code></pre>
+</div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 4: EVENT SCHEMA -->
+  <div id="schema">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>📋 Phần 4: Lược Đồ Sự Kiện Event Grid</h2><div class="mhd-sub">Phần 4: Lược Đồ Sự Kiện Event Grid</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Bài này mô tả Event Grid schema - định dạng sự kiện độc quyền, không mở rộng nhưng hoàn toàn chức năng. Event Grid vẫn hỗ trợ định dạng này, nhưng <strong>CloudEvents</strong> là định dạng được khuyến nghị.</p>
+
+        <h3>📄 Lược Đồ Event Grid</h3>
+        <p>Cấu trúc JSON cơ bản:</p>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">[
+  {
+    "topic": string,
+    "subject": string,
+    "id": string,
+    "eventType": string,
+    "eventTime": string,
+    "data": {
+      object-unique-to-each-publisher
+    },
+    "dataVersion": string,
+    "metadataVersion": string
+  }
+]</code></pre>
+</div>
+
+        <h4>Ví dụ đầy đủ - Azure Blob Storage event:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">[
+  {
+    "topic": "/subscriptions/aaaa0a0a-bb1b-cc2c-dd3d-eeeeee4e4e4e/resourceGroups/contosorg/providers/Microsoft.Storage/storageAccounts/contosostorage",
+    "subject": "/blobServices/default/containers/testcontainer/blobs/dataflow.jpg",
+    "eventType": "Microsoft.Storage.BlobCreated",
+    "id": "aaaaaaaa-0000-1111-2222-bbbbbbbbbbbb",
+    "data": {
+      "api": "PutBlob",
+      "clientRequestId": "bbbbbbbb-1111-2222-3333-cccccccccccc",
+      "requestId": "cccccccc-2222-3333-4444-dddddddddddd",
+      "eTag": "0x8DD15A69488FE5A",
+      "contentType": "image/jpeg",
+      "contentLength": 52577,
+      "blobType": "BlockBlob",
+      "url": "https://contosostorage.blob.core.windows.net/testcontainer/dataflow.jpg",
+      "sequencer": "0000000000000000000000000003A13C00000000007da85d"
+    },
+    "dataVersion": "",
+    "metadataVersion": "1",
+    "eventTime": "2024-12-06T03:32:15.7238874Z"
+  }
+]</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>🏷️ Thuộc Tính Sự Kiện</h3>
+        <table>
+  <thead><tr><th>Thuộc tính</th><th>Kiểu</th><th>Bắt buộc?</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><code>topic</code></td><td>string</td><td>Không bắt buộc</td><td>Đường dẫn đầy đủ đến nguồn sự kiện. Event Grid cung cấp giá trị này nếu không có.</td></tr><tr><td><code>subject</code></td><td>string</td><td>Có</td><td>Đường dẫn được định nghĩa bởi publisher đến chủ đề sự kiện</td></tr><tr><td><code>eventType</code></td><td>string</td><td>Có</td><td>Một trong các loại sự kiện đã đăng ký cho nguồn sự kiện này</td></tr><tr><td><code>eventTime</code></td><td>string</td><td>Có</td><td>Thời điểm sự kiện được tạo theo UTC của provider</td></tr><tr><td><code>id</code></td><td>string</td><td>Có</td><td>Định danh duy nhất cho sự kiện</td></tr><tr><td><code>data</code></td><td>object</td><td>Có</td><td>Dữ liệu sự kiện cụ thể cho resource provider</td></tr><tr><td><code>dataVersion</code></td><td>string</td><td>Không bắt buộc</td><td>Phiên bản schema của object data</td></tr><tr><td><code>metadataVersion</code></td><td>string</td><td>Không bắt buộc</td><td>Phiên bản schema của event metadata (hiện tại chỉ có "1")</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>☁️ CloudEvents (Được Khuyến Nghị)</h3>
+        <p>CloudEvents là định dạng sự kiện được khuyến nghị, cung cấp định nghĩa tiêu chuẩn và không phụ thuộc giao thức. Event Grid đầu tư vào các tính năng liên quan đến CloudEvents JSON format.</p>
+
+        <p>Bảng chuyển đổi schema được hỗ trợ:</p>
+        <table>
+  <thead><tr><th>Input Schema</th><th>Output Schema</th></tr>
+  </thead>
+  <tbody><tr><td>CloudEvents format</td><td>CloudEvents format</td></tr><tr><td>Event Grid format</td><td>CloudEvents format</td></tr><tr><td>Event Grid format</td><td>Event Grid format</td></tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Lưu ý quan trọng</div>
+          <p>Output schema kiểu Event Grid không thể sử dụng khi CloudEvents là input schema, vì CloudEvents hỗ trợ extension attributes mà Event Grid schema không hỗ trợ.</p>
+        </div>
+
+        <h4>Giới hạn kích thước:</h4>
+        <ul>
+          <li>Mảng sự kiện khi POST đến topic: tối đa <strong>1 MB</strong></li>
+          <li>Mỗi sự kiện trong mảng: tối đa <strong>1 MB</strong></li>
+          <li>Các thao tác tính phí theo tăng dần 64 KB (event 130 KB bị tính như 3 event)</li>
+          <li>Event Grid gửi đến subscriber trong mảng chỉ có một sự kiện</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="divider">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+  <div style="text-align:center; margin-bottom:32px;">
+    <h2 style="color:#008272; font-size:1.8rem;">🏗️ AZURE EVENT HUBS</h2>
+    <p style="color:#666;">Luồng dữ liệu thời gian thực với throughput triệu sự kiện/giây</p>
+  </div>
+
+  <!-- MODULE 5: EVENT HUBS OVERVIEW -->
+  <div id="event-hubs-overview">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>🚀 Phần 5: Khám Phá Azure Event Hubs</h2><div class="mhd-sub">Phần 5: Khám Phá Azure Event Hubs</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Azure Event Hubs là dịch vụ phát trực tuyến dữ liệu gốc trên đám mây, có thể phát trực tuyến hàng triệu sự kiện mỗi giây với độ trễ thấp, từ bất kỳ nguồn nào đến bất kỳ đích nào. Event Hubs tương thích với Apache Kafka, cho phép chạy các workload Kafka hiện có mà không cần thay đổi code.</p>
+
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-hd">🏛️ Namespace</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Vùng chứa quản lý cho Event Hubs</div>
+              <div class="arch-item">Điểm cuối mạng duy nhất</div>
+              <div class="arch-item">Quản lý bảo mật, geo-disaster recovery</div>
+              <div class="arch-item">Cấp phát throughput ở cấp namespace</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">📋 Event Hub / Kafka Topic</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Partition 0: E1 → E2 → E3 → E4 → E5</div>
+              <div class="arch-item">Partition 1: E1 → E2 → E3</div>
+              <div class="arch-item">Partition 2: E1 → E2 → E3 → E4</div>
+              <div class="arch-item">Partition 3: E1 → E2</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">👥 Consumer Group 1 — App A</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Offset riêng: vị trí đọc của App A</div>
+              <div class="arch-item">Đọc độc lập với tốc độ riêng</div>
+              <div class="arch-item">Không ảnh hưởng đến Consumer Group 2</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">👥 Consumer Group 2 — App B</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Offset riêng: vị trí đọc của App B</div>
+              <div class="arch-item">Đọc cùng data stream độc lập</div>
+              <div class="arch-item">Ví dụ: analytics, archival, alerting</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>🔑 Các Khả Năng Chính</h3>
+
+        <h4>1. Apache Kafka trên Azure Event Hubs</h4>
+        <p>Event Hubs là engine phát trực tuyến sự kiện đa giao thức, hỗ trợ gốc AMQP, Apache Kafka và HTTPS. Bạn có thể mang Kafka workloads sang Event Hubs <strong>mà không thay đổi code</strong>.</p>
+
+        <h4>2. Schema Registry</h4>
+        <p>Azure Schema Registry trong Event Hubs cung cấp kho lưu trữ tập trung để quản lý schema của ứng dụng phát trực tuyến sự kiện. Schema Registry đi kèm miễn phí với mỗi Event Hubs namespace.</p>
+
+        <h4>3. Xử lý Stream Thời Gian Thực với Stream Analytics</h4>
+        <p>Event Hubs tích hợp với Azure Stream Analytics để kích hoạt xử lý stream thời gian thực. Với trình chỉnh sửa no-code trong portal, bạn có thể phát triển Stream Analytics job bằng drag-and-drop.</p>
+      </section>
+
+      <section>
+        <h3>📦 Các Thành Phần Chính</h3>
+        <table>
+  <thead><tr><th>Thành phần</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>Producer applications</strong></td><td>Ingest dữ liệu vào event hub bằng Event Hubs SDKs hoặc Kafka producer client</td></tr><tr><td><strong>Namespace</strong></td><td>Vùng chứa quản lý cho một hoặc nhiều event hubs. Xử lý cấp phát throughput, bảo mật mạng, geo-disaster recovery ở cấp namespace.</td></tr><tr><td><strong>Event Hubs/Kafka topic</strong></td><td>Append-only distributed log, có thể có một hoặc nhiều partitions</td></tr><tr><td><strong>Partitions</strong></td><td>Dùng để scale event hub (như làn đường trên cao tốc)</td></tr><tr><td><strong>Consumer applications</strong></td><td>Đọc dữ liệu bằng cách seek qua event log và duy trì consumer offset</td></tr><tr><td><strong>Consumer group</strong></td><td>Nhóm logic của consumer instances đọc dữ liệu từ event hub. Nhiều consumer có thể đọc cùng streaming data độc lập với tốc độ riêng và offsets riêng.</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 6: PARTITIONS -->
+  <div id="partitions">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>📊 Phần 6: Partitions trong Event Hubs</h2><div class="mhd-sub">Phần 6: Partitions trong Event Hubs</div></div></div>
+<div class="msec">
+
+      <section>
+        <h3>📐 Partition là gì?</h3>
+        <p>Partition là cơ chế tổ chức dữ liệu cho phép publish và consume song song. Partition có thể được coi như <strong>commit log</strong>. Partitions lưu giữ event data chứa:</p>
+        <ul>
+          <li>Body của sự kiện</li>
+          <li>Property bag do người dùng định nghĩa</li>
+          <li>Metadata như offset trong partition, sequence number trong stream</li>
+          <li>Service-side timestamp khi được chấp nhận</li>
+        </ul>
+
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num">P0</div>
+            <div class="flow-body">
+              <strong>Partition 0 — Commit Log (đọc trái → phải)</strong>
+              offset=0 [Event 1] → offset=1 [Event 2] → offset=2 [Event 3] → offset=3 [Event 4] → offset=4 [Event 5]
+              <br><em style="font-size:.78rem;color:#666;">← Cũ hơn &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Mới hơn →</em>
+            </div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:#107c10">E</div>
+            <div class="flow-body">
+              <strong>Epoch (Exclusive) Consumers — mỗi partition 1 owner</strong>
+              P0 → Consumer A &nbsp;|&nbsp; P1 → Consumer B &nbsp;|&nbsp; P2 → Consumer A &nbsp;|&nbsp; P3 → Consumer C
+            </div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:#8764b8">N</div>
+            <div class="flow-body">
+              <strong>Non-Epoch Consumers — nhiều readers cùng partition</strong>
+              P0 → Consumer 1, Consumer 2, Consumer 3 (fan-out, tối đa 5) — không tăng throughput
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>✅ Lợi Ích Của Partitions</h3>
+        <ul>
+          <li><strong>Tăng throughput:</strong> Nhiều partition song song → nhân throughput IO</li>
+          <li><strong>Xử lý song song:</strong> Nhiều tiến trình consumer xử lý song song</li>
+          <li><strong>Scalability:</strong> Mỗi partition là owner độc lập</li>
+        </ul>
+
+        <h4>Hướng dẫn throughput mỗi partition:</h4>
+        <table>
+  <thead><tr><th>Tầng</th><th>Ingress</th><th>Egress</th></tr>
+  </thead>
+  <tbody><tr><td>Standard</td><td>~1 MB/s</td><td>~2 MB/s</td></tr><tr><td>Premium và Dedicated</td><td>~1-2 MB/s</td><td>~2-5 MB/s</td></tr>
+        
+  </tbody>
+</table>
+      </section>
+
+      <section>
+        <h3>🔢 Số Lượng Partitions</h3>
+        <ul>
+          <li>Được chỉ định khi tạo event hub</li>
+          <li>Đối với tầng Standard: <strong>không thể thay đổi</strong> sau khi tạo</li>
+          <li>Đối với tầng Premium/Dedicated: có thể <strong>tăng</strong> (không giảm) sau khi tạo</li>
+          <li>Số partition = số consumer song song tối đa trên mỗi consumer group</li>
+        </ul>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Không ảnh hưởng đến giá</div>
+          <p>Số lượng partition không ảnh hưởng đến giá. Giá phụ thuộc vào throughput units (Standard), processing units (Premium) hoặc capacity units (Dedicated).</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>🗺️ Ánh Xạ Events đến Partitions</h3>
+        <p>Bạn có thể sử dụng <strong>partition key</strong> để ánh xạ event data đến partitions cụ thể. Partition key được xử lý qua hàm hashing tĩnh.</p>
+        <ul>
+          <li>Nếu không chỉ định partition key: sử dụng round-robin assignment</li>
+          <li>Partition key giúp giữ các sự kiện liên quan cùng partition và theo thứ tự đến</li>
+          <li>Ví dụ key tốt: ID thiết bị hoặc người dùng, địa lý</li>
+        </ul>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Không nên gửi trực tiếp đến partition</div>
+          <p>Không nên gửi sự kiện trực tiếp đến partition cụ thể, đặc biệt khi high availability quan trọng. Điều này làm giảm tính sẵn sàng của event hub xuống cấp partition.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>👥 Consumer Groups và Offsets</h3>
+
+        <h4>Consumer Groups:</h4>
+        <p>Consumer group là view độc lập của event stream. Mỗi consumer group có thể đọc cùng event hub đồng thời, mỗi group theo dõi vị trí của riêng mình.</p>
+        <ul>
+          <li>Mỗi event hub có consumer group mặc định <code>$Default</code></li>
+          <li>Tạo consumer group riêng cho mỗi ứng dụng (analytics, archival, alerting)</li>
+          <li>Một active reader mỗi partition trong một consumer group</li>
+        </ul>
+
+        <h4>Offsets:</h4>
+        <p><strong>Offset</strong> là vị trí của sự kiện trong partition - như con trỏ. Consumers sử dụng offset để chỉ định nơi bắt đầu đọc. Có thể bắt đầu từ:</p>
+        <ul>
+          <li>Giá trị offset cụ thể</li>
+          <li>Timestamp</li>
+          <li>Đầu hoặc cuối stream</li>
+        </ul>
+
+        <h4>Checkpointing:</h4>
+        <p><strong>Checkpointing</strong> là khi consumer lưu offset hiện tại. Điều này cho phép:</p>
+        <ul>
+          <li>✅ Tiếp tục từ lần checkpoint cuối cùng sau khi ngắt kết nối</li>
+          <li>✅ Failover: Consumer instance mới tiếp quản từ nơi consumer cũ bỏ dở</li>
+          <li>✅ Replay: Xử lý lại sự kiện lịch sử bằng offset cũ hơn</li>
+        </ul>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Checkpoint Store Best Practices</div>
+          <ul>
+            <li>Sử dụng container riêng cho mỗi consumer group</li>
+            <li>Không sử dụng storage account cho mục đích khác</li>
+            <li>Tắt: Hierarchical namespace, Blob soft delete, Versioning</li>
+            <li>Tạo storage account trong cùng region với ứng dụng</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h3>💾 Lưu Giữ Sự Kiện (Event Retention)</h3>
+        <table>
+  <thead><tr><th>Tầng</th><th>Mặc định</th><th>Tối đa</th></tr>
+  </thead>
+  <tbody><tr><td>Standard</td><td>1 giờ</td><td>7 ngày</td></tr><tr><td>Premium</td><td>1 giờ</td><td>90 ngày</td></tr><tr><td>Dedicated</td><td>1 giờ</td><td>90 ngày</td></tr>
+        
+  </tbody>
+</table>
+        <p>Sự kiện không thể xóa rõ ràng. Thay đổi retention áp dụng cho sự kiện hiện có. Sự kiện trở nên không khả dụng chính xác khi hết thời hạn retention.</p>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 7: CAPTURE -->
+  <div id="capture">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>💾 Phần 7: Event Hubs Capture</h2><div class="mhd-sub">Phần 7: Event Hubs Capture</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Tính năng Azure Event Hubs Capture tự động chụp dữ liệu streaming qua Event Hubs vào tài khoản Azure Blob Storage hoặc Azure Data Lake Storage. Capture không yêu cầu chi phí quản trị để chạy và tự động scale với Event Hubs.</p>
+
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num">1</div>
+            <div class="flow-body"><strong>Producers (Nguồn)</strong>Gửi events đến Event Hub qua AMQP, Kafka, hoặc HTTPS</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">2</div>
+            <div class="flow-body"><strong>Event Hub — Partitions 0–3</strong>Lưu events theo thứ tự trên từng partition. Cả Capture và consumers bình thường đọc song song.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:#107c10">3a</div>
+            <div class="flow-body"><strong>Capture → Azure Blob Storage / Data Lake Storage</strong>Định dạng Avro. Kích hoạt theo cửa sổ: <em>min(size_threshold, time_threshold)</em> → "First Wins"<br><small style="color:#666;">Đặt tên: {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}.avro</small></div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num" style="background:#8764b8">3b</div>
+            <div class="flow-body"><strong>Stream Analytics / Apache Spark (consumers bình thường)</strong>Đọc và xử lý real-time song song với Capture — không ảnh hưởng lẫn nhau</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>⚙️ Cách Event Hubs Capture Hoạt Động</h3>
+        <p>Event Hubs phục vụ như một durable buffer giữ lâu dài cho telemetry ingress, tương tự distributed log. Capture cho phép:</p>
+        <ul>
+          <li>Xử lý real-time và batch-based pipelines trên cùng một stream</li>
+          <li>Giúp xây dựng giải pháp phát triển theo nhu cầu</li>
+        </ul>
+
+        <h4>Điểm quan trọng cần lưu ý:</h4>
+        <ul>
+          <li>Tài khoản storage đích phải cùng subscription với event hub (khi không dùng managed identity)</li>
+          <li>Event Hubs không hỗ trợ capture đến premium Azure Storage accounts</li>
+          <li>Dữ liệu được ghi theo định dạng <strong>Apache Avro</strong> - compact, binary, có rich data structures với inline schema</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>⏱️ Capture Windowing (Cửa sổ Capture)</h3>
+        <p>Để kiểm soát việc capture, sử dụng cấu hình cửa sổ kết hợp kích thước tối thiểu và thời gian:</p>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Chính sách "First Wins"</div>
+          <p>Điều kiện đầu tiên được đáp ứng - kích thước hoặc thời gian - sẽ kích hoạt capture. Ví dụ: cửa sổ 15 phút, 100MB và gửi 1 MB/giây → cửa sổ kích thước kích hoạt trước cửa sổ thời gian.</p>
+        </div>
+
+        <h4>Cấu trúc đặt tên file capture:</h4>
+<div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}
+
+# Ví dụ:
+https://mystorageaccount.blob.core.windows.net/mycontainer/mynamespace/myeventhub/0/2017/12/08/03/03/17.avro</code></pre>
+</div>
+      </section>
+
+      <section>
+        <h3>💰 Thanh Toán Capture</h3>
+        <ul>
+          <li><strong>Premium tier:</strong> Tính năng Capture được bao gồm</li>
+          <li><strong>Standard tier:</strong> Azure tính phí hàng tháng dựa trên số throughput units</li>
+          <li>Capture <strong>không tiêu thụ egress quota</strong> vì Azure tính phí riêng</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>📊 Định Dạng Capture</h3>
+        <table>
+  <thead><tr><th>Định dạng</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody><tr><td><strong>Avro</strong></td><td>Định dạng mặc định. Compact, binary, rich data structures với inline schema. Được Hadoop ecosystem, Stream Analytics, Data Factory hỗ trợ.</td></tr><tr><td><strong>Parquet</strong></td><td>Khả dụng qua no-code editor trong Azure portal (kết hợp với Stream Analytics)</td></tr>
+        
+  </tbody>
+</table>
+
+        <p>Để tích hợp với Event Grid: Tạo Azure Event Grid subscription với Event Hubs namespace là nguồn.</p>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- MODULE 8: SCALE -->
+  <div id="scale">
+<div class="mhd"><div class="mhd-ico">📌</div><div><h2>📈 Phần 8: Xử Lý Theo Tỷ Lệ với Event Hubs</h2><div class="mhd-sub">Phần 8: Xử Lý Theo Tỷ Lệ với Event Hubs</div></div></div>
+<div class="msec">
+
+      <section>
+        <p>Để scale ứng dụng xử lý sự kiện, bạn có thể chạy nhiều instance và cân bằng tải giữa chúng. <strong>EventProcessorClient</strong> (.NET và Java) hoặc <strong>EventHubConsumerClient</strong> (Python và JavaScript) cung cấp chức năng này.</p>
+
+        <div class="arch-grid">
+          <div class="arch-card">
+            <div class="arch-card-hd">⚙️ Consumer Instance A</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Partition 0</div>
+              <div class="arch-item">Partition 1</div>
+              <div class="arch-item">Partition 2</div>
+              <div class="arch-item">Partition 3</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">⚙️ Consumer Instance B</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Partition 4</div>
+              <div class="arch-item">Partition 5</div>
+              <div class="arch-item">Partition 6</div>
+              <div class="arch-item">Partition 7</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">⚙️ Consumer Instance C</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Partition 8</div>
+              <div class="arch-item">Partition 9</div>
+              <div class="arch-item">Partition 10</div>
+              <div class="arch-item">Partition 11</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">⚙️ Consumer Instance D</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Partition 12</div>
+              <div class="arch-item">Partition 13</div>
+              <div class="arch-item">Partition 14</div>
+              <div class="arch-item">Partition 15</div>
+            </div>
+          </div>
+        </div>
+        <div class="callout info" style="margin-top:10px;">
+          <div class="callout-title">💾 Checkpoint Store (Azure Blob)</div>
+          <p>Lưu ownership: <code>Namespace | EventHub | ConsumerGroup | Owner | PartitionId | LastModified</code><br>
+          EventProcessorClient tự động phân phối partition đều giữa các instances và phát hiện failure qua <code>last modified time</code>.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>📋 Ví Dụ Tình Huống Thực Tế</h3>
+        <p>Công ty bảo mật nhà giám sát 100,000 ngôi nhà. Mỗi phút, nhận dữ liệu từ các cảm biến (detector chuyển động, cảm biến cửa/cửa sổ, v.v.):</p>
+        <ul>
+          <li>Mỗi cảm biến đẩy dữ liệu đến một event hub</li>
+          <li>Event hub được cấu hình với 16 partitions</li>
+          <li>Consumer cần đọc, tổng hợp và lưu vào storage blob</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>🏗️ Yêu Cầu Consumer Phân Tán</h3>
+        <ol>
+          <li><strong>Scale:</strong> Tạo nhiều consumer, mỗi consumer sở hữu một số partition của Event Hubs</li>
+          <li><strong>Load balance:</strong> Tăng/giảm consumer động. Khi thêm consumer, pool tự cân bằng lại số partition</li>
+          <li><strong>Seamless resume on failures:</strong> Nếu consumer A thất bại, consumer khác tiếp tục từ checkpoint cuối cùng của consumer A</li>
+          <li><strong>Consume events:</strong> Code để tiêu thụ sự kiện và làm gì đó hữu ích</li>
+        </ol>
+      </section>
+
+      <section>
+        <h3>🔧 Event Processor Client</h3>
+
+        <table>
+  <thead><tr><th>Ngôn ngữ</th><th>Client</th></tr>
+  </thead>
+  <tbody><tr><td>.NET</td><td><code>EventProcessorClient</code></td></tr><tr><td>Java</td><td><code>EventProcessorClient</code></td></tr><tr><td>Python</td><td><code>EventHubConsumerClient</code></td></tr><tr><td>JavaScript</td><td><code>EventHubConsumerClient</code></td></tr>
+        
+  </tbody>
+</table>
+
+        <div class="callout success">
+          <div class="callout-title">✅ Khuyến nghị Production</div>
+          <p>Đối với hầu hết tình huống production, khuyến nghị sử dụng event processor client để đọc và xử lý sự kiện. Processor client cung cấp trải nghiệm mạnh mẽ cho việc xử lý sự kiện trên tất cả partition theo cách hiệu suất và chịu lỗi.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>🏷️ Partition Ownership (Quyền sở hữu Partition)</h3>
+        <p>Instance event processor thường sở hữu và xử lý sự kiện từ một hoặc nhiều partition. Quyền sở hữu partition được phân phối đều giữa tất cả instance event processor đang hoạt động.</p>
+
+        <p>Bản ghi quyền sở hữu trong checkpoint store:</p>
+        <table>
+  <thead><tr><th>Namespace</th><th>EventHub</th><th>ConsumerGroup</th><th>Owner</th><th>PartitionId</th><th>LastModified</th></tr>
+  </thead>
+  <tbody><tr><td>mynamespace.servicebus.windows.net</td><td>myeventhub</td><td>myconsumergroup</td><td>3be3f9d3-...</td><td>0</td><td>2020-01-15T01:22:15</td></tr><tr><td>mynamespace.servicebus.windows.net</td><td>myeventhub</td><td>myconsumergroup</td><td>f5cc5176-...</td><td>1</td><td>2020-01-15T01:22:17</td></tr>
+        
+  </tbody>
+</table>
+
+        <p>Khi processor thất bại:</p>
+        <ol>
+          <li>Các instance khác phát hiện qua <code>last modified time</code></li>
+          <li>Thử giành quyền sở hữu partition của instance không hoạt động</li>
+          <li>Checkpoint store đảm bảo chỉ một instance thành công</li>
+          <li>Tại bất kỳ thời điểm nào, tối đa một processor nhận sự kiện từ partition</li>
+        </ol>
+      </section>
+
+      <section>
+        <h3>✅ Checkpointing Chi Tiết</h3>
+        <p>Checkpointing là quá trình event processor đánh dấu hoặc commit vị trí của sự kiện cuối cùng được xử lý thành công trong partition.</p>
+
+        <ul>
+          <li>Xảy ra trên cơ sở mỗi partition trong mỗi consumer group</li>
+          <li>Khi processor ngắt kết nối, instance khác tiếp tục từ checkpoint được commit bởi processor cuối cùng</li>
+          <li>Có thể quay về dữ liệu cũ hơn bằng cách chỉ định offset thấp hơn</li>
+        </ul>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ Cân nhắc về tần suất checkpointing</div>
+          <p>Cập nhật sau mỗi sự kiện được xử lý thành công có thể ảnh hưởng đến hiệu suất và chi phí vì nó kích hoạt write operation đến checkpoint store. Checkpointing mỗi sự kiện đơn lẻ cũng cho thấy pattern queued messaging - Service Bus queue có thể là lựa chọn tốt hơn.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>🧵 An Toàn Thread và Instances</h3>
+        <p>Theo mặc định, function xử lý sự kiện được gọi tuần tự cho một partition cụ thể. Sự kiện tiếp theo và các lệnh gọi từ cùng partition xếp hàng phía sau. Sự kiện từ các partition khác nhau có thể được xử lý đồng thời.</p>
+
+        <div class="callout info">
+          <div class="callout-title">💡 Lưu ý về Shared State</div>
+          <p>Bất kỳ shared state nào được truy cập qua các partition phải được đồng bộ hóa.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>📋 Tóm Tắt Quan Trọng Cho Kỳ Thi</h3>
+        <div class="callout success">
+          <div class="callout-title">✅ Điểm cần nhớ - Event Grid</div>
+          <ul>
+            <li>Event Grid hỗ trợ PUSH và PULL delivery</li>
+            <li>Hỗ trợ CloudEvents 1.0 specification (được khuyến nghị)</li>
+            <li>3 loại topic: System, Custom, Partner</li>
+            <li>Xác thực webhook qua SubscriptionValidationEvent hoặc HTTP OPTIONS (CloudEvents)</li>
+            <li>3 cách lọc: Event type, Subject, Advanced</li>
+            <li>Advanced filter: OR trong một filter, AND giữa các filter khác nhau</li>
+            <li>Giới hạn: 25 advanced filters, 512 chars/string, 1MB/event</li>
+          </ul>
+        </div>
+        <div class="callout purple" style="margin-top:16px;">
+          <div class="callout-title">✅ Điểm cần nhớ - Event Hubs</div>
+          <ul>
+            <li>Event Hubs tương thích Apache Kafka, AMQP, HTTPS</li>
+            <li>Partition = commit log append-only</li>
+            <li>Consumer Group = view độc lập, nhiều app đọc cùng data</li>
+            <li>Offset = vị trí trong partition; Checkpointing = lưu offset</li>
+            <li>Capture: Avro format, windowing (size hoặc time first wins)</li>
+            <li>EventProcessorClient: tự động load balancing và checkpointing</li>
+            <li>Standard: không thể thay đổi partition count; Premium/Dedicated: có thể tăng</li>
+            <li>Retention: Standard 7 ngày, Premium/Dedicated 90 ngày</li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="09-api-management.html" class="prev">← Ch.09 API Mgmt</a>
+  <span class="pos">Chương 10 / 11</span>
+  <a href="11-message-based.html" class="next">Ch.11 Messages →</a>
+</div>
+<footer style="background:#323130;color:#c8c8c8;text-align:center;padding:24px;margin-top:0;">
+  <p>Hướng Dẫn Học Tập AZ-204 | Giải Pháp Dựa Trên Sự Kiện | Được dịch sang Tiếng Việt</p>
+  <p style="font-size:0.85rem;margin-top:8px;opacity:0.7;">Nội dung dựa trên Microsoft Learn Training Modules</p>
+</footer>
+<script>
+function toggleToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.toggle('open');b.classList.toggle('open');}
+}
+function closeToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.remove('open');b.classList.remove('open');}
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

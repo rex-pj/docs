@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-204 | Chương 11 – Giải Pháp Dựa Trên Tin Nhắn: Service Bus & Queue Storage</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 11: Message-based Solutions ── */
+.hero { background: linear-gradient(135deg, #1b4332 0%, #107c10 60%, #00b050 100%); }
+.nav-bottom { background: white; border-top: 1px solid var(--border); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.nav-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--blue-5); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .9rem; }
+.nav-btn.outline { background: white; color: var(--blue-5); border: 2px solid var(--blue-5); }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html" class="on">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<div class="hero">
+  <div class="hero-ico">📨</div>
+  <h1>Giải Pháp Dựa Trên Tin Nhắn</h1>
+  <p>Azure Service Bus và Azure Queue Storage</p>
+  <div class="hero-tags">
+    <span class="hero-tag">⚖️ 20–25% bài thi</span>
+    <span class="hero-tag">🚌 Service Bus</span>
+    <span class="hero-tag">📬 Queue Storage</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 11</div>
+  <a href="#compare">So Sánh Dịch Vụ</a>
+  <a href="#servicebus">Azure Service Bus</a>
+  <a href="#sb-tiers" class="sub">1. Service Bus Tiers</a>
+  <a href="#sb-features" class="sub">2. Tính Năng Nâng Cao</a>
+  <a href="#sb-queues" class="sub">3. Queues &amp; Topics</a>
+  <a href="#sb-code" class="sub">4. Code Examples</a>
+  <a href="#queuestore">Azure Queue Storage</a>
+  <a href="#qs-code" class="sub">2. Code Examples</a>
+</nav>
+<main class="content">
+
+<!-- COMPARE -->
+<div>
+<div class="mhd"><div class="mhd-ico">🔀</div><div><h2>So Sánh: Service Bus vs Queue Storage</h2><div class="mhd-sub">Chọn giải pháp messaging phù hợp cho từng tình huống</div></div></div>
+<div class="msec">
+    <section id="compare">
+      <h3>🔷 Khi Nào Dùng Cái Nào?</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Tính năng</th>
+            <th>🚌 Azure Service Bus <small style="font-weight:400">(Enterprise)</small></th>
+            <th class="col-green">📦 Azure Queue Storage <small style="font-weight:400">(Simple)</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Message size</strong></td>
+            <td>≤ 256KB (Standard), ≤ 100MB (Premium)</td>
+            <td>≤ 64KB</td>
+          </tr>
+          <tr>
+            <td><strong>Ordering</strong></td>
+            <td>✅ FIFO guarantee (Message Sessions)</td>
+            <td>Approximate ordering (không đảm bảo)</td>
+          </tr>
+          <tr>
+            <td><strong>Delivery</strong></td>
+            <td>✅ At-most-once <em>và</em> At-least-once</td>
+            <td>✅ At-least-once (Visibility Timeout)</td>
+          </tr>
+          <tr>
+            <td><strong>Pub/Sub</strong></td>
+            <td>✅ Topics &amp; Subscriptions</td>
+            <td>❌ Không có</td>
+          </tr>
+          <tr>
+            <td><strong>Dead-letter</strong></td>
+            <td>✅ Built-in DLQ</td>
+            <td>❌ Không có</td>
+          </tr>
+          <tr>
+            <td><strong>Tính năng nâng cao</strong></td>
+            <td>✅ Transactions, Duplicate detection, Scheduled delivery, Message sessions, JMS 2.0 (Premium)</td>
+            <td>✅ Lưu đến 7 ngày, &gt;80GB capacity, Audit trail</td>
+          </tr>
+          <tr>
+            <td><strong>Dùng khi</strong></td>
+            <td>• Enterprise features<br>• Pub/sub pattern<br>• FIFO guarantee<br>• Mission-critical workloads</td>
+            <td>• Queue lớn &gt;80GB<br>• Audit trail đơn giản<br>• Chi phí thấp<br>• Không cần advanced features</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>🔹 Bảng So Sánh Chi Tiết</h4>
+      <table>
+        <thead><tr><th>Tính Năng</th><th>Service Bus</th><th>Queue Storage</th></tr></thead>
+        <tbody>
+          <tr><td>Max message size</td><td>256KB (Standard), 100MB (Premium)</td><td>64KB</td></tr>
+          <tr><td>Max queue size</td><td>80GB</td><td>Không giới hạn (account limit)</td></tr>
+          <tr><td>Message TTL</td><td>Tùy chỉnh (mặc định 14 ngày)</td><td>Tối đa 7 ngày</td></tr>
+          <tr><td>FIFO guarantee</td><td>✅ (Message sessions)</td><td>❌ Approximate FIFO</td></tr>
+          <tr><td>Dead-letter queue</td><td>✅ Tích hợp sẵn</td><td>❌</td></tr>
+          <tr><td>Topics/Subscriptions</td><td>✅ (Standard/Premium)</td><td>❌</td></tr>
+          <tr><td>Transactions</td><td>✅ (Standard/Premium)</td><td>❌</td></tr>
+          <tr><td>Duplicate detection</td><td>✅</td><td>❌</td></tr>
+          <tr><td>Protocol</td><td>AMQP 1.0, HTTP/REST, JMS 2.0</td><td>HTTP/HTTPS REST</td></tr>
+          <tr><td>Audit trail</td><td>Qua Azure Monitor</td><td>✅ Server-side logs</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+<!-- SERVICE BUS -->
+<div id="servicebus">
+<div class="mhd"><div class="mhd-ico">🚌</div><div><h2>Azure Service Bus</h2><div class="mhd-sub">Enterprise message broker với queues và publish-subscribe topics</div></div></div>
+<div class="msec">
+
+    <section id="sb-tiers">
+      <h3>🔷 1. Service Bus Tiers</h3>
+      <table>
+        <thead>
+          <tr><th>Tính Năng</th><th>Basic</th><th>Standard</th><th>Premium</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Throughput</strong></td><td>Thấp</td><td>Variable</td><td>Cao</td></tr>
+          <tr><td><strong>Performance</strong></td><td>N/A</td><td>Variable latency</td><td>Predictable performance</td></tr>
+          <tr><td><strong>Pricing</strong></td><td>Pay as you go</td><td>Pay as you go</td><td>Fixed (per messaging unit)</td></tr>
+          <tr><td><strong>Scaling</strong></td><td>N/A</td><td>N/A</td><td>✅ Scale up/down</td></tr>
+          <tr><td><strong>Message size</strong></td><td>256 KB</td><td>256 KB</td><td>Tối đa 100 MB</td></tr>
+          <tr><td><strong>Topics &amp; Subscriptions</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td><strong>Transactions</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td><strong>Auto-forwarding</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td><strong>Message sessions</strong></td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td><strong>JMS 2.0</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td><strong>Geo-disaster recovery</strong></td><td>❌</td><td>❌</td><td>✅</td></tr>
+        </tbody>
+      </table>
+      <div class="callout info">
+        <div class="callout-title">📌 Chọn Tier</div>
+        <ul>
+          <li><strong>Basic</strong> — Dev/test, chỉ cần queues đơn giản</li>
+          <li><strong>Standard</strong> — Dev/test và production nhẹ, cần topics</li>
+          <li><strong>Premium</strong> — Production với yêu cầu cao về performance, compliance, message size lớn</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="sb-features">
+      <h3>🔷 2. Tính Năng Nâng Cao</h3>
+      <table>
+        <thead><tr><th>Tính Năng</th><th>Mô Tả</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Message Sessions</strong></td><td>Tạo FIFO guarantee. Exclusive, ordered handling của unbounded sequences of related messages.</td></tr>
+          <tr><td><strong>Autoforwarding</strong></td><td>Chaining queue/subscription sang queue/topic khác trong cùng namespace.</td></tr>
+          <tr><td><strong>Dead-letter Queue (DLQ)</strong></td><td>Chứa messages không thể deliver đến receiver. Có thể inspect và remove messages từ DLQ.</td></tr>
+          <tr><td><strong>Scheduled Delivery</strong></td><td>Submit messages để xử lý vào thời điểm cụ thể trong tương lai.</td></tr>
+          <tr><td><strong>Message Deferral</strong></td><td>Client defer retrieval đến sau. Message vẫn trong queue nhưng được "set aside".</td></tr>
+          <tr><td><strong>Transactions</strong></td><td>Group nhiều operations vào execution scope — atomic (all or nothing).</td></tr>
+          <tr><td><strong>Filtering &amp; Actions</strong></td><td>Subscribers định nghĩa rules để chọn messages từ topic muốn nhận.</td></tr>
+          <tr><td><strong>Duplicate Detection</strong></td><td>Sender resend cùng message → queue/topic tự loại bỏ duplicates.</td></tr>
+          <tr><td><strong>Geo-disaster Recovery</strong></td><td>Khi Azure region downtime, tiếp tục xử lý ở region khác.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="sb-queues">
+      <h3>🔷 3. Queues, Topics &amp; Subscriptions</h3>
+      <div class="compare-2">
+        <div class="cmp-col">
+          <div class="cmp-hd blue">📨 Queue (Point-to-Point)</div>
+          <div class="cmp-step">
+            <div class="cmp-n">1</div><strong>Sender</strong> gửi message vào Queue
+          </div>
+          <div class="cmp-step">
+            <div class="cmp-n">2</div><strong>[Queue]</strong> lưu trữ, đảm bảo delivery
+          </div>
+          <div class="cmp-step">
+            <div class="cmp-n">3</div><strong>1 Receiver</strong> nhận và xử lý
+          </div>
+          <div class="cmp-use">1 message = 1 receiver duy nhất<br>Dùng cho: task queues, work distribution</div>
+        </div>
+        <div class="cmp-col">
+          <div class="cmp-hd dark">📡 Topic/Subscription (Pub-Sub)</div>
+          <div class="cmp-step">
+            <div class="cmp-n">1</div><strong>Publisher</strong> gửi message đến Topic
+          </div>
+          <div class="cmp-step">
+            <div class="cmp-n">2</div><strong>Topic</strong> fan-out sang các Subscriptions
+          </div>
+          <div class="cmp-step">
+            <div class="cmp-n">3</div>Sub A → Receiver A · Sub B → Receiver B · Sub C → Receiver C
+          </div>
+          <div class="cmp-use">1 message = nhiều receivers<br>Filter: SQL Filter · Correlation Filter · True/False Filter</div>
+        </div>
+      </div>
+      <div class="callout warn" style="margin-top:.5rem">
+        <div class="callout-title">💀 Dead-Letter Queue (DLQ)</div>
+        <p>Messages thất bại được chuyển vào DLQ để inspect &amp; reprocess. Nguyên nhân: <strong>MaxDeliveryCount exceeded</strong> · TTL expired · filter evaluation error · explicit dead-lettering.</p>
+      </div>
+
+      <h4>🔹 Service Bus Namespace &amp; Entities</h4>
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="arch-card-hd">📦 Queues</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>Queue: orders</strong> — order processing</div>
+            <div class="arch-item"><strong>Queue: payments</strong> — payment processing</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">mybus.servicebus.windows.net</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">📡 Topic: notifications</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>email-sub</strong> — filter: label = 'email'</div>
+            <div class="arch-item"><strong>sms-sub</strong> — filter: label = 'sms'</div>
+            <div class="arch-item"><strong>push-sub</strong> — filter: label = 'push'</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">📡 Topic: events</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>all-events</strong> — no filter (nhận tất cả)</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">True Filter: nhận mọi message từ topic</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sb-code">
+      <h3>🔷 4. Code: Gửi &amp; Nhận Messages (.NET)</h3>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">dotnet add package Azure.Messaging.ServiceBus</code></pre>
+</div>
+
+      <h4>🔹 Gửi Messages đến Queue</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">using Azure.Messaging.ServiceBus;
+
+string connectionString = "Endpoint=sb://...;SharedAccessKeyName=...;SharedAccessKey=...";
+string queueName = "orders";
+
+await using var client = new ServiceBusClient(connectionString);
+ServiceBusSender sender = client.CreateSender(queueName);
+
+// Gửi 1 message
+ServiceBusMessage message = new ServiceBusMessage("Order #12345")
+{
+    ContentType = "application/json",
+    Subject = "OrderCreated",
+    MessageId = Guid.NewGuid().ToString(),
+    TimeToLive = TimeSpan.FromHours(24)
+};
+await sender.SendMessageAsync(message);
+
+// Gửi batch messages (efficient)
+using ServiceBusMessageBatch messageBatch = await sender.CreateMessageBatchAsync();
+for (int i = 0; i &lt; 10; i++)
+{
+    var msg = new ServiceBusMessage($"Order #{i}");
+    if (!messageBatch.TryAddMessage(msg))
+        throw new Exception("Batch quá lớn");
+}
+await sender.SendMessagesAsync(messageBatch);</code></pre>
+</div>
+
+      <h4>🔹 Nhận Messages từ Queue</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">ServiceBusProcessor processor = client.CreateProcessor(queueName, new ServiceBusProcessorOptions
+{
+    AutoCompleteMessages = false,
+    MaxConcurrentCalls = 4
+});
+
+processor.ProcessMessageAsync += async args =>
+{
+    string body = args.Message.Body.ToString();
+    Console.WriteLine($"Received: {body}");
+
+    // Xử lý message thành công → Complete (xóa khỏi queue)
+    await args.CompleteMessageAsync(args.Message);
+
+    // Nếu xử lý thất bại → Abandon (đưa lại vào queue)
+    // await args.AbandonMessageAsync(args.Message);
+
+    // Gửi vào Dead-letter queue
+    // await args.DeadLetterMessageAsync(args.Message, "reason", "description");
+};
+
+processor.ProcessErrorAsync += args =>
+{
+    Console.WriteLine($"Error: {args.Exception}");
+    return Task.CompletedTask;
+};
+
+await processor.StartProcessingAsync();
+Console.ReadKey();
+await processor.StopProcessingAsync();</code></pre>
+</div>
+
+      <h4>🔹 Gửi đến Topic, Nhận từ Subscription</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// Gửi đến Topic
+ServiceBusSender topicSender = client.CreateSender("notifications");
+await topicSender.SendMessageAsync(new ServiceBusMessage("Hello subscribers!")
+{
+    Subject = "email"  // Dùng làm filter
+});
+
+// Nhận từ Subscription
+ServiceBusProcessor subProcessor = client.CreateProcessor(
+    topicName: "notifications",
+    subscriptionName: "email-sub"
+);
+// ... xử lý tương tự queue</code></pre>
+</div>
+
+      <h4>🔹 Scheduled Messages</h4>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">// Lên lịch gửi message sau 1 giờ
+long sequenceNumber = await sender.ScheduleMessageAsync(
+    message,
+    DateTimeOffset.UtcNow.AddHours(1)
+);
+
+// Hủy scheduled message
+await sender.CancelScheduledMessageAsync(sequenceNumber);</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- QUEUE STORAGE -->
+<div id="queuestore">
+<div class="mhd"><div class="mhd-ico">📬</div><div><h2>Azure Queue Storage</h2><div class="mhd-sub">Simple, scalable message queue — lưu trữ lượng lớn messages</div></div></div>
+<div class="msec">
+
+    <section>
+      <h3>🔷 1. Tổng Quan Queue Storage</h3>
+      <p>Azure Queue Storage là dịch vụ lưu trữ <strong>lượng lớn messages</strong>. Bạn có thể truy cập messages từ bất kỳ đâu trên thế giới qua HTTP hoặc HTTPS. Một queue message có thể lên đến <strong>64 KB</strong>. Một queue có thể chứa <strong>hàng triệu messages</strong>, tới giới hạn total capacity của storage account.</p>
+
+      <h4>🔹 Các Thành Phần</h4>
+      <div class="arch-grid">
+        <div class="arch-card">
+          <div class="arch-card-hd">🗄️ Storage Account → Queue Service</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>Queue: "orders"</strong> — chứa nhiều Messages</div>
+            <div class="arch-item"><strong>Queue: "notifications"</strong> — chứa Messages</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">Message max <strong>64 KB</strong> · TTL ≤ 7 ngày</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">URL: https://&lt;account&gt;.queue.core.windows.net/&lt;queue&gt;</div>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-hd">🔄 Typical Pattern</div>
+          <div class="arch-card-body">
+            <div class="arch-item"><strong>Producer</strong> (Worker Role / App) — enqueue messages</div>
+            <div class="arch-item"><strong>[Queue]</strong> — buffer, decouples producer/consumer</div>
+            <div class="arch-item"><strong>Consumer</strong> (Worker) — dequeue, process, delete</div>
+            <div class="arch-item" style="color:var(--txt2);font-size:.78rem">At-least-once delivery qua visibility timeout</div>
+          </div>
+        </div>
+      </div>
+
+      <h4>🔹 Cơ Chế Visibility Timeout</h4>
+      <div class="flowchart">
+        <div class="fc-box">Consumer lấy message</div>
+        <div class="fc-arr">↓</div>
+        <div class="fc-box yellow">Message INVISIBLE trong Visibility Timeout period</div>
+        <div class="fc-arr">↓</div>
+        <div class="fc-branch">
+          <div class="fc-bcol">
+            <div class="fc-blabel">✅ Xử lý thành công</div>
+            <div class="fc-arr">↓</div>
+            <div class="fc-box green">DELETE message<br><small>Xóa vĩnh viễn khỏi queue</small></div>
+          </div>
+          <div class="fc-bcol">
+            <div class="fc-blabel">⏰ Timeout hết hạn</div>
+            <div class="fc-arr">↓</div>
+            <div class="fc-box red">Message VISIBLE lại<br><small>Consumer khác có thể lấy được</small></div>
+          </div>
+        </div>
+        <div class="fc-label" style="margin-top:10px">Cơ chế <strong>at-least-once delivery</strong> của Azure Queue Storage</div>
+      </div>
+    </section>
+
+    <section id="qs-code">
+      <h3>🔷 2. Code: Azure Queue Storage (.NET)</h3>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">CLI</span></div>
+<pre><code class="language-bash">dotnet add package Azure.Storage.Queues</code></pre>
+</div>
+
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
+
+string connectionString = "DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...";
+string queueName = "orders";
+
+// Tạo QueueClient
+QueueClient queueClient = new QueueClient(connectionString, queueName);
+
+// Tạo queue nếu chưa có
+await queueClient.CreateIfNotExistsAsync();
+
+// ── GỬI MESSAGE ──
+await queueClient.SendMessageAsync("Hello from Queue Storage!");
+
+// Gửi với TTL và visibility delay
+await queueClient.SendMessageAsync(
+    messageText: "Delayed message",
+    visibilityTimeout: TimeSpan.FromSeconds(30),  // Ẩn 30s trước khi visible
+    timeToLive: TimeSpan.FromHours(1)              // Tự xóa sau 1h
+);
+
+// ── XEM MESSAGE (không xóa) ──
+PeekedMessage[] peekedMessages = await queueClient.PeekMessagesAsync(maxMessages: 5);
+foreach (var msg in peekedMessages)
+{
+    Console.WriteLine($"Peeked: {msg.MessageText}");
+}
+
+// ── NHẬN VÀ XỬ LÝ MESSAGE ──
+QueueMessage[] messages = await queueClient.ReceiveMessagesAsync(maxMessages: 10);
+foreach (QueueMessage message in messages)
+{
+    Console.WriteLine($"Processing: {message.MessageText}");
+
+    try
+    {
+        // Xử lý message...
+        await ProcessOrderAsync(message.MessageText);
+
+        // Xóa message sau khi xử lý thành công
+        await queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+    }
+    catch (Exception ex)
+    {
+        // Không xóa → message sẽ visible lại sau visibility timeout
+        Console.WriteLine($"Failed: {ex.Message}");
+
+        // Hoặc update visibility timeout để xử lý sau
+        await queueClient.UpdateMessageAsync(
+            message.MessageId,
+            message.PopReceipt,
+            message.MessageText,
+            TimeSpan.FromMinutes(5)  // Ẩn thêm 5 phút
+        );
+    }
+}
+
+// ── THỐNG KÊ QUEUE ──
+QueueProperties properties = await queueClient.GetPropertiesAsync();
+Console.WriteLine($"Messages in queue: {properties.ApproximateMessagesCount}");
+
+// ── XÓA TẤT CẢ MESSAGES ──
+await queueClient.ClearMessagesAsync();</code></pre>
+</div>
+
+      <h4>🔹 Encode Messages (Base64)</h4>
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Message Encoding</div>
+        <p>Mặc định, QueueClient mới <strong>không</strong> encode messages. Nếu cần tương thích với code cũ hoặc Azure SDK v11, dùng <code>QueueMessageEncoding.Base64</code>:</p>
+      </div>
+      <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JavaScript</span></div>
+<pre><code class="language-csharp">var queueClient = new QueueClient(connectionString, queueName, new QueueClientOptions
+{
+    MessageEncoding = QueueMessageEncoding.Base64
+});</code></pre>
+</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div>
+<div class="mhd"><div class="mhd-ico">📋</div><div><h2>Tóm Tắt — Điểm Quan Trọng Cho Kỳ Thi</h2><div class="mhd-sub">Tóm Tắt — Điểm Quan Trọng Cho Kỳ Thi</div></div></div>
+<div class="msec">
+    <div class="summary-card">
+      <div class="summary-card-hd">💬 GIẢI PHÁP MESSAGING — TÓM TẮT NHANH</div>
+      <div class="summary-card-body">
+        <div class="sum-section">
+          <div class="sum-section-hd">🚌 Service Bus</div>
+          <ul class="sum-items">
+            <li>AMQP 1.0 protocol (+ HTTP/REST, JMS 2.0 ở Premium)</li>
+            <li>3 tiers: Basic (queues only) | Standard | Premium (HSM, 100MB)</li>
+            <li>Message sessions = FIFO guarantee</li>
+            <li>Dead-letter queue (DLQ) tích hợp sẵn</li>
+            <li>Topics + Subscriptions = publish-subscribe</li>
+            <li>Max message: 256KB (Standard), 100MB (Premium)</li>
+          </ul>
+        </div>
+        <div class="sum-section">
+          <div class="sum-section-hd">📬 Queue Storage</div>
+          <ul class="sum-items">
+            <li>Simple HTTP/HTTPS REST API — không cần SDK</li>
+            <li>Max message size: 64 KB</li>
+            <li>Visibility timeout: at-least-once delivery</li>
+            <li>TTL tối đa: 7 ngày</li>
+            <li>Không có FIFO guarantee (approximate ordering)</li>
+            <li>Dùng khi cần lưu &gt;80GB messages hoặc audit trail</li>
+          </ul>
+        </div>
+        <div class="sum-section">
+          <div class="sum-section-hd">🤔 Khi Nào Chọn Gì?</div>
+          <ul class="sum-items">
+            <li><strong>Service Bus:</strong> FIFO, pub/sub, DLQ, enterprise, msg &gt;64KB</li>
+            <li><strong>Queue Storage:</strong> queue &gt;80GB, audit log, giải pháp đơn giản/rẻ</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="10-event-based.html" class="prev">← Ch.10 Events</a>
+  <span class="pos">Chương 11 / 11</span>
+  <a href="index.html" class="next">🏠 Trang Chủ →</a>
+</div>
+
+<script>
+function toggleToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.toggle('open');b.classList.toggle('open');}
+}
+function closeToc(){
+  var t=document.getElementById('toc'),b=document.getElementById('toc-bd');
+  if(t){t.classList.remove('open');b.classList.remove('open');}
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>

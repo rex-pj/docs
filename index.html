@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud & Dev Certification Guides – Tiếng Việt</title>
+<style>
+  :root {
+    --primary: #0078d4;
+    --secondary: #005a9e;
+    --accent: #50e6ff;
+    --bg: #f0f4f8;
+    --card-bg: #ffffff;
+    --text: #323130;
+    --muted: #605e5c;
+    --border: #e1dfdd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0a1628 0%, #0f2460 40%, #0078d4 80%, #00b4d8 100%);
+    color: white;
+    padding: 80px 40px 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .site-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(80,230,255,0.5);
+    border-radius: 50px;
+    padding: 6px 20px;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    line-height: 1.2;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ── WAVE ── */
+  .wave-divider { margin-top: -2px; background: var(--bg); }
+  .wave-divider svg { display: block; }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+  /* ── SECTION ── */
+  .courses-section { padding: 60px 0 80px; }
+  .section-title {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .section-title h2 {
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .section-title p { color: var(--muted); font-size: 1.05rem; }
+
+  /* ── COURSE GRID ── */
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+
+  /* ── COURSE CARD ── */
+  .course-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    overflow: hidden;
+  }
+  .course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,120,212,0.15);
+    border-color: var(--primary);
+  }
+
+  .card-banner {
+    height: 8px;
+  }
+  .banner-azure  { background: linear-gradient(90deg, #0078d4, #50e6ff); }
+  .banner-coming { background: linear-gradient(90deg, #605e5c, #a19f9d); }
+
+  .card-body {
+    padding: 28px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .card-icon {
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .icon-azure  { background: linear-gradient(135deg, #0078d4, #00b4d8); }
+  .icon-coming { background: #f3f2f1; }
+
+  .card-info { flex: 1; }
+  .card-provider {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .card-code {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .card-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    background: #f0f4f8;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .card-footer {
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-stats { font-size: 0.85rem; color: var(--muted); }
+  .card-cta {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .card-cta .arrow { transition: transform 0.2s; }
+  .course-card:hover .card-cta .arrow { transform: translateX(4px); }
+
+  /* Coming soon state */
+  .course-card.coming-soon {
+    opacity: 0.65;
+    cursor: default;
+    pointer-events: none;
+  }
+  .badge-soon {
+    display: inline-block;
+    background: #f3f2f1;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2rem; }
+    .hero { padding: 60px 20px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="site-badge">Certification Guides</div>
+    <h1>Tài Liệu Luyện Thi<br><span>Cloud & Dev</span> Tiếng Việt</h1>
+    <p>Hướng dẫn toàn diện, cô đọng, hoàn toàn bằng tiếng Việt — giúp bạn chinh phục các chứng chỉ công nghệ.</p>
+  </div>
+</div>
+
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,60 L0,60 Z" fill="#f0f4f8"/>
+  </svg>
+</div>
+
+<section class="courses-section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Chọn Khóa Học</h2>
+      <p>Mỗi khóa học bao gồm đầy đủ lý thuyết, ví dụ thực tế và trọng tâm thi cử.</p>
+    </div>
+
+    <div class="course-grid">
+
+      <!-- AZ-204 -->
+      <a href="az-204/index.html" class="course-card">
+        <div class="card-banner banner-azure"></div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div class="card-icon icon-azure">☁️</div>
+            <div class="card-info">
+              <div class="card-provider">Microsoft Azure</div>
+              <div class="card-title">Azure Developer Associate</div>
+              <div class="card-code">AZ-204</div>
+            </div>
+          </div>
+          <p class="card-desc">Xây dựng, triển khai và debug các giải pháp cloud trên Azure — từ App Service, Functions đến Cosmos DB, Blob Storage, Container Apps và hơn nữa.</p>
+          <div class="card-tags">
+            <span class="tag">App Service</span>
+            <span class="tag">Azure Functions</span>
+            <span class="tag">Cosmos DB</span>
+            <span class="tag">Containers</span>
+            <span class="tag">API Management</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="card-stats">📚 11 chương &nbsp;·&nbsp; Tiếng Việt</span>
+          <span class="card-cta">Học ngay <span class="arrow">→</span></span>
+        </div>
+      </a>
+
+      <!-- Placeholder: AZ-900 -->
+      <div class="course-card coming-soon">
+        <div class="card-banner banner-coming"></div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div class="card-icon icon-coming">🌐</div>
+            <div class="card-info">
+              <div class="card-provider">Microsoft Azure</div>
+              <div class="card-title">Azure Fundamentals</div>
+              <div class="card-code">AZ-900</div>
+            </div>
+          </div>
+          <p class="card-desc">Nền tảng về cloud computing, các dịch vụ Azure cơ bản, bảo mật, quyền riêng tư và định giá.</p>
+          <div class="card-tags">
+            <span class="tag">Cloud Concepts</span>
+            <span class="tag">Core Services</span>
+            <span class="tag">Pricing</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="badge-soon">Sắp ra mắt</span>
+        </div>
+      </div>
+
+      <!-- Placeholder: DP-900 -->
+      <div class="course-card coming-soon">
+        <div class="card-banner banner-coming"></div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div class="card-icon icon-coming">📊</div>
+            <div class="card-info">
+              <div class="card-provider">Microsoft Azure</div>
+              <div class="card-title">Azure Data Fundamentals</div>
+              <div class="card-code">DP-900</div>
+            </div>
+          </div>
+          <p class="card-desc">Khái niệm dữ liệu cốt lõi, các dịch vụ dữ liệu Azure — relational, non-relational, analytics.</p>
+          <div class="card-tags">
+            <span class="tag">Relational Data</span>
+            <span class="tag">NoSQL</span>
+            <span class="tag">Analytics</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="badge-soon">Sắp ra mắt</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  Tài liệu học tập &mdash; không phải tài liệu chính thức của Microsoft
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZ-204 | Azure Functions - Hướng Dẫn Tiếng Việt</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="code-diagram.css">
+<style>
+/* ── Chapter 02: Azure Functions ── */
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.card h4 { color: var(--blue-5); margin-bottom: 8px; margin-top: 0; }
+.tag { display: inline-block; background: var(--blue-5); color: white; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; margin: 2px; }
+.tag.success { background: var(--green); }
+.tag.warning { background: #ff8c00; }
+.tag.danger { background: #d13438; }
+.tag.muted { background: var(--muted); }
+.highlight-box { background: linear-gradient(135deg, #e8f4fd, #d0e8f8); border: 1px solid #90caf9; border-radius: 8px; padding: 20px; margin: 16px 0; }
+.highlight-box h4 { color: var(--blue-6); margin-bottom: 10px; }
+.plan-card { border: 2px solid var(--border); border-radius: 10px; padding: 20px; margin: 12px 0; }
+.plan-card.consumption { border-color: var(--green); }
+.plan-card.flex { border-color: var(--blue-5); }
+.plan-card.premium { border-color: #ff8c00; }
+.plan-card.dedicated { border-color: var(--muted); }
+.plan-card.container { border-color: #8764b8; }
+.plan-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+.plan-card.consumption .plan-title { color: var(--green); }
+.plan-card.flex .plan-title { color: var(--blue-5); }
+.plan-card.premium .plan-title { color: #ff8c00; }
+.plan-card.dedicated .plan-title { color: var(--muted); }
+.plan-card.container .plan-title { color: #8764b8; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<nav id="cnav">
+  <a href="index.html" class="cnav-home">🏠 AZ-204</a>
+  <div id="cnav-links">
+    <a href="01-azure-app-service.html">01 App Service</a>
+    <a href="02-azure-functions.html" class="on">02 Functions</a>
+    <a href="03-cosmos-db.html">03 Cosmos DB</a>
+    <a href="04-blob-storage.html">04 Blob Storage</a>
+    <a href="05-containerized-solutions.html">05 Containers</a>
+    <a href="06-authentication.html">06 Auth</a>
+    <a href="07-security.html">07 Security</a>
+    <a href="08-monitoring.html">08 Monitoring</a>
+    <a href="09-api-management.html">09 API Mgmt</a>
+    <a href="10-event-based.html">10 Events</a>
+    <a href="11-message-based.html">11 Messages</a>
+  </div>
+  <button id="toc-btn" onclick="toggleToc()">☰ Mục lục</button>
+</nav>
+<div id="toc-bd" onclick="closeToc()"></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-ico">⚡</div>
+  <h1>Azure Functions</h1>
+  <p>Hướng Dẫn Toàn Diện Tiếng Việt cho Kỳ Thi AZ-204</p>
+  <div class="hero-tags">
+    <span class="hero-tag">⚡ Serverless</span>
+    <span class="hero-tag">🔌 Triggers &amp; Bindings</span>
+    <span class="hero-tag">📦 Hosting Plans</span>
+    <span class="hero-tag">📈 Auto Scaling</span>
+    <span class="hero-tag">🔐 Identity-Based</span>
+  </div>
+</div>
+
+<div class="wrap">
+<nav id="toc">
+  <div class="toc-lbl">Chương 02</div>
+  <a href="#m1">Module 1 – Azure Functions</a>
+  <a href="#s11" class="sub">2.1 Tổng Quan</a>
+  <a href="#s12" class="sub">2.2 So Sánh Logic Apps</a>
+  <a href="#s13" class="sub">2.3 So Sánh WebJobs</a>
+  <a href="#s14" class="sub">3. Hosting Plans</a>
+  <a href="#s15" class="sub">3.1 Timeout</a>
+  <a href="#s16" class="sub">4. Auto Scaling</a>
+  <a href="#m2">Module 2 – Phát Triển Functions</a>
+  <a href="#s21" class="sub">2. Tổng Quan Phát Triển</a>
+  <a href="#s22" class="sub">2.1 Local Files</a>
+  <a href="#s23" class="sub">3. Triggers &amp; Bindings</a>
+  <a href="#s24" class="sub">3.1 Binding Definitions</a>
+  <a href="#s25" class="sub">3.2 Code Examples</a>
+  <a href="#s26" class="sub">4. Kết Nối Services</a>
+  <a href="#s27" class="sub">4.1 Identity Connection</a>
+</nav>
+
+<main class="content">
+
+<!-- ══════════════════════════════════
+     MODULE 1
+══════════════════════════════════ -->
+<div id="m1">
+<div class="mhd"><div class="mhd-ico">⚡</div><div><h2>Module 1: Khám Phá Azure Functions</h2><div class="mhd-sub">Tổng quan, so sánh dịch vụ, hosting plans, và cơ chế scaling</div></div></div>
+<div class="msec">
+
+<section id="s11">
+<h3>⚡ 2.1 Tổng Quan Azure Functions</h3>
+
+<p>
+  <strong>Azure Functions</strong> là một giải pháp <em>serverless</em> (không cần máy chủ) cho phép bạn viết ít code hơn, duy trì ít cơ sở hạ tầng hơn và tiết kiệm chi phí. Thay vì lo lắng về việc triển khai và duy trì máy chủ, hạ tầng đám mây cung cấp tất cả các tài nguyên cần thiết để giữ ứng dụng của bạn hoạt động.
+</p>
+
+<p>
+  Chúng ta thường xây dựng các hệ thống để phản ứng với một loạt sự kiện quan trọng. Dù bạn đang xây dựng một Web API, phản hồi thay đổi cơ sở dữ liệu, xử lý luồng dữ liệu IoT, hay thậm chí quản lý hàng đợi tin nhắn — mọi ứng dụng đều cần một cách để chạy code khi các sự kiện này xảy ra.
+</p>
+
+<div class="note info">
+  <div class="nt">💡 Khái Niệm Cốt Lõi</div>
+Azure Functions hỗ trợ <strong>Trigger (Trình kích hoạt)</strong> — là các cách để bắt đầu thực thi code — và <strong>Binding (Liên kết)</strong> — là các cách để đơn giản hóa việc lập trình cho dữ liệu đầu vào và đầu ra. Có các dịch vụ tích hợp và tự động hóa khác trong Azure, và tất cả chúng đều có thể giải quyết các vấn đề tích hợp và tự động hóa quy trình nghiệp vụ.
+</div>
+
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num">1</div>
+            <div class="flow-body"><strong>Sự kiện xảy ra</strong>HTTP request, timer tick, queue message, blob upload, Event Hub, Cosmos DB change, v.v.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">2</div>
+            <div class="flow-body"><strong>TRIGGER — Trình kích hoạt</strong>Nhận sự kiện và kích hoạt thực thi function. Mỗi function có đúng 1 trigger. Direction = <code>in</code>.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-body"><strong>INPUT BINDING — Liên kết đầu vào (tùy chọn)</strong>Đọc dữ liệu từ dịch vụ khác (Blob Storage, Table, Cosmos DB…) và truyền vào function như tham số.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num">4</div>
+            <div class="flow-body"><strong>FUNCTION CODE — Mã hàm</strong>Logic nghiệp vụ của bạn: xử lý dữ liệu đầu vào và tạo kết quả đầu ra.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num">5</div>
+            <div class="flow-body"><strong>OUTPUT BINDING — Liên kết đầu ra (tùy chọn)</strong>Ghi dữ liệu ra dịch vụ khác: Queue, Blob, Cosmos DB, Email, Service Bus, v.v. Direction = <code>out</code>.</div>
+          </div>
+</div>
+</section>
+
+<hr>
+
+<section id="s12">
+<h3>🔄 2.2 So Sánh Functions và Logic Apps</h3>
+
+<p>
+  Cả Functions và Logic Apps đều là dịch vụ Azure cho phép các khối lượng công việc serverless. <strong>Azure Functions</strong> là dịch vụ tính toán serverless, trong khi <strong>Azure Logic Apps</strong> là nền tảng tích hợp quy trình làm việc (workflow) serverless. Cả hai đều có thể tạo ra các <em>orchestration</em> (điều phối) phức tạp — là tập hợp các hàm hoặc bước được thực thi để hoàn thành một tác vụ phức tạp.
+</p>
+
+<div class="note info">
+  <div class="nt">📌 Điểm Khác Biệt Quan Trọng</div>
+<ul>
+  <li>Với <strong>Azure Functions</strong>: bạn phát triển orchestration bằng cách viết code và sử dụng <strong>Durable Functions extension</strong>.</li>
+  <li>Với <strong>Logic Apps</strong>: bạn tạo orchestration bằng GUI (giao diện đồ họa) hoặc chỉnh sửa các file cấu hình.</li>
+</ul>
+</div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Chủ Đề (Topic)</th>
+              <th>Azure Functions</th>
+              <th>Logic Apps</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Phát triển (Development)</strong></td>
+              <td>Code-first (bắt buộc — imperative)</td>
+              <td>Designer-first (khai báo — declarative)</td>
+            </tr>
+            <tr>
+              <td><strong>Kết nối (Connectivity)</strong></td>
+              <td>Khoảng hơn một chục loại binding tích hợp, viết code cho binding tùy chỉnh</td>
+              <td>Bộ sưu tập lớn các connector, Enterprise Integration Pack cho B2B, xây dựng connector tùy chỉnh</td>
+            </tr>
+            <tr>
+              <td><strong>Hành động (Actions)</strong></td>
+              <td>Mỗi hoạt động là một Azure function; viết code cho activity functions</td>
+              <td>Bộ sưu tập lớn các hành động có sẵn</td>
+            </tr>
+            <tr>
+              <td><strong>Giám sát (Monitoring)</strong></td>
+              <td>Azure Application Insights</td>
+              <td>Azure portal, Azure Monitor logs</td>
+            </tr>
+            <tr>
+              <td><strong>Quản lý (Management)</strong></td>
+              <td>REST API, Visual Studio</td>
+              <td>Azure portal, REST API, PowerShell, Visual Studio</td>
+            </tr>
+            <tr>
+              <td><strong>Ngữ cảnh thực thi (Execution context)</strong></td>
+              <td>Chạy trên Azure hoặc cục bộ (locally)</td>
+              <td>Chạy trên Azure, cục bộ hoặc on-premises</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+<hr>
+
+      <section id="s13">
+        <h3>🔄 2.3 So Sánh Functions và WebJobs</h3>
+
+        <p>
+          Giống như Azure Functions, <strong>Azure App Service WebJobs</strong> với WebJobs SDK là một dịch vụ tích hợp code-first được thiết kế cho các nhà phát triển. Cả hai đều được xây dựng trên Azure App Service và hỗ trợ các tính năng như tích hợp source control, xác thực và giám sát với Application Insights.
+        </p>
+
+        <p>
+          Azure Functions được xây dựng trên WebJobs SDK, vì vậy nó chia sẻ nhiều event trigger và kết nối tới các dịch vụ Azure giống nhau. Dưới đây là các yếu tố cần xem xét khi lựa chọn giữa Azure Functions và WebJobs với WebJobs SDK:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Yếu Tố (Factor)</th>
+              <th>Azure Functions</th>
+              <th>WebJobs với WebJobs SDK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mô hình app serverless với tự động scaling</strong></td>
+              <td><span class="tag success">✅ Có</span></td>
+              <td><span class="tag danger">❌ Không</span></td>
+            </tr>
+            <tr>
+              <td><strong>Phát triển và kiểm thử trên trình duyệt</strong></td>
+              <td><span class="tag success">✅ Có</span></td>
+              <td><span class="tag danger">❌ Không</span></td>
+            </tr>
+            <tr>
+              <td><strong>Định giá trả theo sử dụng (Pay-per-use)</strong></td>
+              <td><span class="tag success">✅ Có</span></td>
+              <td><span class="tag danger">❌ Không</span></td>
+            </tr>
+            <tr>
+              <td><strong>Tích hợp với Logic Apps</strong></td>
+              <td><span class="tag success">✅ Có</span></td>
+              <td><span class="tag danger">❌ Không</span></td>
+            </tr>
+            <tr>
+              <td><strong>Sự kiện trigger</strong></td>
+              <td>
+                Timer, Azure Storage queues và blobs, Azure Service Bus queues và topics,
+                Azure Cosmos DB, Azure Event Hubs, HTTP/WebHook (GitHub, Slack), Azure Event Grid
+              </td>
+              <td>
+                Timer, Azure Storage queues và blobs, Azure Service Bus queues và topics,
+                Azure Cosmos DB, Azure Event Hubs, File system
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note ok">
+          <div class="nt">✅ Khuyến Nghị</div>
+          Azure Functions cung cấp năng suất cho nhà phát triển cao hơn Azure App Service WebJobs, đồng thời cũng cung cấp nhiều lựa chọn hơn về ngôn ngữ lập trình, môi trường phát triển, tích hợp dịch vụ Azure và định giá. Trong hầu hết các trường hợp, đây là lựa chọn tốt nhất.
+        </div>
+      </section>
+
+      <hr>
+
+      <section id="s14">
+        <h3>🖥️ 3. Các Tùy Chọn Hosting (Hosting Plans)</h3>
+
+        <p>
+          Khi bạn tạo một function app trong Azure, bạn phải chọn một hosting plan cho ứng dụng của mình. Azure cung cấp các tùy chọn hosting sau cho code function của bạn:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tùy Chọn Hosting</th>
+              <th>Dịch Vụ</th>
+              <th>Khả Dụng</th>
+              <th>Hỗ Trợ Container</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Consumption plan</strong></td>
+              <td>Azure Functions</td>
+              <td>GA (Generally Available)</td>
+              <td>Không</td>
+            </tr>
+            <tr>
+              <td><strong>Flex Consumption plan</strong></td>
+              <td>Azure Functions</td>
+              <td>GA</td>
+              <td>Không</td>
+            </tr>
+            <tr>
+              <td><strong>Premium plan</strong></td>
+              <td>Azure Functions</td>
+              <td>GA</td>
+              <td>Linux</td>
+            </tr>
+            <tr>
+              <td><strong>Dedicated plan</strong></td>
+              <td>Azure Functions</td>
+              <td>GA</td>
+              <td>Linux</td>
+            </tr>
+            <tr>
+              <td><strong>Container Apps</strong></td>
+              <td>Azure Container Apps</td>
+              <td>GA</td>
+              <td>Linux</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Cơ sở hạ tầng Azure App Service hỗ trợ hosting Azure Functions trên cả máy ảo Linux và Windows. Tùy chọn hosting bạn chọn quyết định các hành vi sau:
+        </p>
+        <ul>
+          <li>Cách function app được <strong>co giãn (scaled)</strong></li>
+          <li>Các <strong>tài nguyên</strong> có sẵn cho mỗi instance của function app</li>
+          <li>Hỗ trợ cho các tính năng nâng cao như kết nối <strong>Azure Virtual Network</strong></li>
+          <li>Hỗ trợ cho <strong>Linux containers</strong></li>
+        </ul>
+
+        <div class="arch-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="arch-card">
+            <div class="arch-card-hd" style="background:#107c10;">Consumption Plan</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Mặc định — Pay-as-you-go</div>
+              <div class="arch-item">Tự động scale theo sự kiện</div>
+              <div class="arch-item">Max: 200 instance (Windows), 100 (Linux)</div>
+              <div class="arch-item">Timeout: 5 phút mặc định, tối đa 10 phút</div>
+              <div class="arch-item">Không hỗ trợ container</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">Flex Consumption Plan</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Pay-as-you-go cải tiến</div>
+              <div class="arch-item">Per-function scaling</div>
+              <div class="arch-item">Không giới hạn (giới hạn bộ nhớ vùng)</div>
+              <div class="arch-item">Hỗ trợ pre-provisioned instances (giảm cold start)</div>
+              <div class="arch-item">Hỗ trợ VNet</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd" style="background:#ff8c00;">Premium Plan</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Pre-warmed workers — không cold start</div>
+              <div class="arch-item">Max: 100 instance (Windows), 20–100 (Linux)</div>
+              <div class="arch-item">Timeout: 30 phút mặc định, không giới hạn tối đa</div>
+              <div class="arch-item">Hỗ trợ VNet và Linux container</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd" style="background:var(--muted);">Dedicated Plan</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Thanh toán theo App Service rate</div>
+              <div class="arch-item">Manual hoặc autoscale</div>
+              <div class="arch-item">Max: 10–30 instance (100 với ASE)</div>
+              <div class="arch-item">Cần Always On để tránh cold start</div>
+              <div class="arch-item">Hỗ trợ Linux container</div>
+            </div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd" style="background:#8764b8;">Container Apps</div>
+            <div class="arch-card-body">
+              <div class="arch-item">Fully managed — Azure Container Apps</div>
+              <div class="arch-item">Event-driven scaling</div>
+              <div class="arch-item">Max: 10–300 instance</div>
+              <div class="arch-item">Timeout: 30 phút mặc định, không giới hạn tối đa</div>
+              <div class="arch-item">Hỗ trợ Linux container, microservices</div>
+            </div>
+          </div>
+        </div>
+
+        <h4>📋 Chi Tiết Từng Plan</h4>
+
+        <div class="plan-card consumption">
+          <div class="plan-title">💚 Consumption Plan (Gói Tiêu Thụ)</div>
+          <p>
+            Consumption plan là hosting plan <strong>mặc định</strong>. Thanh toán cho tài nguyên tính toán chỉ khi các function của bạn đang chạy (<strong>pay-as-you-go</strong>) với tự động co giãn. Trên Consumption plan, các instance của Functions host được thêm vào và xóa đi một cách linh hoạt dựa trên số lượng sự kiện đến.
+          </p>
+          <p><strong>Khi nào nên dùng:</strong> Workload không liên tục, muốn chi phí tối thiểu khi không có lưu lượng truy cập.</p>
+        </div>
+
+        <div class="plan-card flex">
+          <div class="plan-title">💙 Flex Consumption Plan (Gói Tiêu Thụ Linh Hoạt)</div>
+          <p>
+            Có khả năng co giãn cao với lựa chọn tính toán, kết nối mạng ảo và thanh toán theo sử dụng. Trên Flex Consumption plan, các instance được thêm/xóa dựa trên <strong>concurrency được cấu hình mỗi instance</strong> và số lượng sự kiện đến.
+          </p>
+          <p>
+            Bạn có thể giảm <strong>cold start</strong> bằng cách chỉ định số instance được pre-provisioned (luôn sẵn sàng). Tự động co giãn dựa trên nhu cầu.
+          </p>
+        </div>
+
+        <div class="plan-card premium">
+          <div class="plan-title">🟠 Premium Plan (Gói Cao Cấp)</div>
+          <p>
+            Tự động co giãn dựa trên nhu cầu sử dụng <strong>prewarmed workers</strong> (worker được làm ấm sẵn), chạy ứng dụng không có độ trễ sau khi bị idle, chạy trên các instance mạnh hơn và kết nối với virtual network.
+          </p>
+          <p><strong>Hãy xem xét Azure Functions Premium plan trong các tình huống sau:</strong></p>
+          <ul>
+            <li>Function app của bạn chạy liên tục hoặc gần như liên tục</li>
+            <li>Bạn muốn kiểm soát nhiều hơn với các instance và muốn triển khai nhiều function app trên cùng một plan với event-driven scaling</li>
+            <li>Bạn có số lượng thực thi nhỏ cao và hóa đơn thực thi cao, nhưng GB-seconds thấp trong Consumption plan</li>
+            <li>Bạn cần nhiều tùy chọn CPU hoặc bộ nhớ hơn so với consumption plans</li>
+            <li>Code của bạn cần chạy lâu hơn thời gian thực thi tối đa cho phép trên Consumption plan</li>
+            <li>Bạn yêu cầu kết nối virtual network</li>
+            <li>Bạn muốn cung cấp custom Linux image để chạy các function của mình</li>
+          </ul>
+        </div>
+
+        <div class="plan-card dedicated">
+          <div class="plan-title">⚫ Dedicated Plan (Gói Chuyên Dụng)</div>
+          <p>
+            Chạy các function trong một App Service plan theo mức giá App Service plan thông thường. Tốt nhất cho các kịch bản chạy dài mà Durable Functions không thể sử dụng.
+          </p>
+          <p><strong>Hãy xem xét App Service plan trong các tình huống sau:</strong></p>
+          <ul>
+            <li>Bạn phải có hóa đơn hoàn toàn có thể dự đoán, hoặc bạn cần tự thủ công co giãn các instance</li>
+            <li>Bạn muốn chạy nhiều web app và function app trên cùng một plan</li>
+            <li>Bạn cần truy cập vào các tùy chọn kích thước tính toán lớn hơn</li>
+            <li>Isolation tính toán đầy đủ và truy cập mạng an toàn được cung cấp bởi <strong>App Service Environment (ASE)</strong></li>
+            <li>Sử dụng bộ nhớ cao và co giãn cao (ASE)</li>
+          </ul>
+        </div>
+
+        <div class="plan-card container">
+          <div class="plan-title">🟣 Container Apps (Ứng Dụng Container)</div>
+          <p>
+            Tạo và triển khai các function app được container hóa trong môi trường hoàn toàn được quản lý, được lưu trữ bởi Azure Container Apps.
+          </p>
+          <p>
+            Sử dụng mô hình lập trình Azure Functions để xây dựng các function app event-driven, serverless, cloud native. Chạy các function của bạn cùng với các microservice, API, website và workflow khác dưới dạng các chương trình được container-hosted.
+          </p>
+          <p><strong>Hãy xem xét hosting function trên Container Apps trong các tình huống sau:</strong></p>
+          <ul>
+            <li>Bạn muốn đóng gói các thư viện tùy chỉnh với code function để hỗ trợ các line-of-business app</li>
+            <li>Bạn cần di chuyển thực thi code từ on-premises hoặc legacy app sang cloud native microservices chạy trong container</li>
+            <li>Bạn muốn tránh overhead và sự phức tạp của việc quản lý Kubernetes cluster và dedicated compute</li>
+            <li>Bạn cần sức mạnh xử lý cao cấp được cung cấp bởi dedicated CPU compute resources cho các function của mình</li>
+          </ul>
+        </div>
+      </section>
+
+      <hr>
+
+      <section id="s15">
+        <h3>⏱️ 3.1 Thời Gian Chờ (Function App Timeout Duration)</h3>
+
+        <p>
+          Thuộc tính <code>functionTimeout</code> trong file project <strong>host.json</strong> chỉ định thời gian chờ cho các function trong một function app. Thuộc tính này áp dụng cụ thể cho việc thực thi function. Sau khi trigger bắt đầu thực thi function, function cần return/respond trong thời gian chờ.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Mặc định (Default)</th>
+              <th>Tối đa (Maximum)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Flex Consumption plan</strong></td>
+              <td>30 phút</td>
+              <td>Không giới hạn ²</td>
+            </tr>
+            <tr>
+              <td><strong>Premium plan</strong></td>
+              <td>30 phút ⁴</td>
+              <td>Không giới hạn ²</td>
+            </tr>
+            <tr>
+              <td><strong>Dedicated plan</strong></td>
+              <td>30 phút ⁴</td>
+              <td>Không giới hạn ³</td>
+            </tr>
+            <tr>
+              <td><strong>Container Apps</strong></td>
+              <td>30 phút</td>
+              <td>Không giới hạn ⁵</td>
+            </tr>
+            <tr>
+              <td><strong>Consumption plan</strong></td>
+              <td>5 phút</td>
+              <td><strong>10 phút</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note warn">
+          <div class="nt">⚠️ Lưu Ý Quan Trọng</div>
+          <ol>
+            <li>Bất kể cài đặt timeout của function app, <strong>230 giây</strong> là lượng thời gian tối đa mà một HTTP triggered function có thể mất để phản hồi một yêu cầu. Đây là do idle timeout mặc định của Azure Load Balancer. Với thời gian xử lý dài hơn, hãy xem xét sử dụng <strong>Durable Functions async pattern</strong> hoặc trì hoãn công việc thực sự và trả về phản hồi ngay lập tức.</li>
+            <li>Không có thời gian thực thi tối đa nào được thực thi. Tuy nhiên, grace period cho một lần thực thi function là 60 phút trong quá trình scale in cho Flex Consumption và Premium plans, và 10 phút trong quá trình cập nhật platform.</li>
+            <li>Yêu cầu App Service plan được đặt thành <strong>Always On</strong>. Grace period 10 phút được cho trong quá trình cập nhật platform.</li>
+            <li>Timeout mặc định cho phiên bản 1.x của Functions host runtime là <em>không giới hạn</em>.</li>
+            <li>Khi số lượng replica tối thiểu được đặt thành zero, timeout mặc định phụ thuộc vào các trigger cụ thể được sử dụng trong app.</li>
+          </ol>
+        </div>
+      </section>
+
+      <hr>
+
+      <section id="s16">
+        <h3>📈 4. Tự Động Co Giãn (Scale Azure Functions)</h3>
+
+        <p>
+          Bảng sau so sánh các hành vi scaling của các hosting plan khác nhau. Số instance tối đa được tính trên cơ sở mỗi function app (Consumption) hoặc mỗi plan (Premium/Dedicated), trừ khi có ghi chú khác.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Cách Scale Out</th>
+              <th>Số Instance Tối Đa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Consumption plan</strong></td>
+              <td>Event driven. Tự động scale out, kể cả trong các giai đoạn tải cao. Hạ tầng Functions scale CPU và bộ nhớ bằng cách thêm instance dựa trên số lượng sự kiện trigger đến.</td>
+              <td><strong>Windows:</strong> 200<br><strong>Linux:</strong> 100 ¹</td>
+            </tr>
+            <tr>
+              <td><strong>Flex Consumption plan</strong></td>
+              <td>Per-function scaling. Các quyết định scaling event-driven được tính toán trên cơ sở từng function, cung cấp cách xác định hơn để scale các function trong app.</td>
+              <td>Chỉ giới hạn bởi tổng sử dụng bộ nhớ của tất cả các instance trên một vùng nhất định.</td>
+            </tr>
+            <tr>
+              <td><strong>Premium plan</strong></td>
+              <td>Event driven. Tự động scale out dựa trên số lượng sự kiện mà các function được triggered.</td>
+              <td><strong>Windows:</strong> 100<br><strong>Linux:</strong> 20-100 ²</td>
+            </tr>
+            <tr>
+              <td><strong>Dedicated plan</strong></td>
+              <td>Manual/autoscale</td>
+              <td>10-30<br>100 (ASE)</td>
+            </tr>
+            <tr>
+              <td><strong>Container Apps</strong></td>
+              <td>Event driven. Tự động scale out bằng cách thêm instance của Functions host dựa trên số sự kiện mà các function được triggered.</td>
+              <td>10-300 ⁴</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note info">
+          <div class="nt">📝 Ghi Chú</div>
+          <ol>
+            <li>Trong quá trình scale-out, hiện tại có giới hạn 500 instance mỗi subscription mỗi giờ cho các Linux app trên Consumption plan.</li>
+            <li>Ở một số vùng, Linux app trên Premium plan có thể scale lên 100 instance.</li>
+            <li>Để biết các giới hạn cụ thể cho các tùy chọn App Service plan khác nhau, xem App Service plan limits.</li>
+            <li>Trên Container Apps, bạn có thể đặt số lượng replica tối đa, được tuân thủ miễn là có đủ cores quota.</li>
+          </ol>
+        </div>
+
+        <div class="flow-v">
+          <div class="flow-step hi">
+            <div class="flow-num" style="font-size:.6rem;">➡</div>
+            <div class="flow-body"><strong>Trigger Events đến</strong>HTTP requests, queue messages, timer, blob upload, Event Hub… Scale Controller theo dõi liên tục.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step hi">
+            <div class="flow-num" style="font-size:.6rem;">⚙</div>
+            <div class="flow-body"><strong>Scale Controller quyết định</strong>Phân tích lượng sự kiện chờ xử lý → quyết định thêm hoặc xóa instance.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num" style="font-size:.6rem;">+</div>
+            <div class="flow-body"><strong>Tự động thêm instance (Scale Out)</strong>Thêm instance mới khi tải tăng. Mỗi instance xử lý một phần sự kiện song song.</div>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <div class="flow-num" style="font-size:.6rem;">−</div>
+            <div class="flow-body"><strong>Tự động xóa instance (Scale In)</strong>Xóa instance không cần thiết khi tải giảm (Consumption: về 0 khi không có traffic).</div>
+          </div>
+        </div>
+        <div class="arch-grid" style="margin-top:.5rem;">
+          <div class="arch-card">
+            <div class="arch-card-hd">Consumption</div>
+            <div class="arch-card-body">Mỗi function app scale độc lập. Về 0 khi không có traffic (cold start). Max 200/100 instances.</div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd">Flex Consumption</div>
+            <div class="arch-card-body">Per-function scaling — mỗi function scale riêng. Pre-provisioned instances giảm cold start.</div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd" style="background:#ff8c00;">Premium</div>
+            <div class="arch-card-body">Pre-warmed workers luôn sẵn sàng — không có cold start. Scale dựa trên sự kiện.</div>
+          </div>
+          <div class="arch-card">
+            <div class="arch-card-hd" style="background:var(--muted);">Dedicated</div>
+            <div class="arch-card-body">Manual hoặc autoscale theo App Service rules. Không tự động scale như các plan khác.</div>
+          </div>
+        </div>
+      </section>
+
+  </div><!-- /msec --></div><!-- /m1 -->
+
+  <!-- ══════════════════════════════════
+       MODULE 2
+  ═════════════════════════════════════ -->
+  <div id="m2">
+  <div class="mhd"><div class="mhd-ico">🔧</div><div><h2>Module 2: Phát Triển Azure Functions</h2><div class="mhd-sub">Môi trường phát triển, Triggers, Bindings, và kết nối dịch vụ</div></div></div>
+  <div class="msec">
+
+      <section id="s21">
+        <h3>⚙️ 2. Tổng Quan Phát Triển Azure Functions</h3>
+
+        <p>
+          Một <strong>function app (ứng dụng hàm)</strong> cung cấp ngữ cảnh thực thi trong Azure nơi các function của bạn chạy. Vì vậy, nó là đơn vị triển khai và quản lý cho các function của bạn. Một function app bao gồm một hoặc nhiều function riêng lẻ được quản lý, triển khai và co giãn cùng nhau. Tất cả các function trong một function app chia sẻ cùng pricing plan, phương thức triển khai và phiên bản runtime.
+        </p>
+
+        <div class="note info">
+          <div class="nt">📝 Lưu Ý</div>
+          Trong Functions 2.x, tất cả các function trong một function app phải được viết bằng cùng một ngôn ngữ. Trong các phiên bản cũ hơn của Azure Functions runtime, điều này không bắt buộc.
+        </div>
+
+        <div class="highlight-box">
+          <h4>💡 Tư Duy Đúng Về Function App</h4>
+          <p>Hãy nghĩ về function app như một cách để tổ chức và quản lý các function của bạn một cách tập thể. Tất cả function trong một app sẽ cùng:</p>
+          <ul>
+            <li>Chia sẻ <strong>pricing plan</strong> (gói giá)</li>
+            <li>Chia sẻ <strong>deployment method</strong> (phương thức triển khai)</li>
+            <li>Chia sẻ <strong>runtime version</strong> (phiên bản runtime)</li>
+            <li>Được <strong>scaled cùng nhau</strong> (co giãn cùng nhau)</li>
+          </ul>
+        </div>
+
+        <h4>💻 Phát Triển và Kiểm Thử Cục Bộ</h4>
+        <p>
+          Functions giúp dễ dàng sử dụng trình soạn thảo code và công cụ phát triển yêu thích của bạn để tạo và kiểm thử function trên máy tính cục bộ. Các function cục bộ của bạn có thể kết nối với các dịch vụ Azure trực tiếp, và bạn có thể debug chúng trên máy tính cục bộ sử dụng Functions runtime đầy đủ.
+        </p>
+
+        <div class="note warn">
+          <div class="nt">⚠️ Khuyến Nghị Phát Triển</div>
+          Do các giới hạn khi chỉnh sửa code function trong Azure portal, bạn nên phát triển các function của mình cục bộ và publish code project lên một function app trong Azure. Không nên dùng portal để chỉnh sửa code production.
+        </div>
+      </section>
+
+      <hr>
+
+      <section id="s22">
+        <h3>📁 2.1 Các Tệp Dự Án Cục Bộ (Local Project Files)</h3>
+
+        <p>
+          Một thư mục dự án Functions chứa các file sau trong thư mục gốc của dự án, bất kể ngôn ngữ:
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>📄 host.json</h4>
+            <p>File metadata chứa các <strong>tùy chọn cấu hình ảnh hưởng đến tất cả các function</strong> trong một function app instance. Cấu hình liên quan đến bindings trong <code>host.json</code> được áp dụng đồng đều cho mỗi function trong function app.</p>
+            <p>Bạn cũng có thể ghi đè hoặc áp dụng cài đặt theo môi trường bằng cách sử dụng application settings.</p>
+          </div>
+          <div class="card">
+            <h4>📄 local.settings.json</h4>
+            <p>Lưu trữ <strong>app settings và cài đặt</strong> được sử dụng bởi local development tools. Cài đặt trong <code>local.settings.json</code> chỉ được sử dụng khi bạn chạy project cục bộ.</p>
+            <p>Khi publish project lên Azure, hãy đảm bảo thêm bất kỳ cài đặt cần thiết nào vào app settings của function app.</p>
+          </div>
+        </div>
+
+        <div class="note danger">
+          <div class="nt">🚨 Quan Trọng - Bảo Mật</div>
+          Vì <code>local.settings.json</code> có thể chứa các bí mật, chẳng hạn như connection strings, bạn <strong>KHÔNG BAO GIỜ nên lưu trữ nó trong remote repository</strong> (như GitHub, Azure DevOps, v.v.). Hãy thêm file này vào <code>.gitignore</code>.
+        </div>
+
+        <h4>📋 Cấu Hình Theo Môi Trường</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Nơi Chạy</th>
+              <th>Cấu Hình Tại</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Triển khai lên Azure (Deployed to Azure)</td>
+              <td>Application settings (trong Azure portal hoặc CLI)</td>
+            </tr>
+            <tr>
+              <td>Máy tính cục bộ (Local computer)</td>
+              <td>File <code>local.settings.json</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>🔄 Đồng Bộ Cài Đặt (Synchronize Settings)</h4>
+        <p>
+          Khi bạn phát triển các function cục bộ, bất kỳ cài đặt cục bộ nào được yêu cầu bởi ứng dụng của bạn cũng phải có trong app settings của function app đã triển khai. Bạn cũng có thể tải xuống các cài đặt hiện tại từ function app về dự án cục bộ của mình.
+        </p>
+      </section>
+
+      <!-- SECTION: TRIGGERS AND BINDINGS -->
+      <hr>
+
+      <section id="s23">
+        <h3>🔌 3. Triggers &amp; Bindings (Trình Kích Hoạt &amp; Liên Kết)</h3>
+
+        <p>
+          Một <strong>Trigger (Trình kích hoạt)</strong> xác định cách một function được gọi và một function phải có <strong>đúng một trigger</strong>. Trigger có dữ liệu liên kết, thường được cung cấp như payload của function.
+        </p>
+
+        <p>
+          <strong>Binding (Liên kết)</strong> với một function là cách khai báo kết nối tài nguyên khác với function; binding có thể được kết nối như <em>input binding (liên kết đầu vào)</em>, <em>output binding (liên kết đầu ra)</em>, hoặc cả hai. Dữ liệu từ binding được cung cấp cho function như các tham số (parameters).
+        </p>
+
+        <div class="note ok">
+          <div class="nt">✅ Lợi Ích của Triggers &amp; Bindings</div>
+          Trigger và binding cho phép bạn <strong>tránh hardcode quyền truy cập vào các dịch vụ khác</strong>. Function của bạn nhận dữ liệu (ví dụ: nội dung của một queue message) trong các tham số function. Bạn gửi dữ liệu (ví dụ: để tạo một queue message) bằng cách sử dụng giá trị trả về của function.
+        </div>
+
+        <div class="arch-grid" style="grid-template-columns:1fr 2fr;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="arch-card">
+              <div class="arch-card-hd" style="background:#107c10;">TRIGGER (bắt buộc, đúng 1)</div>
+              <div class="arch-card-body" style="font-size:.8rem;">HTTP · Timer · Queue · Blob · Event Hub · Cosmos DB · Service Bus<br><em>Direction: <code>in</code></em></div>
+            </div>
+            <div class="arch-card">
+              <div class="arch-card-hd">INPUT BINDING (tùy chọn, nhiều)</div>
+              <div class="arch-card-body" style="font-size:.8rem;">Blob Storage · Table Storage · Cosmos DB · SignalR · v.v.<br><em>Direction: <code>in</code></em></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="arch-card" style="border-color:var(--blue-5);border-width:2px;">
+              <div class="arch-card-hd">FUNCTION CODE</div>
+              <div class="arch-card-body" style="font-size:.83rem;">Logic nghiệp vụ của bạn. Nhận dữ liệu từ trigger và input bindings qua tham số. Gửi kết quả qua output bindings.</div>
+            </div>
+            <div class="arch-card">
+              <div class="arch-card-hd" style="background:#ff8c00;">OUTPUT BINDING (tùy chọn, nhiều)</div>
+              <div class="arch-card-body" style="font-size:.8rem;">Queue message · Blob · Cosmos DB · Email · Table · SignalR · v.v.<br><em>Direction: <code>out</code></em></div>
+            </div>
+          </div>
+        </div>
+        <div class="note info" style="margin-top:.5rem;font-size:.83rem;"><strong>Quy tắc:</strong> Mỗi function PHẢI CÓ ĐÚNG 1 trigger · Input &amp; Output binding là tùy chọn, có thể có nhiều · Một số binding đặc biệt hỗ trợ direction <code>inout</code> qua Advanced editor.</div>
+
+        <h4>🧪 Kiểm Thử Cục Bộ với Triggers &amp; Bindings</h4>
+
+        <p>Khi phát triển function cục bộ, cần xem xét cách xử lý trigger và binding:</p>
+
+        <ul>
+          <li><strong>HTTP trigger:</strong> Có thể gọi HTTP endpoint trực tiếp trên máy cục bộ: <code>http://localhost/</code></li>
+          <li><strong>Non-HTTP triggered functions:</strong> Có nhiều tùy chọn:
+            <ul>
+              <li>Dùng <strong>connection strings</strong> trỏ đến dịch vụ Azure thực — thêm vào mảng <code>Values</code> trong <code>local.settings.json</code>. Lưu ý: đây là dữ liệu thực nên nên dùng dịch vụ riêng cho dev/test.</li>
+              <li>Với storage-based trigger: Dùng <strong>Azurite emulator</strong> cục bộ để kiểm thử Azure Storage bindings (Queue, Blob, Table) mà không cần kết nối remote storage.</li>
+              <li>Tự thủ công chạy non-HTTP trigger functions bằng cách sử dụng các <strong>administrator endpoints</strong> đặc biệt.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h4>📋 Hướng Dẫn Binding Direction (Chiều Binding)</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Loại</th>
+              <th>Direction (Chiều)</th>
+              <th>Mô Tả</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Trigger</td>
+              <td><code>in</code></td>
+              <td>Luôn luôn là "in" — nhận sự kiện kích hoạt</td>
+            </tr>
+            <tr>
+              <td>Input binding</td>
+              <td><code>in</code></td>
+              <td>Nhận dữ liệu từ dịch vụ bên ngoài</td>
+            </tr>
+            <tr>
+              <td>Output binding</td>
+              <td><code>out</code></td>
+              <td>Gửi dữ liệu ra dịch vụ bên ngoài</td>
+            </tr>
+            <tr>
+              <td>Một số binding đặc biệt</td>
+              <td><code>inout</code></td>
+              <td>Vừa đọc vừa ghi — chỉ khả dụng qua Advanced editor trong portal</td>
+            </tr>
+          </tbody>
+        </table>
+
+      <!-- SECTION: BINDING DEFINITIONS -->
+      </section>
+
+      <hr>
+
+      <section id="s24">
+        <h3>📝 3.1 Định Nghĩa Binding Theo Ngôn Ngữ</h3>
+
+        <p>Trigger và binding được định nghĩa khác nhau tùy theo ngôn ngữ phát triển và runtime model:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Ngôn Ngữ</th>
+              <th>Cách Cấu Hình Trigger &amp; Binding</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>C# class library</strong></td>
+              <td>Trang trí (decorating) các method và parameter với <strong>C# attributes</strong> (in-process hoặc isolated worker)</td>
+            </tr>
+            <tr>
+              <td><strong>Java</strong></td>
+              <td>Trang trí các method và parameter với <strong>Java annotations</strong></td>
+            </tr>
+            <tr>
+              <td><strong>JavaScript/TypeScript</strong></td>
+              <td>v4: định nghĩa input/output trong code với <code>@azure/functions</code>; v3: cấu hình trong <em>function.json</em> mỗi function</td>
+            </tr>
+            <tr>
+              <td><strong>Python</strong></td>
+              <td>v2: định nghĩa input/output với decorators; v1: cấu hình trong <em>function.json</em></td>
+            </tr>
+            <tr>
+              <td><strong>PowerShell</strong></td>
+              <td>Cấu hình trong <em>function.json</em></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note info">
+          <div class="nt">📌 Mô Hình Lập Trình Mới vs. Cũ</div>
+          <ul>
+            <li><strong>Mô hình mới (Node.js v4, Python v2):</strong> Bạn viết cấu hình trigger và binding trong code — runtime tự động tạo ra <em>function.json</em> tương ứng.</li>
+            <li><strong>Mô hình cũ (Node.js v3, Python v1, PowerShell):</strong> Sử dụng <em>function.json</em> trực tiếp.</li>
+            <li><strong>Quan trọng:</strong> Bạn không thể trộn lẫn các mô hình lập trình trong cùng một function app.</li>
+          </ul>
+        </div>
+
+        <h4>📄 Ví Dụ function.json (Legacy — Node.js v3, Python v1, PowerShell)</h4>
+        <p>Kịch bản: Ghi một tin nhắn vào Azure Queue Storage mỗi khi nhận được HTTP request:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+    "disabled": false,
+    "bindings": [
+        {
+            "type": "httpTrigger",
+            "direction": "in",
+            "name": "req",
+            "authLevel": "function",
+            "methods": ["get","post"]
+        },
+        {
+            "type": "queue",
+            "direction": "out",
+            "name": "outqueue",
+            "queueName": "outqueue",
+            "connection": "AzureWebJobsStorage"
+        }
+    ]
+}</code></pre>
+</div>
+
+        <div class="note info">
+          <div class="nt">📋 Giải Thích function.json</div>
+          <ul>
+            <li>Phần tử <strong>đầu tiên</strong> trong mảng <code>bindings</code> là HTTP trigger: <code>type: "httpTrigger"</code>, <code>direction: "in"</code>, <code>name: "req"</code>, <code>methods: ["get", "post"]</code></li>
+            <li>Phần tử <strong>thứ hai</strong> là Storage Queue output binding: <code>type: "queue"</code>, <code>direction: "out"</code>, <code>name: "outqueue"</code>, <code>queueName: "outqueue"</code>, <code>connection: "AzureWebJobsStorage"</code></li>
+            <li>Thuộc tính <code>disabled</code> trong function.json là hành vi cũ — nên dùng app setting <code>AzureWebJobs.&lt;FunctionName&gt;.Disabled=true</code> thay thế.</li>
+          </ul>
+        </div>
+
+        <h4>📌 Cấu Hình dataType cho Ngôn Ngữ Động (JavaScript v3, PowerShell)</h4>
+        <p>Với các ngôn ngữ kiểu động, sử dụng thuộc tính <code>dataType</code> trong file <em>function.json</em>. Ví dụ, để đọc nội dung HTTP request ở định dạng nhị phân:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">JSON</span></div>
+<pre><code class="language-json">{
+    "dataType": "binary",
+    "type": "httpTrigger",
+    "name": "req",
+    "direction": "in"
+}</code></pre>
+</div>
+
+        <p>Các tùy chọn cho <code>dataType</code>: <code>binary</code>, <code>stream</code>, <code>string</code>.</p>
+
+      <!-- SECTION: CODE EXAMPLES -->
+      </section>
+
+      <hr>
+
+      <section id="s25">
+        <h3>💻 3.2 Ví Dụ Code Đa Ngôn Ngữ</h3>
+
+        <p>
+          Kịch bản: Ghi một tin nhắn vào Azure Queue Storage mỗi khi nhận được HTTP request.
+          Cách tiếp cận cấu hình phụ thuộc vào ngôn ngữ và mô hình lập trình của bạn.
+        </p>
+
+        <div class="flowchart">
+          <div class="fc-box yellow">HTTP GET / POST Request</div>
+          <div class="fc-arr">↓</div>
+          <div class="fc-box hi" style="background:#dce6f5;max-width:400px;">
+            Azure Function (httpTrigger)<br>
+            <span style="font-size:.78rem;font-weight:400;">Xử lý request · Tạo queue message</span>
+          </div>
+          <div class="fc-branch" style="max-width:400px;">
+            <div class="fc-bcol">
+              <div class="fc-arr">↓</div>
+              <div class="fc-box green" style="max-width:180px;">HTTP 200 OK Response</div>
+            </div>
+            <div class="fc-bcol">
+              <div class="fc-arr">→</div>
+              <div class="fc-box" style="max-width:180px;">Azure Queue Storage<br><span style="font-size:.75rem;font-weight:400;">(outqueue)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <h4>🔵 C# (Isolated Worker Model)</h4>
+        <p>Ví dụ này hiển thị một HTTP-triggered function viết tin nhắn vào Storage Queue bằng output binding được định nghĩa bởi attributes:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">C#</span></div>
+<pre><code class="language-csharp">using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
+
+public static class HttpToQueue
+{
+    [Function("HttpToQueue")]
+    public static MultiResponse Run(
+        [HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+    {
+        var message = "Processed request";
+        return new MultiResponse
+        {
+            Messages = new[] { message },
+            HttpResponse = req.CreateResponse(System.Net.HttpStatusCode.OK)
+        };
+    }
+}
+
+public class MultiResponse
+{
+    [QueueOutput("outqueue", Connection = "AzureWebJobsStorage")]
+    public string[] Messages { get; set; }
+    public HttpResponseData HttpResponse { get; set; }
+}</code></pre>
+</div>
+
+        <h4>🟡 Node.js (v4 Programming Model)</h4>
+        <p>Trong mô hình lập trình Node.js v4, bạn cấu hình input và output trong code bằng cách sử dụng <code>@azure/functions</code>:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">Python</span></div>
+<pre><code class="language-python">import { app, output } from "@azure/functions";
+
+const queueOutput = output.storageQueue({
+  queueName: "outqueue",
+  connection: "AzureWebJobsStorage"
+});
+
+app.http("HttpToQueue", {
+  methods: ["GET", "POST"],
+  authLevel: "function",
+  extraOutputs: [queueOutput],
+  handler: async (request, context) => {
+    const body = await request.text();
+    context.extraOutputs.set(queueOutput, body || "Processed request");
+    return { status: 200, body: "Queued" };
+  }
+});</code></pre>
+</div>
+
+        <h4>🐍 Python (v2 Programming Model)</h4>
+        <p>Trong mô hình lập trình Python v2, bạn sử dụng decorators để định nghĩa bindings. Runtime tự động tạo ra <em>function.json</em> cho bạn:</p>
+
+        <div class="cb">
+<div class="cb-hd"><div class="dots"><i class="dr"></i><i class="dy"></i><i class="dg"></i></div><span class="cb-lang">Python</span></div>
+<pre><code class="language-python">import azure.functions as func
+
+app = func.FunctionApp()
+
+@app.route(route="HttpToQueue", auth_level=func.AuthLevel.FUNCTION)
+@app.queue_output(arg_name="msg", queue_name="outqueue", connection="AzureWebJobsStorage")
+def HttpToQueue(req: func.HttpRequest, msg: func.Out[str]) -> func.HttpResponse:
+    body = req.get_body().decode("utf-8") if req.get_body() else "Processed request"
+    msg.set(body)
+    return func.HttpResponse("Queued", status_code=200)</code></pre>
+</div>
+
+        <div class="note info">
+          <div class="nt">💡 Lưu Ý Quan Trọng cho Node.js v4 và Python v2</div>
+          Trong Node.js v4 và Python v2, runtime tạo ra <em>function.json</em> từ code của bạn. Tránh chỉnh sửa <em>function.json</em> trực tiếp trong portal cho các mô hình này; hãy thực hiện thay đổi trong code và republish.
+        </div>
+
+        <h4>📊 So Sánh Cách Tiếp Cận Theo Ngôn Ngữ</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Ngôn Ngữ / Model</th>
+              <th>Cách Khai Báo Binding</th>
+              <th>Runtime Tạo function.json?</th>
+              <th>Chỉnh Sửa Được Trong Portal?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>C# (in-process)</td>
+              <td>C# Attributes trên method/parameter</td>
+              <td>Không (dùng attributes trực tiếp)</td>
+              <td>Không (dùng C# script trong portal)</td>
+            </tr>
+            <tr>
+              <td>C# (isolated worker)</td>
+              <td>C# Attributes</td>
+              <td>Không</td>
+              <td>Không</td>
+            </tr>
+            <tr>
+              <td>Java</td>
+              <td>Java Annotations</td>
+              <td>Không</td>
+              <td>Không</td>
+            </tr>
+            <tr>
+              <td>Node.js v4</td>
+              <td>Code với <code>@azure/functions</code></td>
+              <td><strong>Có</strong></td>
+              <td>Hạn chế</td>
+            </tr>
+            <tr>
+              <td>Node.js v3</td>
+              <td>function.json trực tiếp</td>
+              <td>Không</td>
+              <td><strong>Có</strong> (qua Integration tab)</td>
+            </tr>
+            <tr>
+              <td>Python v2</td>
+              <td>Decorators</td>
+              <td><strong>Có</strong></td>
+              <td>Hạn chế</td>
+            </tr>
+            <tr>
+              <td>Python v1</td>
+              <td>function.json trực tiếp</td>
+              <td>Không</td>
+              <td><strong>Có</strong> (qua Integration tab)</td>
+            </tr>
+            <tr>
+              <td>PowerShell</td>
+              <td>function.json trực tiếp</td>
+              <td>Không</td>
+              <td><strong>Có</strong> (qua Integration tab)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note info">
+          <div class="nt">📝 C# và Java vs. Ngôn Ngữ Động</div>
+          <ul>
+            <li>Với <strong>.NET và Java</strong>: kiểu tham số xác định kiểu dữ liệu cho dữ liệu đầu vào. Ví dụ: dùng <code>string</code> để bind với text của queue trigger, byte array để đọc dạng nhị phân, và custom type để deserialize sang object.</li>
+            <li>Với <strong>ngôn ngữ kiểu động</strong> như JavaScript (v3) hoặc PowerShell: dùng thuộc tính <code>dataType</code> trong function.json.</li>
+            <li>C# class library và Java functions <strong>không thể</strong> được tạo và chỉnh sửa trong portal vì chúng không dựa vào function.json.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- SECTION: CONNECT SERVICES -->
+      <section id="s26">
+        <h3>🔐 4. Kết Nối Dịch Vụ Azure (Connect Functions to Azure Services)</h3>
+
+        <p>
+          Là một thực hành bảo mật tốt nhất, Azure Functions tận dụng tính năng <strong>application settings</strong> của Azure App Service để giúp bạn lưu trữ an toàn hơn các chuỗi kết nối, khóa và các token khác cần thiết để kết nối với các dịch vụ khác.
+        </p>
+
+        <p>
+          Application settings trong Azure được lưu trữ <strong>mã hóa (encrypted)</strong> và được truy cập tại runtime bởi ứng dụng của bạn như các cặp <code>name</code>/<code>value</code> của biến môi trường. Đối với trigger và binding yêu cầu thuộc tính connection, bạn đặt <strong>tên của application setting</strong> thay vì connection string thực tế. Bạn <strong>không thể</strong> cấu hình binding trực tiếp với connection string hoặc key.
+        </p>
+
+        <div class="note warn">
+          <div class="nt">🔑 Cách Hoạt Động</div>
+          <ul>
+            <li>Application settings được lưu trữ <strong>mã hóa</strong> trong Azure</li>
+            <li>Được truy cập tại runtime như <strong>biến môi trường</strong></li>
+            <li>Khi chạy trong Azure: đọc từ <strong>application settings</strong></li>
+            <li>Khi phát triển cục bộ: đọc từ <strong>local.settings.json</strong></li>
+            <li>Default configuration provider sử dụng <strong>environment variables</strong></li>
+          </ul>
+        </div>
+
+        <div class="compare-2">
+          <div class="cmp-col">
+            <div class="cmp-hd blue">Môi trường Azure (Production)</div>
+            <div class="cmp-use">Cấu hình qua Application Settings</div>
+            <div class="cmp-step"><div class="cmp-n">1</div><div>Application Settings lưu trữ <strong>mã hóa (encrypted)</strong> trên Azure</div></div>
+            <div class="cmp-step"><div class="cmp-n">2</div><div>Runtime đọc settings như <strong>biến môi trường</strong> (environment variables)</div></div>
+            <div class="cmp-step"><div class="cmp-n">3</div><div>Ví dụ: <code>AzureWebJobsStorage</code>, <code>MyServiceBus</code>, <code>MyCosmosDB</code></div></div>
+            <div class="cmp-step"><div class="cmp-n">4</div><div>Function App kết nối tới Azure Services bằng connection string từ settings</div></div>
+          </div>
+          <div class="cmp-col">
+            <div class="cmp-hd dark">Môi trường cục bộ (Local Development)</div>
+            <div class="cmp-use">Cấu hình qua local.settings.json</div>
+            <div class="cmp-step"><div class="cmp-n">1</div><div>File <code>local.settings.json</code> lưu settings khi phát triển cục bộ</div></div>
+            <div class="cmp-step"><div class="cmp-n">2</div><div>Cùng tên key với Application Settings trên Azure</div></div>
+            <div class="cmp-step"><div class="cmp-n">3</div><div>Ví dụ: <code>"AzureWebJobsStorage": "UseDevelopmentStorage=true"</code></div></div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#d13438;">!</div><div><strong>KHÔNG commit</strong> file này lên git — có thể chứa secrets</div></div>
+          </div>
+        </div>
+      </section>
+
+      <hr>
+
+      <section id="s27">
+        <h3>🛡️ 4.1 Kết Nối Dựa Trên Danh Tính (Identity-Based Connection)</h3>
+
+        <p>
+          Một số kết nối trong Azure Functions được cấu hình để sử dụng <strong>danh tính (identity)</strong> thay vì bí mật (secret). Hỗ trợ phụ thuộc vào extension sử dụng kết nối. Trong một số trường hợp, connection string vẫn có thể được yêu cầu trong Functions dù dịch vụ bạn đang kết nối hỗ trợ identity-based connections.
+        </p>
+
+        <div class="note warn">
+          <div class="nt">⚠️ Ngoại Lệ Quan Trọng</div>
+          Một app chạy trong Consumption hoặc Elastic Premium plan sử dụng các setting <code>WEBSITE_AZUREFILESCONNECTIONSTRING</code> và <code>WEBSITE_CONTENTSHARE</code> khi kết nối với Azure Files trên storage account được sử dụng bởi function app. <strong>Azure Files không hỗ trợ sử dụng managed identity</strong> khi truy cập file share.
+        </div>
+
+        <h4>🔑 Cách Identity-Based Connection Hoạt Động</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Ngữ Cảnh</th>
+              <th>Danh Tính Được Sử Dụng</th>
+              <th>Ghi Chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hosted trong Azure Functions service</td>
+              <td><strong>Managed Identity</strong></td>
+              <td>System-assigned identity được dùng mặc định</td>
+            </tr>
+            <tr>
+              <td>User-assigned identity</td>
+              <td>Chỉ định qua <code>credential</code> và <code>clientID</code></td>
+              <td>Cấu hình với resource ID <strong>không</strong> được hỗ trợ</td>
+            </tr>
+            <tr>
+              <td>Local development</td>
+              <td><strong>Developer identity</strong></td>
+              <td>Danh tính của nhà phát triển được dùng thay thế (có thể tùy chỉnh)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>🔐 Cấp Quyền Cho Danh Tính (Grant Permission to Identity)</h4>
+
+        <p>
+          Các danh tính phải có quyền để thực hiện các hành động dự định. Điều này thường được thực hiện bằng cách:
+        </p>
+        <ul>
+          <li><strong>Gán vai trò (Role Assignment)</strong> trong Azure Role-Based Access Control (RBAC)</li>
+          <li><strong>Chỉ định danh tính</strong> trong access policy tùy thuộc vào dịch vụ bạn đang kết nối</li>
+        </ul>
+
+        <div class="note danger">
+          <div class="nt">🚨 Nguyên Tắc Bảo Mật Quan Trọng: Least Privilege</div>
+          Dịch vụ đích có thể expose một số quyền không cần thiết cho tất cả các ngữ cảnh. Khi có thể, hãy tuân thủ <strong>nguyên tắc quyền tối thiểu (principle of least privilege)</strong> — chỉ cấp cho danh tính các quyền bắt buộc cần thiết.
+        </div>
+
+        <div class="compare-2">
+          <div class="cmp-col">
+            <div class="cmp-hd" style="background:#d13438;color:#fff;">Phương pháp cũ — Connection String / Secret</div>
+            <div class="cmp-use">Function App → Connection String → Azure Service</div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#d13438;">✗</div><div>Lưu connection string hoặc key trong Application Settings</div></div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#d13438;">✗</div><div>Cần quản lý key — xoay vòng thủ công, rủi ro hết hạn</div></div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#d13438;">✗</div><div>Rủi ro lộ secret nếu settings bị truy cập trái phép</div></div>
+          </div>
+          <div class="cmp-col">
+            <div class="cmp-hd" style="background:#107c10;color:#fff;">Phương pháp mới — Identity-Based / Managed Identity</div>
+            <div class="cmp-use">Function App (Managed Identity) → RBAC Role → Azure Service</div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#107c10;">✓</div><div>Dùng Azure AD token — không cần lưu secret</div></div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#107c10;">✓</div><div>Token tự động luân phiên — không cần quản lý thủ công</div></div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#107c10;">✓</div><div>An toàn hơn, dễ kiểm toán qua Azure AD logs</div></div>
+            <div class="cmp-step"><div class="cmp-n" style="background:#107c10;">✓</div><div>Tích hợp tự nhiên với Azure RBAC — Least Privilege</div></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>✅ Lợi Ích Identity-Based</h4>
+            <ul>
+              <li>Không cần lưu trữ và quản lý secret</li>
+              <li>Tự động luân phiên token (token rotation)</li>
+              <li>An toàn hơn — không có rủi ro lộ key</li>
+              <li>Dễ kiểm toán (audit) qua Azure AD logs</li>
+              <li>Tích hợp tự nhiên với Azure RBAC</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>⚠️ Khi Nào Cần Dùng Secret</h4>
+            <ul>
+              <li>Azure Files (không hỗ trợ managed identity)</li>
+              <li>Dịch vụ chưa hỗ trợ identity-based connections</li>
+              <li>Extension không hỗ trợ identity-based connections</li>
+              <li>Môi trường cục bộ (local dev) cần cấu hình thêm</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+  </div><!-- /msec --></div><!-- /m2 -->
+
+  <!-- ══════════════════════════════════
+       SUMMARY
+  ══════════════════════════════════ -->
+  <div id="summary">
+  <div class="mhd"><div class="mhd-ico">🗺️</div><div><h2>Tổng Kết &amp; Tham Khảo Nhanh</h2><div class="mhd-sub">Quick reference cho kỳ thi AZ-204 — những điểm quan trọng nhất cần nhớ</div></div></div>
+  <div class="msec">
+
+      <section>
+        <h3>🎯 Những Điểm Quan Trọng Cần Nhớ</h3>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>⚡ Trigger Rules</h4>
+            <ul>
+              <li>Mỗi function <strong>PHẢI CÓ ĐÚNG 1 trigger</strong></li>
+              <li>Trigger luôn có direction = <code>in</code></li>
+              <li>HTTP trigger timeout tối đa là <strong>230 giây</strong> (giới hạn Load Balancer)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>🔌 Binding Rules</h4>
+            <ul>
+              <li>Binding là <strong>tùy chọn</strong></li>
+              <li>Có thể có <strong>nhiều</strong> input và output bindings</li>
+              <li>Input: direction <code>in</code> | Output: direction <code>out</code></li>
+              <li>Một số hỗ trợ <code>inout</code> qua Advanced editor</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>🖥️ Hosting Plan — Mặc Định</h4>
+            <ul>
+              <li><strong>Consumption plan</strong> là plan mặc định</li>
+              <li>Timeout mặc định Consumption: <strong>5 phút</strong>, tối đa <strong>10 phút</strong></li>
+              <li>Timeout mặc định các plan khác: <strong>30 phút</strong></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>📈 Scaling Limits</h4>
+            <ul>
+              <li>Consumption Windows: max <strong>200</strong> instances</li>
+              <li>Consumption Linux: max <strong>100</strong> instances</li>
+              <li>Premium Windows: max <strong>100</strong> instances</li>
+              <li>Container Apps: max <strong>10-300</strong> instances</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>🔐 Bảo Mật</h4>
+            <ul>
+              <li><strong>KHÔNG BAO GIỜ</strong> commit <code>local.settings.json</code> lên git</li>
+              <li>Dùng Application Settings thay vì hardcode connection strings</li>
+              <li>Ưu tiên <strong>Managed Identity</strong> thay vì connection strings</li>
+              <li>Nguyên tắc <strong>Least Privilege</strong> cho identity</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>💻 Phát Triển</h4>
+            <ul>
+              <li>Functions 2.x+: tất cả function trong app cùng <strong>một ngôn ngữ</strong></li>
+              <li>Nên phát triển <strong>cục bộ</strong> thay vì chỉnh sửa trong portal</li>
+              <li>Node.js v4 và Python v2: runtime tự tạo <em>function.json</em></li>
+              <li>Dùng <strong>Azurite emulator</strong> để test storage bindings cục bộ</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="section">
+        <h3>📊 Bảng So Sánh Tổng Hợp</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tiêu Chí</th>
+              <th>Consumption</th>
+              <th>Flex Consumption</th>
+              <th>Premium</th>
+              <th>Dedicated</th>
+              <th>Container Apps</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Scaling</strong></td>
+              <td>Event-driven, tự động</td>
+              <td>Per-function scaling</td>
+              <td>Event-driven, prewarmed</td>
+              <td>Manual / Autoscale</td>
+              <td>Event-driven</td>
+            </tr>
+            <tr>
+              <td><strong>Cold Start</strong></td>
+              <td>Có (risk)</td>
+              <td>Giảm với pre-provisioned</td>
+              <td>Không (prewarmed)</td>
+              <td>Không (Always On)</td>
+              <td>Có thể có</td>
+            </tr>
+            <tr>
+              <td><strong>Billing</strong></td>
+              <td>Pay-per-use</td>
+              <td>Pay-per-use</td>
+              <td>Per-instance (kể cả idle)</td>
+              <td>App Service rate</td>
+              <td>Per-use</td>
+            </tr>
+            <tr>
+              <td><strong>VNet Support</strong></td>
+              <td>Hạn chế</td>
+              <td>Có</td>
+              <td>Có</td>
+              <td>Có (ASE)</td>
+              <td>Có</td>
+            </tr>
+            <tr>
+              <td><strong>Container</strong></td>
+              <td>Không</td>
+              <td>Không</td>
+              <td>Linux</td>
+              <td>Linux</td>
+              <td>Linux</td>
+            </tr>
+            <tr>
+              <td><strong>Timeout Mặc Định</strong></td>
+              <td>5 phút</td>
+              <td>30 phút</td>
+              <td>30 phút</td>
+              <td>30 phút</td>
+              <td>30 phút</td>
+            </tr>
+            <tr>
+              <td><strong>Timeout Tối Đa</strong></td>
+              <td><strong>10 phút</strong></td>
+              <td>Không giới hạn</td>
+              <td>Không giới hạn</td>
+              <td>Không giới hạn</td>
+              <td>Không giới hạn</td>
+            </tr>
+            <tr>
+              <td><strong>Max Instances (Win)</strong></td>
+              <td>200</td>
+              <td>Giới hạn bộ nhớ vùng</td>
+              <td>100</td>
+              <td>10-30 (100 ASE)</td>
+              <td>10-300</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <h3>🔍 Từ Điển Thuật Ngữ</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tiếng Anh</th>
+              <th>Tiếng Việt</th>
+              <th>Mô Tả Ngắn</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Serverless</td>
+              <td>Không máy chủ</td>
+              <td>Không cần quản lý infrastructure, trả tiền theo sử dụng</td>
+            </tr>
+            <tr>
+              <td>Trigger</td>
+              <td>Trình kích hoạt</td>
+              <td>Sự kiện bắt đầu thực thi function; mỗi function có đúng 1</td>
+            </tr>
+            <tr>
+              <td>Binding</td>
+              <td>Liên kết</td>
+              <td>Kết nối khai báo với tài nguyên khác; tùy chọn, có thể nhiều</td>
+            </tr>
+            <tr>
+              <td>Input binding</td>
+              <td>Liên kết đầu vào</td>
+              <td>Đọc dữ liệu từ dịch vụ bên ngoài vào function</td>
+            </tr>
+            <tr>
+              <td>Output binding</td>
+              <td>Liên kết đầu ra</td>
+              <td>Ghi dữ liệu từ function ra dịch vụ bên ngoài</td>
+            </tr>
+            <tr>
+              <td>Orchestration</td>
+              <td>Điều phối</td>
+              <td>Tập hợp các bước/hành động thực thi để hoàn thành tác vụ phức tạp</td>
+            </tr>
+            <tr>
+              <td>Consumption plan</td>
+              <td>Gói tiêu thụ</td>
+              <td>Hosting plan mặc định, pay-as-you-go, timeout tối đa 10 phút</td>
+            </tr>
+            <tr>
+              <td>Cold start</td>
+              <td>Khởi động nguội</td>
+              <td>Độ trễ khi function cần khởi động instance mới từ trạng thái idle</td>
+            </tr>
+            <tr>
+              <td>Prewarmed worker</td>
+              <td>Worker khởi động sẵn</td>
+              <td>Instance đã sẵn sàng trước, dùng trong Premium plan để tránh cold start</td>
+            </tr>
+            <tr>
+              <td>Managed Identity</td>
+              <td>Danh tính được quản lý</td>
+              <td>Danh tính Azure AD được Azure tự quản lý, dùng thay vì secret/key</td>
+            </tr>
+            <tr>
+              <td>Scale Controller</td>
+              <td>Bộ điều khiển co giãn</td>
+              <td>Thành phần Azure giám sát trigger events và quyết định scaling</td>
+            </tr>
+            <tr>
+              <td>host.json</td>
+              <td>File cấu hình host</td>
+              <td>File cấu hình ảnh hưởng đến tất cả functions trong function app</td>
+            </tr>
+            <tr>
+              <td>local.settings.json</td>
+              <td>File cài đặt cục bộ</td>
+              <td>Lưu settings cho môi trường phát triển cục bộ; không commit lên git</td>
+            </tr>
+            <tr>
+              <td>Durable Functions</td>
+              <td>Functions bền vững</td>
+              <td>Extension cho phép viết stateful functions và orchestrations bằng code</td>
+            </tr>
+            <tr>
+              <td>ASE (App Service Environment)</td>
+              <td>Môi trường App Service</td>
+              <td>Tùy chọn Dedicated plan với isolation đầy đủ, scale lên 100 instances</td>
+            </tr>
+            <tr>
+              <td>Least Privilege</td>
+              <td>Quyền tối thiểu</td>
+              <td>Nguyên tắc bảo mật: chỉ cấp quyền cần thiết, không cấp thừa</td>
+            </tr>
+            <tr>
+              <td>Azurite</td>
+              <td>Trình giả lập Azure Storage</td>
+              <td>Local emulator cho Azure Storage (Queue, Blob, Table) dùng trong dev/test</td>
+            </tr>
+            <tr>
+              <td>function.json</td>
+              <td>File định nghĩa function</td>
+              <td>File khai báo trigger/binding cho các ngôn ngữ scripting (Node v3, Python v1, PowerShell)</td>
+            </tr>
+            <tr>
+              <td>per-function scaling</td>
+              <td>Co giãn theo từng function</td>
+              <td>Tính năng của Flex Consumption: mỗi function được scale độc lập</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+  </div><!-- /msec --></div><!-- /summary -->
+
+</main>
+</div><!-- /wrap -->
+
+<div class="pnav">
+  <a href="01-azure-app-service.html" class="prev">← Ch.01 App Service</a>
+  <span class="pos">Chương 02 / 11</span>
+  <a href="03-cosmos-db.html" class="next">Ch.03 Cosmos DB →</a>
+</div>
+
+<footer style="background: #1a1a2e; color: #aaa; text-align: center; padding: 24px; font-size: 0.85rem;">
+  <p>AZ-204 Azure Developer Certification — Hướng Dẫn Tiếng Việt | Azure Functions</p>
+  <p style="margin-top: 6px; color: #666;">Dựa trên tài liệu chính thức Microsoft Learn | Cập nhật 2025</p>
+</footer>
+
+<script>
+function toggleToc(){
+  document.getElementById('toc').classList.toggle('open');
+  document.getElementById('toc-bd').classList.toggle('open');
+}
+function closeToc(){
+  document.getElementById('toc').classList.remove('open');
+  document.getElementById('toc-bd').classList.remove('open');
+}
+document.querySelectorAll('#toc a').forEach(function(a){
+  a.addEventListener('click',function(){ if(window.innerWidth<1080) closeToc(); });
+});
+</script>
+<script src="common.js"></script>
+</body>
+</html>
